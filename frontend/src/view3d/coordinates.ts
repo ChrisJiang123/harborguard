@@ -76,8 +76,10 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
     return { target, position: [target[0] + bounds.span * .27, Math.max(260, bounds.span * .13), target[2] + bounds.span * .52] }
   }
   if (mode === 'underwater') {
-    const target: Point3 = [bounds.center[0], -10 * verticalScale, bounds.center[2]]
-    return { target, position: [target[0] + bounds.span * .14, -1 * verticalScale, target[2] + bounds.span * .22] }
+    // Use a close, downward-looking underwater inspection angle. A span-scaled
+    // offset made this camera almost horizontal over kilometer-wide DEM bounds.
+    const target: Point3 = [bounds.center[0], -16 * verticalScale, bounds.center[2]]
+    return { target, position: [target[0] + 80, -2 * verticalScale, target[2] + 100] }
   }
   const target: Point3 = [bounds.center[0], -8 * verticalScale, bounds.center[2]]
   return { target, position: [bounds.center[0] + bounds.span * .3, bounds.span * .72, bounds.center[2] + bounds.span * .62] }
