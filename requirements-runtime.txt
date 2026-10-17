@@ -1,0 +1,22 @@
+# ============================================================
+# 环境一：运行环境（MacBook 开发与演示主机）
+# 用途：Agent 服务（python -m agent.main）、render_ping、SonarDetector CPU 推理
+# 安装：bash scripts/setup_env_runtime.sh
+#   或  python3.11 -m venv .venv && source .venv/bin/activate
+#       pip install -r requirements-runtime.txt
+# ============================================================
+numpy>=1.26
+opencv-python-headless>=4.9
+pyyaml>=6.0
+matplotlib>=3.8
+# SonarDetector CPU 推理需要（含 torch CPU 版）；训练请用 requirements-yolo-train.txt
+ultralytics>=8.3
+fastapi>=0.115
+uvicorn[standard]>=0.30
+httpx>=0.27
+websockets>=12
+pydantic>=2.7
+anthropic>=0.40
+openai>=1.30
+python-dotenv>=1.0
+pytest>=8.0

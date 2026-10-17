@@ -1,0 +1,15 @@
+# ============================================================
+# 环境二：YOLO26 训练环境（Lenovo GPU / Colab —— 与运行环境分开，不在 MacBook 上装）
+# 安装（本地 NVIDIA GPU）：
+#   python3.11 -m venv .venv-yolo-train && source .venv-yolo-train/bin/activate
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements-yolo-train.txt
+# Windows (Lenovo): py -3.11 -m venv .venv-yolo-train && .venv-yolo-train\Scripts\activate
+# Colab: 直接 pip install -r requirements-yolo-train.txt（自带匹配 CUDA 的 torch）
+# ============================================================
+numpy>=1.26
+opencv-python-headless>=4.9
+pyyaml>=6.0
+matplotlib>=3.8
+ultralytics>=8.3
+pytest>=8.0

@@ -1,0 +1,16 @@
+# ============================================================
+# 环境三：LoRA 训练环境
+# 目标机器：Colab 或经验证可用的 Lenovo CUDA 环境；当前尚未验证训练 GPU。
+# （Unsloth 在 macOS 上不可用，训练不放在 MacBook。）
+# 执行（装完重启 runtime / 激活环境）：
+#   pip install -r requirements-lora-train.txt
+# 或使用 Unsloth 官方 notebook 的安装 cell（版本以 Unsloth 文档为准）
+# 对应 C4：ml/lora/train_lora.ipynb（Unsloth + TRL SFT，基座 Qwen3.5 0.8B / 兼容问题换 Qwen3 1.7B）
+# ============================================================
+unsloth
+trl>=0.9
+transformers>=4.44
+datasets>=2.20
+accelerate>=0.33
+peft>=0.12
+bitsandbytes>=0.43

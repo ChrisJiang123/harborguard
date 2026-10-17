@@ -1,0 +1,50 @@
+# ============ HarborGuard .gitignore（C 维护） ============
+# 规则：.env、虚拟环境、数据集、训练日志、大型模型文件一律不入库。
+
+# ---- 密钥与本地配置 ----
+.env
+.env.*
+!.env.example
+
+# ---- 虚拟环境（运行环境 / YOLO 训练 / LoRA 训练，分开创建） ----
+.venv/
+.venv-*/
+
+# ---- 数据集（合成声呐数据集等，体积大，可由脚本重跑生成） ----
+ml/datasets/
+data/cache/
+
+# ---- 训练日志 / 训练输出 ----
+runs/
+wandb/
+*.log
+logs/
+
+# ---- 大型模型文件（权重 / GGUF / checkpoint） ----
+# 例外：ml/yolo/weights/best.pt 为最终交付的 nano 权重（几 MB），允许入库
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.gguf
+!ml/yolo/weights/best.pt
+!ml/yolo/weights/.gitkeep
+
+# ---- 下载缓存（check_c0 下载的官方权重等） ----
+.cache/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+
+# ---- IDE / 系统 ----
+.idea/
+.vscode/
+.DS_Store
