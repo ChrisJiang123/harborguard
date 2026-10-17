@@ -81,10 +81,12 @@ def export(bounds, width, height, name):
     depth = np.full((height,width),-9999,dtype=float)
     uncertainty = np.full_like(depth,-9999)
     provenance = []
+    native_resolution = np.zeros_like(depth, dtype=np.uint8)
     # Coarser measured 2 m product first; prefer 1 m where all support cells exist.
     for file in reversed(FILES):
         values,valid,quality,source = sample_bag(CACHE/file,lon,lat)
         depth[valid],uncertainty[valid] = values[valid],quality[valid]
+        native_resolution[valid] = int(source['grid_spacing_m'])
         provenance.append(source)
     valid = depth!=-9999
     assert valid.sum()>width*height*.1, 'Survey does not meaningfully cover the requested crop'
@@ -104,6 +106,7 @@ def export(bounds, width, height, name):
         'nodata_value':-9999,'nodata_rule':'BAG 1e6, unsupported samples and missing support cells remain -9999; all four corners required; no CRM/CoNED/synthetic infill. 1 m measured product takes priority over 2 m measured product.',
         'width':width,'height':height,'bounds':bounds,'approximate_spacing_m':spacing,'min_depth_m':float(supported.min()),'max_depth_m':float(supported.max()),'nodata_cells':int((~valid).sum()),
         'coverage_percent':round(float(valid.mean()*100),2),'uncertainty_support_max_range_m':[round(float(quality.min()),3),round(float(quality.max()),3)],
+        'native_resolution_sample_counts':{str(step):int(((native_resolution==step)&valid).sum()) for step in [1,2]},
         'uncertainty_note':'Range of maximum BAG productUncert over four interpolation support cells, valid rendered samples only; not project RMSE, not local measurement accuracy guarantee. See source BAG uncertainty band for per-cell data.',
         'accuracy_note':'Grid spacing is not survey accuracy. Historical MBES data; local uncertainty, dated coverage, vertical datum/epoch and field acceptance remain to be checked.',
         'intended_use':'Visualization only; NOAA explicitly excludes navigation. No artificial procedural seafloor detail. Unknown/land/outside-survey cells remain holes.',
@@ -121,4 +124,4 @@ if __name__ == '__main__':
         download(BASE+'BAG/'+name, target)
     export({'west':-118.31,'south':33.70,'east':-118.19,'north':33.765},1401,911,'seabed-dem.json')
     # Align the patch perimeter with coarse source vertices to prevent LOD cracks.
-    export({'west':-118.31+600*.12/1400,'south':33.765-544*.065/910,'east':-118.31+800*.12/1400,'north':33.765-368*.065/910},801,705,'seabed-detail-mb.json')
+    export({'west':-118.31+600*.12/1400,'south':33.765-544*.065/910,'east':-118.31+800*.12/1400,'north':33.765-368*.065/910},1601,1409,'seabed-detail-mb.json')

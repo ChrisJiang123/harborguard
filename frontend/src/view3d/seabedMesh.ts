@@ -1,6 +1,20 @@
 import type { BathymetryBounds, BathymetryGrid } from '../data/bathymetry'
 import { worldPosition } from './coordinates'
 
+/** One display-cell feather INSIDE valid coverage, never fills or moves soundings.
+ * Crop/LOD rectangle edges stay opaque so matching patches do not develop seams.
+ */
+export function surveyEdgeOpacity(depths: Float32Array, columns: number, rows: number): Float32Array {
+  const opacity = new Float32Array(depths.length)
+  for (let row = 0; row < rows; row++) for (let col = 0; col < columns; col++) {
+    const i = row*columns+col
+    if (!Number.isFinite(depths[i])) continue
+    const boundary = col > 0 && !Number.isFinite(depths[i-1]) || col+1 < columns && !Number.isFinite(depths[i+1]) || row > 0 && !Number.isFinite(depths[i-columns]) || row+1 < rows && !Number.isFinite(depths[i+columns])
+    opacity[i] = boundary ? 0 : 1
+  }
+  return opacity
+}
+
 /** Conservative display tessellation, not new soundings. Never bridges NoData. */
 export function buildSeabedMeshData(grid: BathymetryGrid, refinement: 1 | 2 = 2, excludeBounds?: BathymetryBounds) {
   const { width, height, bounds, nodata_value } = grid.metadata

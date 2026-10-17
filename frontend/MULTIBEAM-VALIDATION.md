@@ -1,5 +1,11 @@
 # Multibeam frontend validation — 2026-10-18
 
+**Historical browser record for commit `2c677a3` and its 2 m patch.** The later
+sonar/1 m display revision has different sample/triangle counts and has NOT
+been browser-validated: Work settings disable local browser control. See
+[current change/test boundaries](SONAR-DEPLOYMENT.md). The FPS and screenshots
+below must not be attributed to the newer revision.
+
 Scope: frontend only, on `feature/3d-vertical-relief`, following `051d3f1`.
 Renderer: Three.js / React Three Fiber, not Cesium. No backend, database, frozen
 contract or B/C tests were modified. No recording was performed.

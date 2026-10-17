@@ -4,6 +4,11 @@ Date: 2026-10-18 (Asia/Shanghai). Scope: `frontend/` only.
 
 **Conclusion: the frontend supports a conditionally accepted synthetic demo; A6 is NOT fully accepted.** This is a review of implementation and execution evidence, not a claim that every original taskbook checkbox or field sign-off has passed. No recording was performed, per the user's cancellation.
 
+Latest revision: [proposed sonar placement and ~1 m local display](SONAR-DEPLOYMENT.md).
+Its automated checks are separate from earlier browser evidence: local browser
+control is currently disabled in Work settings, so this revision has no new
+visual/FPS acceptance. Existing live/recorded coordinates are not remapped.
+
 ## Version and evidence boundaries
 
 - Feature branch: `feature/3d-vertical-relief`, following vessel-motion commit `051d3f1`. This report now includes the multibeam changes; the committed changeset SHA is the reproduction reference.
@@ -18,7 +23,7 @@ Date: 2026-10-18 (Asia/Shanghai). Scope: `frontend/` only.
 | A1 state and controls | Automated cadence, event timing, pause/resume/speed/reset, source labels, recovery generation/session/log-merge races | Current live backend reconnect/restart not rerun |
 | A2 2D | Coordinate/GeoJSON/selection tests; browser switched from selected T3 in 3D to 2D and back, preserving selection and the shared source | No new real chart, official zone, or field position acceptance |
 | A3 alerts, Agent, approval | Automated source-event state, option/approval/rejection errors, dedupe, unknown-state fallback; synthetic UI and recorded approval | No new real Agent, real recognition, or live human-approval round-trip verification |
-| A4 3D | NOAA H12617 MBES 1–2 m BAG ingestion, ~8 m harbor / ~2 m local patch, source hashes, NoData and aligned LOD tests; browser evidence in MULTIBEAM-VALIDATION.md | Historical 2013 survey, coverage/uncertainty acceptance, MLLW/NAVD88 alignment, live tide and field acceptance pending |
+| A4 3D | NOAA H12617 MBES 1–2 m BAG ingestion, ~8 m harbor / ~1 m local display, source hashes, NoData, edge-opacity and aligned LOD tests; proposed sonar consistency/route offset tests | Latest visual/FPS check blocked by Work browser setting; earlier 2 m evidence in MULTIBEAM-VALIDATION.md; historical survey, datum, tide and field acceptance pending |
 | A5 replay | New deterministic T3/T4 source reused by mock and three regenerated replay fixtures; arbitrary seek, pause/resume, reset and prediction tests | Synthetic files are not B backend recordings; no new long live replay/soak acceptance |
 | A6 presentation | Build/lint/A1–A6/recovery/English/vessel checks pass; 1920×1080 browser inspection exists | NOT fully accepted: sustained target-device FPS, projector/3 m readability, current A/B/C and field sign-off pending; backup recording excluded this run by user instruction |
 
@@ -58,7 +63,7 @@ Build retains the known approximately 998 kB uncompressed 3D chunk warning; it i
 
 ## Remaining sign-off
 
-- Current site bathymetry/coverage/uncertainty acceptance: historical NOAA H12617 multibeam is integrated; 1–2 m source, ~8 m harbor and ~2 m local display. This does not establish whole-harbor present-day accuracy. Newer 2024 Long Beach products found but not integrated or assumed to cover the demo.
+- Current site bathymetry/coverage/uncertainty acceptance: historical NOAA H12617 multibeam is integrated; 1–2 m source, ~8 m harbor and ~1 m local display. This does not establish whole-harbor present-day accuracy. Newer 0.5 m Long Beach products found but not integrated or assumed to cover the demo; links and actual survey-envelope checks in SONAR-DEPLOYMENT.md.
 - Land NAVD88 to water/seabed MLLW transformation and live tide.
 - Current-version live approval/rejection refresh, reconnect/restart and history-window tests with B; actual Agent/recognition services with C.
 - Synthetic replay Z-style zone references versus the named static business-zone IDs still limit some evidence/reopening-zone links. The UI's waiting/unknown indication is not claimed as successful route highlighting.

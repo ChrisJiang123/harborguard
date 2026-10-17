@@ -12,6 +12,7 @@
     "refresh:buildings": "node scripts/fetch-lacounty-buildings.mjs",
     "refresh:noaa-bathy": "node scripts/refresh-noaa-crm.mjs",
     "refresh:multibeam": "python scripts/refresh-multibeam.py",
+    "check:sonar": "tsc --ignoreConfig src/data/sonarDeployment.ts src/data/mock.ts src/data/replayCore.ts --outDir work/verify-sonar --module commonjs --target ES2023 --moduleResolution node --ignoreDeprecations 6.0 --esModuleInterop --skipLibCheck --strict && node scripts/verify-sonar-layout.cjs",
     "refresh:shore-dem": "node scripts/refresh-usgs-shore-dem.mjs",
     "refresh:shore-imagery": "node scripts/refresh-shore-imagery.mjs",
     "make:bathymetry": "node scripts/make-demo-bathymetry.mjs",

@@ -37,14 +37,20 @@ separate source confirmation before safety or engineering interpretation.
 | File | Grid | Approximate display sampling | Survey-supported samples |
 | --- | --- | --- | --- |
 | `seabed-dem.json` | 1401×911 | 7.94×7.95 m | 599,472 (46.97% of rectangle) |
-| `seabed-detail-mb.json` | 801×705 | 1.98×1.99 m | 135,763 (24.04% of rectangle) |
+| `seabed-detail-mb.json` | 1601×1409 | 0.99×0.99 m | 542,742 (24.06% of rectangle) |
 
 The harbor crop is west -118.31, south 33.70, east -118.19, north 33.765.
 The local patch surrounds the existing underwater inspection view. Its edges
-align with harbor-grid samples (4 subdivisions per coarse edge). Coarse faces
+align with harbor-grid samples (8 subdivisions per coarse edge). Coarse faces
 and contours under the patch are removed; colors share the same scale. The
 patch is not a separate simulation. Outside it the harbor retains ~8 m sampling.
 This is **not** a whole-harbor 1 m display or a guarantee of 1 m accuracy.
+Native resolution counts are now embedded: local patch 541,854 samples with 1 m
+support and 888 with 2 m support; interpolating the latter does not create new
+1 m observations. One-cell inward display feathering softens NoData silhouettes
+without changing coordinates/depths or adding coverage. See
+[sonar/layout and data-discovery notes](../../SONAR-DEPLOYMENT.md) for newer
+0.5 m Long Beach surveys and their location limitations.
 
 Per-product BAG SHA-256, native grid/origin, crop windows, display-value SHA-256,
 NoData counts, bounds, and source provenance are embedded in each JSON metadata.

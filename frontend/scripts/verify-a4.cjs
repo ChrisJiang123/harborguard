@@ -10,7 +10,7 @@ const { parseLocalBase } = require(path.join(root, 'data/localBase.js'))
 const { updateLine } = require(path.join(root, 'view3d/lineBuffers.js'))
 const { buildBathymetryContours } = require(path.join(root, 'view3d/seabedContours.js'))
 const { buildWaterSurfaceData } = require(path.join(root, 'view3d/waterMask.js'))
-const { buildSeabedMeshData } = require(path.join(root, 'view3d/seabedMesh.js'))
+const { buildSeabedMeshData, surveyEdgeOpacity } = require(path.join(root, 'view3d/seabedMesh.js'))
 const { DEMO_ASSETS, DEMO_BUOYS, DEMO_ZONES } = require(path.join(root, 'data/demoGeometry.js'))
 const { createMockEngine } = require(path.join(root, 'data/mock.js'))
 const { useHarbor, receiveMessage } = require(path.join(root, 'store/useHarbor.js'))
@@ -142,6 +142,11 @@ const waterMesh = buildWaterSurfaceData(waterGrid)
 const refinementSource = { ...waterGrid, values: [10, 12, 14, 20] }
 const refinementBefore = JSON.stringify(refinementSource)
 const refined = buildSeabedMeshData(refinementSource, 2)
+const edgeInput = new Float32Array([10,10,10,10,NaN,10,10,10,10])
+const edgeBefore = [...edgeInput]
+assert.deepEqual([...surveyEdgeOpacity(edgeInput,3,3)],[1,0,1,0,0,0,1,0,1])
+assert.deepEqual([...edgeInput],edgeBefore,'display feather must not alter depth or NoData')
+assert.ok([...surveyEdgeOpacity(refined.depths,refined.columns,refined.rows)].every(v=>v===1),'valid crop/LOD perimeter must remain opaque')
 assert.equal(refined.columns, 3)
 assert.equal(refined.rows, 3)
 assert.equal(refined.indices.length / 3, 8)
@@ -194,9 +199,10 @@ assert.equal(compatibleBathymetryDetail(dem,incompatible),false,'unaligned LOD e
 assert.equal(detail.metadata.measurement_method, 'multibeam_echosounder')
 assert.equal(detail.metadata.source, dem.metadata.source)
 assert.equal(detail.metadata.vertical_datum, dem.metadata.vertical_datum)
-assert.equal(detail.metadata.width, 801)
-assert.equal(detail.metadata.height, 705)
-assert.ok(detail.metadata.approximate_spacing_m.east_west <= 2 && detail.metadata.approximate_spacing_m.north_south <= 2)
+assert.equal(detail.metadata.width, 1601)
+assert.equal(detail.metadata.height, 1409)
+assert.ok(detail.metadata.approximate_spacing_m.east_west <= 1 && detail.metadata.approximate_spacing_m.north_south <= 1)
+assert.ok(detail.metadata.native_resolution_sample_counts['1'] > 0 && detail.metadata.native_resolution_sample_counts['2'] > 0, '1 m display must explicitly retain mixed native 1–2 m provenance')
 assert.equal(require('node:crypto').createHash('sha256').update(JSON.stringify(detail.values)).digest('hex'), detail.metadata.values_sha256)
 for (const source of dem.metadata.source_products) {
   assert.match(source.file, /^H12617_MB_[12]m_MLLW_/)
@@ -208,7 +214,7 @@ assert.ok(dem.metadata.coverage_percent < 100 && dem.metadata.coverage_percent >
 assert.ok(detail.metadata.coverage_percent < 30, 'missing survey coverage must remain missing, not fabricated')
 for (let row = 0; row <= 176; row++) for (let col = 0; col <= 200; col++) {
   const coarse = dem.values[(row+368)*dem.metadata.width+col+600]
-  const fine = detail.values[(row*4)*detail.metadata.width+col*4]
+  const fine = detail.values[(row*8)*detail.metadata.width+col*8]
   near(coarse, fine, .011) // Shared LOD boundary/source coordinates must agree.
 }
 const clipped = buildSeabedMeshData(dem, 2, detail.metadata.bounds)
@@ -219,7 +225,7 @@ assert.ok(detailed.indices.every(index => Number.isFinite(detailed.depths[index]
 assert.equal(detailed.factor, 1)
 assert.equal(buildSeabedMeshData(refinementSource, 1, refinementSource.metadata.bounds).indices.length, 0)
 assert.equal(buildBathymetryContours(refinementSource, 5, refinementSource.metadata.bounds).length, 0)
-console.log(`PASS multibeam detail: source BAG IDs/checksums/NoData; 35,577 shared coarse/fine samples; 2 m patch ${detailed.indices.length/3} triangles; combined seabed ${(clipped.indices.length+detailed.indices.length)/3} triangles; coverage gaps retained; no overlapping LOD faces.`)
+console.log(`PASS multibeam detail: source BAG IDs/checksums/NoData; 35,577 shared coarse/fine samples; 1 m display / 1–2 m native patch ${detailed.indices.length/3} triangles; combined seabed ${(clipped.indices.length+detailed.indices.length)/3} triangles; coverage gaps retained; no overlapping LOD faces.`)
 const contours = buildBathymetryContours(dem)
 assert.ok(contours.length > 0)
 assert.ok(contours.every(segment => Number.isFinite(segment.from.lat) && Number.isFinite(segment.from.lon) && Number.isFinite(segment.to.lat) && Number.isFinite(segment.to.lon)))

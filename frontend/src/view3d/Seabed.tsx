@@ -3,7 +3,7 @@ import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute } from 'three
 import type { BathymetryBounds, BathymetryGrid } from '../data/bathymetry'
 import { worldPosition } from './coordinates'
 import { buildBathymetryContours } from './seabedContours'
-import { buildSeabedMeshData } from './seabedMesh'
+import { buildSeabedMeshData, surveyEdgeOpacity } from './seabedMesh'
 
 const stops = [new Color('#b8b08a'), new Color('#4d8f91'), new Color('#245477'), new Color('#102d4d')]
 function depthColor(depth: number, minDepth: number, maxDepth: number, color: Color): Color {
@@ -13,21 +13,22 @@ function depthColor(depth: number, minDepth: number, maxDepth: number, color: Co
   return color.copy(stops[index]!).lerp(stops[index + 1]!, scaled - index)
 }
 
-export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true, showContours = true, excludeBounds, colorRange }: { grid: BathymetryGrid; verticalScale: number; refinement?: 1 | 2; showSurface?: boolean; showContours?: boolean; excludeBounds?: BathymetryBounds; colorRange?: { min_depth_m: number; max_depth_m: number } }) {
+export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true, showContours = true, excludeBounds, colorRange, softEdges = true }: { grid: BathymetryGrid; verticalScale: number; refinement?: 1 | 2; showSurface?: boolean; showContours?: boolean; excludeBounds?: BathymetryBounds; colorRange?: { min_depth_m: number; max_depth_m: number }; softEdges?: boolean }) {
   const geometry = useMemo(() => {
     const result = new BufferGeometry()
     const { min_depth_m, max_depth_m } = colorRange ?? grid.metadata
-    const { positions, depths, indices } = buildSeabedMeshData(grid, refinement, excludeBounds)
-    const colors = new Float32Array(depths.length * 3)
+    const { positions, depths, indices, columns, rows } = buildSeabedMeshData(grid, refinement, excludeBounds)
+    const opacity = surveyEdgeOpacity(depths,columns,rows)
+    const colors = new Float32Array(depths.length * 4)
     const color = new Color()
     for (let i = 0; i < depths.length; i++) {
       const depth = depths[i]!
       if (Number.isFinite(depth)) depthColor(depth, min_depth_m, max_depth_m, color)
       else color.set('#172838')
-      colors.set([color.r, color.g, color.b], i * 3)
+      colors[i*4] = color.r; colors[i*4+1] = color.g; colors[i*4+2] = color.b; colors[i*4+3] = opacity[i]!
     }
     result.setAttribute('position', new Float32BufferAttribute(positions, 3))
-    result.setAttribute('color', new Float32BufferAttribute(colors, 3))
+    result.setAttribute('color', new Float32BufferAttribute(colors, 4))
     result.setIndex(indices)
     result.computeVertexNormals()
     result.computeBoundingSphere()
@@ -52,7 +53,7 @@ export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true
   }, [grid, refinement, excludeBounds])
   useEffect(() => () => { geometry.dispose(); contours.minor.dispose(); contours.major.dispose() }, [geometry, contours])
   return <group scale={[1, verticalScale, 1]}>
-    {showSurface && <mesh geometry={geometry} raycast={() => {}}><meshStandardMaterial vertexColors roughness={.96} side={DoubleSide} /></mesh>}
+    {showSurface && <mesh geometry={geometry} raycast={() => {}}><meshStandardMaterial key={String(softEdges)} vertexColors roughness={.96} side={DoubleSide} alphaToCoverage={softEdges} /></mesh>}
     {showContours && <><lineSegments geometry={contours.minor} raycast={() => {}} renderOrder={5}><lineBasicMaterial color="#9bd8e5" transparent opacity={.38} depthWrite={false} /></lineSegments><lineSegments geometry={contours.major} raycast={() => {}} renderOrder={6}><lineBasicMaterial color="#d8f3f7" transparent opacity={.62} depthWrite={false} /></lineSegments></>}
   </group>
 }

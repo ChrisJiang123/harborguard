@@ -15,7 +15,7 @@ export function ensureBathymetry(force = false): Promise<void> {
     if (main.status === 'rejected') throw main.reason
     const patch = detail.status === 'fulfilled' ? detail.value : null
     const compatible = patch && compatibleBathymetryDetail(main.value, patch)
-    useBathymetry.setState({ grid: main.value, detailGrid: compatible ? patch : null, detailError: detail.status === 'rejected' ? 'Local 2 m multibeam patch unavailable; showing harbor grid only.' : patch && !compatible ? 'Detail source/datum/grid mismatch; patch disabled.' : null, loading: false, error: null, url: configuredUrl })
+    useBathymetry.setState({ grid: main.value, detailGrid: compatible ? patch : null, detailError: detail.status === 'rejected' ? 'High-resolution multibeam patch unavailable; showing harbor grid only.' : patch && !compatible ? 'Detail source/datum/grid mismatch; patch disabled.' : null, loading: false, error: null, url: configuredUrl })
   }).catch(error => useBathymetry.setState({ grid: null, detailGrid: null, detailError: null, loading: false, error: error instanceof Error ? error.message : 'DEM request failed', url: configuredUrl })).finally(() => { pending = null })
   return pending
 }
