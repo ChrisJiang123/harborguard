@@ -2,6 +2,8 @@
 
 日期：2026-10-17（America/Los_Angeles）。依据原始《HarborGuard 任务书 B · 后端与算法》，面向项目负责人和 A/B/C 队友。
 
+后续声呐安全修复及指定 C `6389b70` 的实际验收见 [候选补充报告](sonar-safety-integration.md)：真实模型 Security 三级为 505s，超过原 500s 上限；浏览器和新版耐久仍待验。下文 37 项统计适用于注明的历史基线，不能直接用于宣布新 C 全部通过；20ms 仍是负责人调整后的尽力目标。
+
 **结论：B 的核心 MVP 已实现并具备有条件的合成演示能力，原始任务书尚未全部验收。** 原始 37 个复选框逐项覆盖：31 PASS、1 FAIL、5 PENDING。FAIL 是原始“每 tick <20ms”的实测结果；负责人已取消其硬性门槛，因此它不再阻塞 Demo，但本报告不把未达阈值改成 PASS。31 个 PASS 中含明确标注版本的历史验收，不表示当前 main 已完整验收。
 
 本轮 B 全量回归 **95 passed / 0 failed / 0 skipped，63.17s**；Ruff、compileall、依赖一致性及样例 TypeScript 严格编译均通过。仅编制 B 报告和隔离验证，没有修改生产代码、A/C 源码、静态坐标、冻结契约或数据库迁移，没有 Push/PR/Merge。

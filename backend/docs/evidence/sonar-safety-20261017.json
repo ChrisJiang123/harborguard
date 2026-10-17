@@ -1,0 +1,1749 @@
+{
+  "date": "2026-10-17",
+  "main": "8613834e7430eee40d2f020e6277dbdec72ca1f5",
+  "C": "6389b705bec35b8fc44018d1c14d770f2a82b364",
+  "candidate_merge": "3f237b87866592d43064c76a93083c0f67ac3bd0",
+  "candidate_B": "8843422",
+  "published_B_implementation": "6353421",
+  "weights_sha256": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839",
+  "tests": {
+    "baseline": {
+      "tests": "177",
+      "failures": "5",
+      "errors": "0",
+      "skipped": "2",
+      "time": "101.806"
+    },
+    "candidate": {
+      "tests": "193",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "2",
+      "time": "93.050"
+    },
+    "B_only": {
+      "tests": "111",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "1",
+      "time": "66.855"
+    }
+  },
+  "before": [
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 4.93831499999942,
+      "max_state_bytes": 2038,
+      "first_levels": {},
+      "first_uuv_t": 0.1,
+      "zone_counts": {
+        "clear": 8,
+        "blocked": 2,
+        "unsurveyed": 2
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "clear"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "clear"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise"
+        ],
+        "blocked_zone_ids": [
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 12.0
+      },
+      "tick_ms": {
+        "p50": 0.6200500001796172,
+        "p95": 1.1269650007307057,
+        "p99": 1.3472640000327367,
+        "max": 2315.9773999996105
+      },
+      "semantic_sha256": "cd7d0830a6e707069ee18c97db571cdf709b12c827fa032eff0196e5bba2ade5",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "",
+          "buoy_id": "B2",
+          "t": 0.1,
+          "cls": "uuv",
+          "conf": 0.5951961874961853,
+          "bbox": [
+            316.0,
+            326.0,
+            323.0,
+            338.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "",
+          "buoy_id": "B5",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.6759898662567139,
+          "bbox": [
+            316.0,
+            432.0,
+            322.0,
+            443.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.509332537651062,
+          "bbox": [
+            317.0,
+            511.0,
+            323.0,
+            522.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "",
+          "buoy_id": "B10",
+          "t": 0.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        2058.640799999921,
+        84.06149999973422,
+        82.53990000048361,
+        84.27839999967546
+      ]
+    },
+    {
+      "scenario": "a",
+      "simulated_s": 1200.0,
+      "wall_s": 22.06028789999982,
+      "max_state_bytes": 26621,
+      "first_levels": {
+        "1": 1.0,
+        "2": 150.7,
+        "3": 505.0
+      },
+      "first_uuv_t": 363.9,
+      "zone_counts": {
+        "open": 12
+      },
+      "debris_zones": [],
+      "reopen": null,
+      "tick_ms": {
+        "p50": 15.14835000034509,
+        "p95": 25.008389999584324,
+        "p99": 101.7118730001857,
+        "max": 191.21220000124595
+      },
+      "semantic_sha256": "b4827fcd6f361e02c9cf849fd34210efb62a9f8994c2b041c500322bdaf1766c",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 150.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 170.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 190.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 343.9,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 363.9,
+          "cls": "uuv",
+          "conf": 0.7201558947563171,
+          "bbox": [
+            318.0,
+            306.0,
+            325.0,
+            312.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-6",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 919.0,
+          "cls": "uuv",
+          "conf": 0.6964585781097412,
+          "bbox": [
+            461.0,
+            392.0,
+            469.0,
+            399.0
+          ],
+          "image_url": "/api/sonar/det-6.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-7",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 939.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-7.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-8",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 959.0,
+          "cls": "uuv",
+          "conf": 0.6138724088668823,
+          "bbox": [
+            315.0,
+            366.0,
+            321.0,
+            370.0
+          ],
+          "image_url": "/api/sonar/det-8.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-9",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 979.0,
+          "cls": "uuv",
+          "conf": 0.6088582277297974,
+          "bbox": [
+            311.0,
+            359.0,
+            318.0,
+            363.0
+          ],
+          "image_url": "/api/sonar/det-9.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-10",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 999.0,
+          "cls": "uuv",
+          "conf": 0.6542500257492065,
+          "bbox": [
+            312.0,
+            343.0,
+            319.0,
+            347.0
+          ],
+          "image_url": "/api/sonar/det-10.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-11",
+          "track_id": "T74",
+          "buoy_id": "B8",
+          "t": 1089.0,
+          "cls": "uuv",
+          "conf": 0.726197361946106,
+          "bbox": [
+            386.0,
+            464.0,
+            394.0,
+            471.0
+          ],
+          "image_url": "/api/sonar/det-11.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-12",
+          "track_id": "T76",
+          "buoy_id": "B8",
+          "t": 1100.0,
+          "cls": "uuv",
+          "conf": 0.639860212802887,
+          "bbox": [
+            320.0,
+            451.0,
+            327.0,
+            456.0
+          ],
+          "image_url": "/api/sonar/det-12.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-13",
+          "track_id": "T77",
+          "buoy_id": "B8",
+          "t": 1121.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-13.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-14",
+          "track_id": "T78",
+          "buoy_id": "B8",
+          "t": 1153.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-14.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        171.9465999995009,
+        82.46809999945981,
+        92.63400000054389,
+        98.41790000064066,
+        90.79899999960617,
+        98.40970000004745,
+        84.55599999979313,
+        99.6039000001474,
+        106.82119999910356,
+        83.66550000027928,
+        135.7973000012862,
+        119.77900000056252,
+        120.30800000138697,
+        115.20440000094823
+      ]
+    }
+  ],
+  "after_three_runs": [
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 5.477528800000073,
+      "max_state_bytes": 2038,
+      "first_levels": {},
+      "first_uuv_t": null,
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "tick_ms": {
+        "p50": 0.6328499994197045,
+        "p95": 1.0625199998685273,
+        "p99": 1.3596399992820805,
+        "max": 2382.9415000000154
+      },
+      "semantic_sha256": "f46f003aa255db334e1df4c3e0d0e617b7eebe085508e5cb7826c25995ac60a0",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "",
+          "buoy_id": "B5",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.5377624034881592,
+          "bbox": [
+            316.0,
+            432.0,
+            322.0,
+            443.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 0.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "",
+          "buoy_id": "B2",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.7105661034584045,
+          "bbox": [
+            315.0,
+            327.0,
+            323.0,
+            338.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 20.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 40.1,
+          "cls": "debris",
+          "conf": 0.5660885572433472,
+          "bbox": [
+            317.0,
+            511.0,
+            323.0,
+            522.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        2216.5698999997403,
+        81.1388000001898,
+        80.3689000003942,
+        75.47069999964151,
+        80.16260000113107
+      ]
+    },
+    {
+      "scenario": "a",
+      "simulated_s": 1200.0,
+      "wall_s": 21.66448859999946,
+      "max_state_bytes": 26621,
+      "first_levels": {
+        "1": 1.0,
+        "2": 150.7,
+        "3": 505.0
+      },
+      "first_uuv_t": 363.9,
+      "zone_counts": {
+        "open": 12
+      },
+      "debris_zones": [],
+      "reopen": null,
+      "tick_ms": {
+        "p50": 15.04544999988866,
+        "p95": 26.323104998846247,
+        "p99": 85.47698199881776,
+        "max": 173.05860000124085
+      },
+      "semantic_sha256": "b4827fcd6f361e02c9cf849fd34210efb62a9f8994c2b041c500322bdaf1766c",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 150.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 170.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 190.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 343.9,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 363.9,
+          "cls": "uuv",
+          "conf": 0.7201558947563171,
+          "bbox": [
+            318.0,
+            306.0,
+            325.0,
+            312.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-6",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 919.0,
+          "cls": "uuv",
+          "conf": 0.6964585781097412,
+          "bbox": [
+            461.0,
+            392.0,
+            469.0,
+            399.0
+          ],
+          "image_url": "/api/sonar/det-6.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-7",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 939.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-7.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-8",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 959.0,
+          "cls": "uuv",
+          "conf": 0.6138724088668823,
+          "bbox": [
+            315.0,
+            366.0,
+            321.0,
+            370.0
+          ],
+          "image_url": "/api/sonar/det-8.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-9",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 979.0,
+          "cls": "uuv",
+          "conf": 0.6088582277297974,
+          "bbox": [
+            311.0,
+            359.0,
+            318.0,
+            363.0
+          ],
+          "image_url": "/api/sonar/det-9.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-10",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 999.0,
+          "cls": "uuv",
+          "conf": 0.6542500257492065,
+          "bbox": [
+            312.0,
+            343.0,
+            319.0,
+            347.0
+          ],
+          "image_url": "/api/sonar/det-10.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-11",
+          "track_id": "T74",
+          "buoy_id": "B8",
+          "t": 1089.0,
+          "cls": "uuv",
+          "conf": 0.726197361946106,
+          "bbox": [
+            386.0,
+            464.0,
+            394.0,
+            471.0
+          ],
+          "image_url": "/api/sonar/det-11.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-12",
+          "track_id": "T76",
+          "buoy_id": "B8",
+          "t": 1100.0,
+          "cls": "uuv",
+          "conf": 0.639860212802887,
+          "bbox": [
+            320.0,
+            451.0,
+            327.0,
+            456.0
+          ],
+          "image_url": "/api/sonar/det-12.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-13",
+          "track_id": "T77",
+          "buoy_id": "B8",
+          "t": 1121.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-13.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-14",
+          "track_id": "T78",
+          "buoy_id": "B8",
+          "t": 1153.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-14.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        157.1234999992157,
+        83.84530000148516,
+        79.512700000123,
+        88.59130000018922,
+        80.70059999954537,
+        72.58939999883296,
+        86.67520000017248,
+        83.08000000033644,
+        78.29110000056971,
+        76.63680000041495,
+        70.09310000103142,
+        71.88809999934165,
+        76.22599999922386,
+        84.21460000135994
+      ]
+    },
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 1.0605565999994724,
+      "max_state_bytes": 2038,
+      "first_levels": {},
+      "first_uuv_t": null,
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "tick_ms": {
+        "p50": 0.6070999988878611,
+        "p95": 0.998610000442568,
+        "p99": 1.199841000143351,
+        "max": 379.8437000004924
+      },
+      "semantic_sha256": "f46f003aa255db334e1df4c3e0d0e617b7eebe085508e5cb7826c25995ac60a0",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "",
+          "buoy_id": "B5",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.5377624034881592,
+          "bbox": [
+            316.0,
+            432.0,
+            322.0,
+            443.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 0.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "",
+          "buoy_id": "B2",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.7105661034584045,
+          "bbox": [
+            315.0,
+            327.0,
+            323.0,
+            338.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 20.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 40.1,
+          "cls": "debris",
+          "conf": 0.5660885572433472,
+          "bbox": [
+            317.0,
+            511.0,
+            323.0,
+            522.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        194.36599999971804,
+        88.88250000018161,
+        91.38630000052217,
+        89.80400000109512,
+        78.407299999526
+      ]
+    },
+    {
+      "scenario": "a",
+      "simulated_s": 1200.0,
+      "wall_s": 20.602974399998857,
+      "max_state_bytes": 26621,
+      "first_levels": {
+        "1": 1.0,
+        "2": 150.7,
+        "3": 505.0
+      },
+      "first_uuv_t": 363.9,
+      "zone_counts": {
+        "open": 12
+      },
+      "debris_zones": [],
+      "reopen": null,
+      "tick_ms": {
+        "p50": 14.553849999174417,
+        "p95": 21.876879999854282,
+        "p99": 83.17427500109258,
+        "max": 209.33420000073966
+      },
+      "semantic_sha256": "b4827fcd6f361e02c9cf849fd34210efb62a9f8994c2b041c500322bdaf1766c",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 150.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 170.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 190.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 343.9,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 363.9,
+          "cls": "uuv",
+          "conf": 0.7201558947563171,
+          "bbox": [
+            318.0,
+            306.0,
+            325.0,
+            312.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-6",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 919.0,
+          "cls": "uuv",
+          "conf": 0.6964585781097412,
+          "bbox": [
+            461.0,
+            392.0,
+            469.0,
+            399.0
+          ],
+          "image_url": "/api/sonar/det-6.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-7",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 939.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-7.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-8",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 959.0,
+          "cls": "uuv",
+          "conf": 0.6138724088668823,
+          "bbox": [
+            315.0,
+            366.0,
+            321.0,
+            370.0
+          ],
+          "image_url": "/api/sonar/det-8.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-9",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 979.0,
+          "cls": "uuv",
+          "conf": 0.6088582277297974,
+          "bbox": [
+            311.0,
+            359.0,
+            318.0,
+            363.0
+          ],
+          "image_url": "/api/sonar/det-9.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-10",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 999.0,
+          "cls": "uuv",
+          "conf": 0.6542500257492065,
+          "bbox": [
+            312.0,
+            343.0,
+            319.0,
+            347.0
+          ],
+          "image_url": "/api/sonar/det-10.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-11",
+          "track_id": "T74",
+          "buoy_id": "B8",
+          "t": 1089.0,
+          "cls": "uuv",
+          "conf": 0.726197361946106,
+          "bbox": [
+            386.0,
+            464.0,
+            394.0,
+            471.0
+          ],
+          "image_url": "/api/sonar/det-11.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-12",
+          "track_id": "T76",
+          "buoy_id": "B8",
+          "t": 1100.0,
+          "cls": "uuv",
+          "conf": 0.639860212802887,
+          "bbox": [
+            320.0,
+            451.0,
+            327.0,
+            456.0
+          ],
+          "image_url": "/api/sonar/det-12.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-13",
+          "track_id": "T77",
+          "buoy_id": "B8",
+          "t": 1121.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-13.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-14",
+          "track_id": "T78",
+          "buoy_id": "B8",
+          "t": 1153.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-14.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        189.09469999925932,
+        79.00389999849722,
+        75.12449999921955,
+        69.36859999950684,
+        67.42839999969874,
+        101.60429999996268,
+        73.67969999904744,
+        73.1078000007983,
+        76.97110000117391,
+        75.14590000027965,
+        82.27769999939483,
+        73.74799999888637,
+        76.89209999989544,
+        77.93100000162667
+      ]
+    },
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 1.0800454000000173,
+      "max_state_bytes": 2038,
+      "first_levels": {},
+      "first_uuv_t": null,
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "tick_ms": {
+        "p50": 0.6011499999658554,
+        "p95": 1.1021100001926243,
+        "p99": 1.2792330007869157,
+        "max": 385.0170999994589
+      },
+      "semantic_sha256": "f46f003aa255db334e1df4c3e0d0e617b7eebe085508e5cb7826c25995ac60a0",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "",
+          "buoy_id": "B5",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.5377624034881592,
+          "bbox": [
+            316.0,
+            432.0,
+            322.0,
+            443.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 0.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "",
+          "buoy_id": "B2",
+          "t": 0.1,
+          "cls": "debris",
+          "conf": 0.7105661034584045,
+          "bbox": [
+            315.0,
+            327.0,
+            323.0,
+            338.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 20.1,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "",
+          "buoy_id": "B7",
+          "t": 40.1,
+          "cls": "debris",
+          "conf": 0.5660885572433472,
+          "bbox": [
+            317.0,
+            511.0,
+            323.0,
+            522.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        199.1126000011718,
+        88.17520000047807,
+        93.26270000019576,
+        89.17569999903208,
+        80.56299999952898
+      ]
+    },
+    {
+      "scenario": "a",
+      "simulated_s": 1200.0,
+      "wall_s": 20.11995349999961,
+      "max_state_bytes": 26621,
+      "first_levels": {
+        "1": 1.0,
+        "2": 150.7,
+        "3": 505.0
+      },
+      "first_uuv_t": 363.9,
+      "zone_counts": {
+        "open": 12
+      },
+      "debris_zones": [],
+      "reopen": null,
+      "tick_ms": {
+        "p50": 14.326499999697262,
+        "p95": 21.55907999976989,
+        "p99": 88.25857999869184,
+        "max": 166.35739999946964
+      },
+      "semantic_sha256": "b4827fcd6f361e02c9cf849fd34210efb62a9f8994c2b041c500322bdaf1766c",
+      "detections": [
+        {
+          "id": "det-1",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 150.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-2",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 170.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-2.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-3",
+          "track_id": "T3",
+          "buoy_id": "B2",
+          "t": 190.7,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-3.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-4",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 343.9,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-4.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-5",
+          "track_id": "T3",
+          "buoy_id": "B3",
+          "t": 363.9,
+          "cls": "uuv",
+          "conf": 0.7201558947563171,
+          "bbox": [
+            318.0,
+            306.0,
+            325.0,
+            312.0
+          ],
+          "image_url": "/api/sonar/det-5.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-6",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 919.0,
+          "cls": "uuv",
+          "conf": 0.6964585781097412,
+          "bbox": [
+            461.0,
+            392.0,
+            469.0,
+            399.0
+          ],
+          "image_url": "/api/sonar/det-6.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-7",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 939.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-7.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-8",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 959.0,
+          "cls": "uuv",
+          "conf": 0.6138724088668823,
+          "bbox": [
+            315.0,
+            366.0,
+            321.0,
+            370.0
+          ],
+          "image_url": "/api/sonar/det-8.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-9",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 979.0,
+          "cls": "uuv",
+          "conf": 0.6088582277297974,
+          "bbox": [
+            311.0,
+            359.0,
+            318.0,
+            363.0
+          ],
+          "image_url": "/api/sonar/det-9.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-10",
+          "track_id": "T60",
+          "buoy_id": "B5",
+          "t": 999.0,
+          "cls": "uuv",
+          "conf": 0.6542500257492065,
+          "bbox": [
+            312.0,
+            343.0,
+            319.0,
+            347.0
+          ],
+          "image_url": "/api/sonar/det-10.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-11",
+          "track_id": "T74",
+          "buoy_id": "B8",
+          "t": 1089.0,
+          "cls": "uuv",
+          "conf": 0.726197361946106,
+          "bbox": [
+            386.0,
+            464.0,
+            394.0,
+            471.0
+          ],
+          "image_url": "/api/sonar/det-11.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-12",
+          "track_id": "T76",
+          "buoy_id": "B8",
+          "t": 1100.0,
+          "cls": "uuv",
+          "conf": 0.639860212802887,
+          "bbox": [
+            320.0,
+            451.0,
+            327.0,
+            456.0
+          ],
+          "image_url": "/api/sonar/det-12.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-13",
+          "track_id": "T77",
+          "buoy_id": "B8",
+          "t": 1121.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-13.png",
+          "model": "yolo26n"
+        },
+        {
+          "id": "det-14",
+          "track_id": "T78",
+          "buoy_id": "B8",
+          "t": 1153.0,
+          "cls": "unknown",
+          "conf": 0.0,
+          "bbox": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "image_url": "/api/sonar/det-14.png",
+          "model": "yolo26n"
+        }
+      ],
+      "classify_ms": [
+        150.36639999925683,
+        76.47460000043793,
+        76.0234000008495,
+        74.57240000076126,
+        78.07529999990948,
+        79.07279999926686,
+        76.02469999983441,
+        73.84740000088641,
+        73.82760000109556,
+        74.80320000104257,
+        77.5658000002295,
+        73.89150000017253,
+        75.25669999995444,
+        83.09299999928044
+      ]
+    }
+  ],
+  "live": {
+    "kind": "HTTP/WS integration, not browser/field acceptance",
+    "directory": "C:\\Users\\Administrator\\.codex\\worktrees\\harborguard-real-model-fixes\\marine\\artifacts\\model-fixes\\live-1",
+    "cold_start_to_health_s": 5.959370500000659,
+    "restart_to_health_s": 5.823507999999492,
+    "restart_persistence": "PASS",
+    "stream": {
+      "frames": 294,
+      "mean_hz": 5.001681387140272,
+      "max_gap_ms": 393.03839999956836,
+      "p99_gap_ms": 315.09781999880914,
+      "max_bytes": 24264,
+      "max_rss_mb": 431.58984375,
+      "cpu_percent_one_core": 46.13395973591034,
+      "cpu_percent_machine": 2.883372483494396
+    },
+    "runtime_health": {
+      "ok": true
+    },
+    "result": "PASS (HTTP/WS only)"
+  },
+  "live_decisions": [
+    {
+      "alert_id": "A1",
+      "option_id": "opt-1",
+      "action": "reject",
+      "operator": "B candidate QA"
+    },
+    {
+      "alert_id": "A1",
+      "option_id": "opt-1",
+      "action": "approve",
+      "operator": "B candidate QA"
+    }
+  ],
+  "live_recommendation_models": [
+    "template",
+    "template"
+  ],
+  "live_options_t": 505.0,
+  "raw_hashes": {
+    "before.json": "f484600cb8928e3b852b38d13ad6b4f6c52b779914782108215e4704ffa90ae7",
+    "after.json": "daa63df68a93568764b3f890ebb1186269efca0781a1a21ce07a294cd507d6da",
+    "baseline-tests.xml": "60c34871b0cc59a2dedcad5fb98e3bdc9e1ba3ab24702dfe153d928cbb4539a6",
+    "final-tests.xml": "492d1f172c0503c3b1e04a88e876f8e7c05574a99b56d38637a2c7711f58663d",
+    "live-1/results.json": "20f3b999a361d457275996cac88cf49bce3a07baa6c09913855579769f0a1857",
+    "environment.txt": "5a0b117f63cd2cc14e664cd709f397488b4d2a4b4f709a34a11c7d3f9520cb02"
+  },
+  "B_only_junit_sha256": "6f2ece8dfe564ba133a67d03e2af6c10b1cce1abde013af87ce0bf071856c4e5",
+  "unchanged": [
+    "frontend vs main",
+    "shared vs main",
+    "agent/ml/tests vs fixed C in candidate"
+  ],
+  "limitations": {
+    "security_500_sim_seconds": "FAIL:505",
+    "browser_new_combination": "PENDING",
+    "20_min_soak_new_model": "PENDING",
+    "field_rehearsals": "PENDING",
+    "B_only_real_model_test": "SKIP: C weights absent in main",
+    "B_only_warnings": "2 pytest cache path permission warnings; test assertions passed",
+    "real_sonar": "PENDING: generated synthetic images only",
+    "old_database": "Reject changed config fingerprint; preserve old DB and use separate new DB"
+  }
+}
