@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { RefObject } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { AdaptiveDpr, Stats } from '@react-three/drei'
+import { AdaptiveDpr } from '@react-three/drei'
 import { useHarbor } from '../store/useHarbor'
 import { ensureMapData, useMapData } from '../store/useMapData'
 import { ensureBathymetry, useBathymetry } from '../store/useBathymetry'
@@ -101,8 +100,8 @@ export default function Scene() {
     <SceneBoundary><Canvas key={rendererVersion} camera={camera} dpr={[1, 1.35]} performance={{ min: .65 }} gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }} fallback={<div className="three-fallback"><h3>浏览器未提供 3D 渲染支持</h3><button onClick={() => useHarbor.getState().setView('2d')}>返回 2D 地图</button></div>} onPointerMissed={() => useHarbor.getState().selectTrack(null)}>
       <color attach="background" args={['#071522']} /><fog attach="fog" args={['#071522', bounds.span * .65, bounds.span * 3.2]} /><ambientLight intensity={1.25} /><hemisphereLight args={['#d7efff', '#324b42', 1.55]} /><directionalLight position={[2000, 3500, 1500]} intensity={2.4} />
       <AdaptiveDpr pixelated />{waterVisible && <Water bounds={bounds} opacity={waterOpacity} />}{layers.seabed && grid && <Seabed grid={grid} verticalScale={verticalScale} />}{layers.models && <HarborModels3D />}{layers.risks && <Zone3D />}{layers.routes && <NavigationRoute3D />}{layers.risks && <AlertVolume simple={simple} verticalScale={verticalScale} maxDepth={maxDepth} />}{layers.buoys && <><Buoy3D verticalScale={verticalScale} maxDepth={maxDepth} /><BlindAreas3D /></>}{layers.vessels && <><Track3D verticalScale={verticalScale} /><Target3D verticalScale={verticalScale} /></>}<CameraRig mode={mode} revision={choice.revision} bounds={bounds} verticalScale={verticalScale} /><RendererLifecycle onLoss={onLoss} /><PerformanceProbe onSample={updateFps} />
-      {showStats && <Stats className="three-fps" parent={container as RefObject<HTMLElement>} />}
     </Canvas></SceneBoundary>
+    {showStats && <div className="three-fps" aria-label="三维帧率"><strong>{fps ?? '—'}</strong><span>FPS</span></div>}
     <div className="three-camera-controls" aria-label="三维相机预设"><button className={mode === 'overview' ? 'active' : ''} onClick={() => choose('overview')}>整体总览</button><button className={mode === 'surface' ? 'active' : ''} onClick={() => choose('surface')}>水上视角</button><button className={mode === 'underwater' ? 'active' : ''} onClick={() => choose('underwater')}>水下视角</button><button className={mode === 'follow' ? 'active' : ''} disabled={!selected} onClick={() => choose('follow')}>跟随选中</button><button onClick={() => choose('overview')}>视角复位</button><ObjectPicker /></div>
     <div className={`three-source-note ${grid?.metadata.source_kind === 'synthetic' ? 'demo' : ''}`}>{loading || demLoading ? '正在加载港区与海底数据…' : demError ? `海底 DEM 不可用：${demError}` : grid?.metadata.source_kind === 'synthetic' ? '演示地形 · 非真实测深 · 固定参考水位' : '测深数据已加载 · 元数据见图例'}</div>
     <SelectedReadout />

@@ -377,7 +377,8 @@ a { color: #70c8f9; text-decoration: none; }
 .three-layer-controls strong { grid-column: 1 / -1; color: #e0f2fe; font-weight: 600; }
 .three-layer-controls label { display: flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap; }
 .three-layer-controls input { width: 14px; height: 14px; accent-color: #38bdf8; }
-.three-stage .three-fps { position: absolute !important; top: auto !important; bottom: 175px !important; left: 12px !important; z-index: 90 !important; }
+.three-stage .three-fps { position: absolute; bottom: 175px; left: 12px; z-index: 90; display: grid; place-items: center; min-width: 52px; padding: 6px 8px; border: 1px solid #31526b; border-radius: 5px; background: #061422e8; color: #bde8ff; font: 11px/1 Consolas, monospace; pointer-events: none; }
+.three-stage .three-fps strong { font-size: 20px; line-height: 1.05; }
 .three-context-notice { position: absolute; top: 70px; left: 12px; right: 12px; z-index: 100; padding: 12px; background: #432b1eea; color: #f7d49b; border: 1px solid #89603b; border-radius: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 14px; }
 .three-loading, .three-fallback { display: flex; flex: 1; height: 100%; min-height: 250px; flex-direction: column; justify-content: center; align-items: center; gap: 20px; color: #a0bfd7; text-align: center; padding: 30px; background: #071522; }
 .three-fallback h3 { color: #d9ecfa; }.three-fallback > div { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }

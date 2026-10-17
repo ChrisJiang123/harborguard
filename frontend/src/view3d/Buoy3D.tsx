@@ -1,5 +1,4 @@
 import { useMemo, useRef } from 'react'
-import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { DoubleSide } from 'three'
 import type { Group, Mesh, MeshBasicMaterial } from 'three'
@@ -8,6 +7,7 @@ import type { StaticBuoy } from '../data/mapGeometry'
 import { useHarbor } from '../store/useHarbor'
 import { useMapData } from '../store/useMapData'
 import { pingEnvelope, worldPosition } from './coordinates'
+import { SceneLabel } from './SceneLabel'
 
 function Buoy({ id, baseline, verticalScale, maxDepth }: { id: string; baseline?: StaticBuoy; verticalScale: number; maxDepth: number }) {
   const status = useHarbor(s => s.latest?.buoys.find(buoy => buoy.id === id)?.status ?? 'pending')
@@ -44,7 +44,7 @@ function Buoy({ id, baseline, verticalScale, maxDepth }: { id: string; baseline?
     <mesh position={[0, 3, 0]}><cylinderGeometry args={[3, 3, 6, 12]} /><meshStandardMaterial color={status === 'ok' ? '#f9bc49' : '#6B7280'} emissive={color} emissiveIntensity={.4} /></mesh><mesh position={[0, 9, 0]}><cylinderGeometry args={[.45, .45, 8, 8]} /><meshStandardMaterial color="#f8fafc" /></mesh><mesh position={[0, 13, 0]}><sphereGeometry args={[1.3, 10, 8]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={.7} /></mesh>
     <mesh position={[0, -height / 2, 0]} raycast={() => {}}><coneGeometry args={[range, height, 32, 1, true]} /><meshBasicMaterial color={color} transparent opacity={status === 'ok' ? .12 : .025} depthWrite={false} side={DoubleSide} /></mesh>
     <mesh ref={wave} visible={false} raycast={() => {}}><sphereGeometry args={[1, 24, 12]} /><meshBasicMaterial ref={waveMaterial} color="#7dd3fc" transparent wireframe opacity={0} depthWrite={false} /></mesh>
-    <Html position={[0, 22, 0]} center zIndexRange={[20, 0]} pointerEvents="none"><span className={`buoy-3d-label ${status}`}>{id}{status === 'down' ? ' ×' : status === 'pending' ? ' · 待连接' : ''}</span></Html>
+    <SceneLabel position={[0, 22, 0]} text={`${id}${status === 'down' ? ' ×' : status === 'pending' ? ' · 待连接' : ''}`} color={status === 'ok' ? '#7bd0f2' : '#a0aabd'} borderColor={status === 'ok' ? '#2b5c77' : '#4a5365'} pixelHeight={16} />
   </group>
 }
 export function Buoy3D({ verticalScale, maxDepth }: { verticalScale: number; maxDepth: number }) {

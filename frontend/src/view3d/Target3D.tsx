@@ -1,5 +1,4 @@
 import { useMemo, useRef } from 'react'
-import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Object3D } from 'three'
 import type { Group, InstancedMesh } from 'three'
@@ -8,6 +7,7 @@ import { useHarbor } from '../store/useHarbor'
 import { LEVEL_COLORS } from '../theme'
 import type { Cls } from '../types/contract'
 import { createTrackMotion, sampleTrackMotion } from './coordinates'
+import { SceneLabel } from './SceneLabel'
 
 function FishSchool({ color }: { color: string }) {
   const mesh = useRef<InstancedMesh>(null)
@@ -44,20 +44,20 @@ function Target({ id, verticalScale }: { id: string; verticalScale: number }) {
   const selected = useHarbor(s => s.selectedTrackId === id)
   const group = useRef<Group>(null)
   const model = useRef<Group>(null)
-  const label = useRef<HTMLSpanElement>(null)
+  const heading = useHarbor(s => s.tracks[id]?.heading_deg ?? 0)
+  const depth = useHarbor(s => s.tracks[id]?.depth_m ?? 0)
   const motion = useMemo(() => createTrackMotion(useHarbor.getState().tracks[id], verticalScale), [id, verticalScale])
   useFrame(({ clock }) => {
     const track = useHarbor.getState().tracks[id]
     if (!track || !group.current) return
     group.current.position.fromArray(sampleTrackMotion(motion, track, clock.elapsedTime, verticalScale))
     if (model.current) model.current.rotation.y = -track.heading_deg * Math.PI / 180
-    const text = track.cls === 'vessel' ? `${id} · 船舶 · ${Math.round(track.heading_deg)}°` : `${id} · L${track.level} · ${track.depth_m.toFixed(1)} m`
-    if (label.current && label.current.textContent !== text) label.current.textContent = text
   })
+  const labelText = cls === 'vessel' ? `${id} · 船舶 · ${Math.round(heading)}°` : `${id} · L${level} · ${depth.toFixed(1)} m`
   return <group ref={group} onClick={event => { event.stopPropagation(); useHarbor.getState().selectTrack(id) }}>
     <group ref={model} scale={5}><TargetBody cls={cls} color={LEVEL_COLORS[level]} tentative={tentative} /></group>
     {selected && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -6, 0]} raycast={() => {}}><ringGeometry args={[19, 22, 40]} /><meshBasicMaterial color="#ffffff" transparent opacity={.85} depthWrite={false} side={2} /></mesh>}
-    {(selected || level > 0) && <Html position={[0, 32, 0]} center zIndexRange={[40, 0]} pointerEvents="none"><span ref={label} className={`target-3d-label ${selected ? 'selected' : ''}`} style={{ color: LEVEL_COLORS[level] }}>{id}</span></Html>}
+    {(selected || level > 0) && <SceneLabel position={[0, 32, 0]} text={labelText} color={LEVEL_COLORS[level]} selected={selected} pixelHeight={24} />}
   </group>
 }
 
