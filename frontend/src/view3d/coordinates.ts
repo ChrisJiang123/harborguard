@@ -1,4 +1,5 @@
 import type { MapResources } from '../data/mapGeometry'
+import type { BathymetryGrid } from '../data/bathymetry'
 import type { Track } from '../types/contract'
 import { toLocal } from '../map2d/geo'
 import { SEABED_DEPTH_M, VZ } from '../theme'
@@ -45,12 +46,19 @@ export function zoneExtent(feature: MapResources['zones']['features'][number]): 
   return Number.isFinite(minX) ? { width: Math.max(30, maxX - minX), length: Math.max(30, maxZ - minZ) } : { width: 80, length: 120 }
 }
 
-export function sceneBounds(resources: MapResources | null): SceneBounds {
+export function sceneBounds(resources: MapResources | null, bathymetry?: BathymetryGrid | null): SceneBounds {
   let minX = -1800, maxX = 1800, minZ = -1800, maxZ = 1800
   function include(x: number, z: number, radius = 0) { minX = Math.min(minX, x - radius); maxX = Math.max(maxX, x + radius); minZ = Math.min(minZ, z - radius); maxZ = Math.max(maxZ, z + radius) }
   resources?.zones.features.forEach(feature => zoneRings(feature).forEach(ring => ring.forEach(point => include(point[0], point[2]))))
   resources?.assets.forEach(asset => { const position = worldPosition(asset.lat, asset.lon); include(position[0], position[2], Math.max(...asset.rings_m)) })
   resources?.buoys.forEach(buoy => { const position = worldPosition(buoy.lat, buoy.lon); include(position[0], position[2], buoy.range_m) })
+  if (bathymetry) {
+    const { west, south, east, north } = bathymetry.metadata.bounds
+    for (const [lat, lon] of [[south, west], [south, east], [north, west], [north, east]]) {
+      const position = worldPosition(lat!, lon!)
+      include(position[0], position[2])
+    }
+  }
   return { center: [(minX + maxX) / 2, -SEABED_DEPTH_M / 3, (minZ + maxZ) / 2], span: Math.max(maxX - minX, maxZ - minZ), width: maxX - minX, length: maxZ - minZ }
 }
 
@@ -68,8 +76,8 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
     return { target, position: [target[0] + bounds.span * .27, Math.max(260, bounds.span * .13), target[2] + bounds.span * .52] }
   }
   if (mode === 'underwater') {
-    const target: Point3 = [bounds.center[0], -18 * verticalScale, bounds.center[2]]
-    return { target, position: [target[0] + bounds.span * .055, -2 * verticalScale, target[2] + bounds.span * .09] }
+    const target: Point3 = [bounds.center[0], -10 * verticalScale, bounds.center[2]]
+    return { target, position: [target[0] + bounds.span * .14, -1 * verticalScale, target[2] + bounds.span * .22] }
   }
   const target: Point3 = [bounds.center[0], -8 * verticalScale, bounds.center[2]]
   return { target, position: [bounds.center[0] + bounds.span * .3, bounds.span * .72, bounds.center[2] + bounds.span * .62] }

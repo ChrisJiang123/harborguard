@@ -34,13 +34,15 @@ export function startLive(): () => void {
       if (stopped) return
       try {
         const message: unknown = JSON.parse(String(event.data))
+        const previousSnapshotSeq = useHarbor.getState().latest?.seq
         if (!receiveMessage(message)) throw new Error('数据格式与共享契约不一致')
         useHarbor.getState().setConnection('live')
         if (!recoveryStarted && typeof message === 'object' && message !== null && (message as { type?: unknown }).type === 'state') {
           recoveryStarted = true
           recovery?.abort()
           recovery = new AbortController()
-          void recoverLiveFromBackend(message as import('../types/contract').StateMsg, recovery.signal)
+          useHarbor.getState().setRecoveryLoading()
+          void recoverLiveFromBackend(message as import('../types/contract').StateMsg, recovery.signal, previousSnapshotSeq)
         }
         armWatchdog()
       } catch {

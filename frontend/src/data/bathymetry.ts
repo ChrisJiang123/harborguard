@@ -17,12 +17,15 @@ const object = (value: unknown): Record<string, unknown> | null => typeof value 
 export function parseBathymetry(value: unknown): BathymetryGrid | null {
   const root = object(value), metadata = object(root?.metadata), bounds = object(metadata?.bounds), spacing = object(metadata?.approximate_spacing_m)
   const width = metadata?.width, height = metadata?.height, values = root?.values
-  if (root?.version !== 1 || !metadata || metadata.source_kind !== 'synthetic' && metadata.source_kind !== 'survey' || metadata.horizontal_crs !== 'EPSG:4326' || metadata.horizontal_units !== 'degrees' || metadata.vertical_units !== 'm' || metadata.depth_positive !== 'down' || typeof metadata.vertical_datum !== 'string' || !metadata.vertical_datum || typeof metadata.reference_water_level_m !== 'number' || typeof metadata.nodata_value !== 'number' || !Number.isInteger(width) || !Number.isInteger(height) || (width as number) < 2 || (height as number) < 2 || !bounds || !spacing || !Array.isArray(values) || values.length !== (width as number) * (height as number)) return null
+  if (root?.version !== 1 || !metadata || metadata.source_kind !== 'synthetic' && metadata.source_kind !== 'survey' || typeof metadata.title !== 'string' || !metadata.title || typeof metadata.source !== 'string' || !metadata.source || metadata.horizontal_crs !== 'EPSG:4326' || metadata.horizontal_units !== 'degrees' || metadata.vertical_units !== 'm' || metadata.depth_positive !== 'down' || typeof metadata.vertical_datum !== 'string' || !metadata.vertical_datum || typeof metadata.reference_water_level_m !== 'number' || typeof metadata.nodata_value !== 'number' || !Number.isInteger(width) || !Number.isInteger(height) || (width as number) < 2 || (height as number) < 2 || !bounds || !spacing || !Array.isArray(values) || values.length !== (width as number) * (height as number)) return null
   const coordinates = [bounds.west, bounds.south, bounds.east, bounds.north]
   if (!coordinates.every(item => typeof item === 'number' && Number.isFinite(item)) || !(bounds.west as number < (bounds.east as number)) || !(bounds.south as number < (bounds.north as number)) || !values.every(item => typeof item === 'number' && Number.isFinite(item))) return null
   const noData = metadata.nodata_value as number
   const valid = values.filter(item => item !== noData) as number[]
-  if (!valid.length || valid.some(item => item < 0) || typeof spacing.east_west !== 'number' || typeof spacing.north_south !== 'number') return null
+  const minDepth = valid.reduce((minimum, item) => Math.min(minimum, item), Infinity)
+  const maxDepth = valid.reduce((maximum, item) => Math.max(maximum, item), -Infinity)
+  const declaredNumbers = [metadata.reference_water_level_m, metadata.min_depth_m, metadata.max_depth_m, metadata.nodata_cells, spacing.east_west, spacing.north_south]
+  if (!valid.length || valid.some(item => item < 0) || !declaredNumbers.every(item => typeof item === 'number' && Number.isFinite(item)) || (spacing.east_west as number) <= 0 || (spacing.north_south as number) <= 0 || metadata.nodata_cells !== values.length - valid.length || Math.abs((metadata.min_depth_m as number) - minDepth) > .011 || Math.abs((metadata.max_depth_m as number) - maxDepth) > .011) return null
   return value as BathymetryGrid
 }
 

@@ -133,6 +133,16 @@ async function main() {
     assert.equal(useHarbor.getState().latest.zones.find(zone => zone.id === 'Z4').state, 'restricted')
 
     seedLive()
+    const rejectInput = { ...input, action: 'reject' }
+    await api.decide(rejectInput)
+    assert.equal(useHarbor.getState().decisionRequests.A1, undefined)
+    assert.equal(useHarbor.getState().decisionsByAlert.A1, undefined)
+    assert.equal(useHarbor.getState().uncertainDecisions.A1.reason, 'reject-without-event')
+    receiveMessage({ type: 'event', seq: 100002, t: 68, event: 'decision', data: rejectInput })
+    assert.equal(useHarbor.getState().uncertainDecisions.A1, undefined)
+    assert.equal(useHarbor.getState().decisionsByAlert.A1.action, 'reject')
+
+    seedLive()
     global.fetch = async () => new Response(JSON.stringify({ detail: '方案不存在' }), { status: 422, headers: { 'content-type': 'application/json' } })
     const success = await runOperation('批准方案', () => api.decide(input))
     assert.equal(success, false)
@@ -165,7 +175,7 @@ async function main() {
     assert.deepEqual(useHarbor.getState().decisionRequests, {})
     assert.deepEqual(useHarbor.getState().optionsByAlert, {})
     assert.equal(useHarbor.getState().latestRec, null)
-    console.log('PASS A3: scenario A approval/rejection; manual/default options; target-specific context; contribution display; network/mode/scenario controls; replay POST lock; real-event-only confirmation; HTTP/toast errors; request de-duplication; clean session reset.')
+    console.log('PASS A3: scenario A approval/rejection; manual/default options; target-specific context; contribution display; network/mode/scenario controls; replay POST lock; real-event-only confirmation; explicit unconfirmed reject state; HTTP/toast errors; request de-duplication; clean session reset.')
   } finally {
     stop?.()
     global.fetch = originalFetch

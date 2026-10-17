@@ -205,6 +205,7 @@ a { color: #70c8f9; text-decoration: none; }
 .timeline-marker:hover { outline: 3px solid #ffffff30; }
 .timeline-labels { display: flex; justify-content: space-between; margin-top: 12px; font-family: Consolas, "Microsoft YaHei", monospace; color: #738aa4; font-size: 14px; }
 .status-notice { padding: 11px 18px; background: #3c2b155c; border-bottom: 1px solid #5c4828; color: #e2bd77; font-size: 14px; }
+.status-notice.warning { background: #4a321a; color: #ffd18a; }
 .status-notice.error { background: #422132; color: #ffbdca; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .status-notice button { border: 0; padding: 0 5px; background: transparent; font-size: 18px; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }::-webkit-scrollbar-track { background: transparent; }::-webkit-scrollbar-thumb { background: #2a3d55; border-radius: 4px; }
@@ -267,8 +268,9 @@ a { color: #70c8f9; text-decoration: none; }
 .decision-buttons .approve-button { background: #123e32; border-color: #2c7a59; color: #9ff0bc; }
 .decision-buttons .reject-button { background: #321d2a; border-color: #6c3547; color: #ffbdca; }
 .decision-buttons button:disabled { opacity: .45; }
-.decision-confirmed, .decision-waiting { font-size: 14px; margin-top: 7px; }
+.decision-confirmed, .decision-waiting, .decision-uncertain { font-size: 14px; margin-top: 7px; }
 .decision-confirmed.approve { color: #86efac; }.decision-confirmed.reject { color: #fda4af; }.decision-waiting { color: #f4d082; }
+.decision-uncertain { color: #fdba74; border-left: 2px solid #f59e0b; padding-left: 8px; }
 .impact-section { display: flex; flex-direction: column; min-height: 0; border-bottom: 1px solid var(--line); overflow: hidden; }
 .impact-section .section-heading { flex-shrink: 0; }
 .impact-scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 9px 9px; }
@@ -352,7 +354,8 @@ a { color: #70c8f9; text-decoration: none; }
 .three-camera-controls button.active { background: #1d4762; color: #a8e3ff; border-color: #6393ad; }
 .three-object-picker { display: flex; align-items: center; gap: 6px; min-height: 32px; margin-left: 4px; padding: 0 8px; border: 1px solid #35516b; border-radius: 4px; background: #0a1b2ded; color: #a8c9dd; font-size: 14px; }
 .three-object-picker select { min-width: 128px; border: 0; background: #071522; color: #e0f2fe; font: inherit; }
-.three-source-note { position: absolute; top: 58px; left: 12px; z-index: 70; border: 1px solid #2c4d66; border-radius: 4px; background: #081827e8; padding: 5px 8px; color: #98b7ce; font-size: 14px; pointer-events: none; }
+.three-source-note { position: absolute; top: 58px; left: 12px; z-index: 70; border: 1px solid #2c4d66; border-radius: 4px; background: #081827e8; padding: 5px 8px; color: #98b7ce; font-size: 14px; }
+.three-source-note button { margin-left: 7px; padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: transparent; color: inherit; }
 .three-source-note.demo { color: #f4cf83; border-color: #775e2d; background: #31260de8; }
 .target-3d-label, .buoy-3d-label, .asset-3d-label { display: inline-block; white-space: nowrap; border-radius: 4px; background: #061422e8; border: 1px solid #31526b; padding: 3px 8px; font: 14px/1.5 Consolas, "Microsoft YaHei", monospace; color: #b7d7eb; user-select: none; }
 .target-3d-label.selected { border-color: #eef8ff; box-shadow: 0 0 0 2px #ffffff22; }

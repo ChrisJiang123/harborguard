@@ -95,7 +95,14 @@ export const api = {
     if (!body.operator.trim()) throw new APIError('请填写操作员名称。')
     const session = state.session
     state.setDecisionRequest(body.alert_id, body)
-    try { return await command('/decision', body) }
+    try {
+      const result = await command('/decision', body)
+      if (body.action === 'reject' && useHarbor.getState().session === session && useHarbor.getState().decisionRequests[body.alert_id]) {
+        useHarbor.getState().setDecisionRequest(body.alert_id, null)
+        useHarbor.getState().markDecisionUncertain(body.alert_id, { ...body, reason: 'reject-without-event' })
+      }
+      return result
+    }
     catch (error) { if (useHarbor.getState().session === session) useHarbor.getState().setDecisionRequest(body.alert_id, null); throw error }
   },
   // Agent-owned endpoints are wrapped for the shared REST surface, not invoked by the UI.

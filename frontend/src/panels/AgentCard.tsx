@@ -47,28 +47,34 @@ export function AgentCard() {
   const mode = useHarbor(s => s.latest?.mode)
   const confirmed = useHarbor(s => alertId ? s.decisionsByAlert[alertId] : undefined)
   const requested = useHarbor(s => alertId ? s.decisionRequests[alertId] : undefined)
+  const uncertain = useHarbor(s => alertId ? s.uncertainDecisions[alertId] : undefined)
+  const recovery = useHarbor(s => s.recovery)
   const pending = useOperations(s => s.pending)
   const [operator, setOperator] = useState('操作员 A')
   const effective = effectiveOptionId(alertId, options, rec, chosen, chosenFor)
-  const locked = !!pending || !!confirmed || !!requested || !effective || !operator.trim() || (conn !== 'live' && conn !== 'mock')
+  const locked = !!pending || !!confirmed || !!requested || !!uncertain || !effective || !operator.trim() || (conn !== 'live' && conn !== 'mock')
   const decide = (action: 'approve' | 'reject') => {
     if (!alertId || !effective || locked) return
     void runOperation(action === 'approve' ? '批准方案' : '驳回方案', async () => {
       await api.decide({ alert_id: alertId, option_id: effective, action, operator: operator.trim() })
-      if (useHarbor.getState().decisionRequests[alertId]) notify('操作请求已送达，等待后端决策事件确认。')
+      if (action === 'reject' && useHarbor.getState().uncertainDecisions[alertId]) notify('驳回请求已被接口接受，但后端未返回结构化 decision，状态无法确认。')
+      else if (useHarbor.getState().decisionRequests[alertId]) notify('操作请求已送达，等待后端决策事件确认。')
     })
   }
   return <section className="agent-section"><SectionHeading index="03" title="Agent 建议" note={alertId ?? '待命'} />
     {rec ? <div className="agent-body"><div className="agent-meta"><span className={`model-badge ${rec.model}`}>{MODELS[rec.model]}</span><span>置信度：{CONFIDENCE[rec.confidence]}</span></div><h3>{rec.summary}</h3><details className="agent-explanation"><summary>查看建议解读</summary><p>{rec.explanation}</p></details>
       {rec.uncertainties.length > 0 && <ul className="uncertainty-list">{rec.uncertainties.map((text, index) => <li key={index}>{text}</li>)}</ul>}
       <EvidenceChips recommendation={rec} />
-      {alertId && <div className="decision-area"><label className="operator-label">操作员<input aria-label="操作员名称" value={operator} maxLength={32} onChange={event => setOperator(event.target.value)} disabled={!!pending || !!confirmed || !!requested} /></label>
+      {alertId && <div className="decision-area"><label className="operator-label">操作员<input aria-label="操作员名称" value={operator} maxLength={32} onChange={event => setOperator(event.target.value)} disabled={!!pending || !!confirmed || !!requested || !!uncertain} /></label>
         {effective ? <p className="decision-option">当前方案：{options.find(option => option.id === effective)?.label}</p> : <p className="decision-option muted">请先在下方选择一个可用方案。</p>}
         <div className="decision-buttons"><button className="approve-button" disabled={locked} onClick={() => decide('approve')}>{pending === '批准方案' ? '批准中…' : '批准'}</button><button className="reject-button" disabled={locked} onClick={() => decide('reject')}>{pending === '驳回方案' ? '驳回中…' : '驳回'}</button></div>
         {confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">{confirmed.action === 'approve' ? '已批准' : '已驳回'} · {clock(confirmed.t)} · {confirmed.operator}</p>}
-        {requested && !confirmed && <p className="decision-waiting" role="status">等待后端确认，请勿重复操作。</p>}
+        {requested && !confirmed && <p className="decision-waiting" role="status">等待后端结构化 decision 确认，请勿重复操作。</p>}
+        {uncertain && !confirmed && <p className="decision-uncertain" role="status">状态无法确认：驳回请求已被接口接受，但当前契约没有返回结构化驳回事件。</p>}
+        {!requested && !uncertain && !confirmed && conn === 'live' && recovery.phase === 'loading' && <p className="decision-waiting" role="status">正在恢复历史审批状态…</p>}
+        {!requested && !uncertain && !confirmed && conn === 'live' && (recovery.phase === 'complete' || recovery.phase === 'partial' || recovery.phase === 'failed') && <p className="decision-uncertain" role="status">未收到结构化 decision：可能尚未处理，历史状态无法确认。</p>}
       </div>}
-    </div> : <div className="agent-body"><div className="agent-waiting"><span>✦</span><strong>{selected && !alertId ? '该目标暂无活动警报' : mode === 'disaster' ? '等待勘测与复航建议' : '等待警报与处置建议'}</strong></div><p>{mode === 'disaster' ? '灾害模式下显示数据源发来的复航建议。' : '选中目标后显示对应建议；未选中时显示等级最高的活动警报。'}</p>{confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">该警报{confirmed.action === 'approve' ? '已批准' : '已驳回'} · {clock(confirmed.t)} · {confirmed.operator}</p>}{requested && !confirmed && <p className="decision-waiting" role="status">操作已提交，等待后端确认。</p>}{conn === 'mock' && <p className="hint">{mode === 'disaster' ? '场景 B 第 45 秒生成模板建议。' : '场景 A 第 66 秒生成模板建议。'}可使用 10× 加速。</p>}</div>}
+    </div> : <div className="agent-body"><div className="agent-waiting"><span>✦</span><strong>{selected && !alertId ? '该目标暂无活动警报' : mode === 'disaster' ? '等待勘测与复航建议' : '等待警报与处置建议'}</strong></div><p>{mode === 'disaster' ? '灾害模式下显示数据源发来的复航建议。' : '选中目标后显示对应建议；未选中时显示等级最高的活动警报。'}</p>{confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">该警报{confirmed.action === 'approve' ? '已批准' : '已驳回'} · {clock(confirmed.t)} · {confirmed.operator}</p>}{requested && !confirmed && <p className="decision-waiting" role="status">操作已提交，等待后端结构化 decision 确认。</p>}{uncertain && !confirmed && <p className="decision-uncertain" role="status">状态无法确认：后端未返回结构化驳回事件。</p>}{alertId && !confirmed && !requested && !uncertain && conn === 'live' && recovery.phase !== 'idle' && <p className="decision-uncertain" role="status">当前没有可恢复的结构化建议或决策，历史状态无法确认。</p>}{conn === 'mock' && <p className="hint">{mode === 'disaster' ? '场景 B 第 45 秒生成模板建议。' : '场景 A 第 66 秒生成模板建议。'}可使用 10× 加速。</p>}</div>}
   </section>
 }
 

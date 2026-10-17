@@ -28,8 +28,11 @@ function MainView() {
 function StatusNotice() {
   const error = useHarbor(s => s.error)
   const conn = useHarbor(s => s.conn)
+  const recovery = useHarbor(s => s.recovery)
   if (error) return <div className="status-notice error" role="alert">{error}<button onClick={() => useHarbor.getState().setError(null)} aria-label="关闭提示">×</button></div>
   if (conn === 'disconnected' || conn === 'connecting') return <div className="status-notice">{conn === 'connecting' ? '正在连接后端…' : '后端未连接，正在自动重连。'} 可以点击顶栏“本地演示”继续查看。</div>
+  if (conn === 'live' && recovery.phase === 'loading') return <div className="status-notice">正在衔接实时事件并恢复刷新前记录…</div>
+  if (conn === 'live' && recovery.message) return <div className="status-notice warning" role="status">{recovery.message} 不会从自由文本日志推断审批结果。</div>
   return null
 }
 export function AppShell() {
