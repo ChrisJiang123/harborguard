@@ -4,8 +4,10 @@
 
 ## 环境说明（与运行环境、YOLO 训练环境分开）
 
-- **目标机器：Colab 或经验证可用的 Lenovo CUDA 环境；当前尚未验证训练 GPU。**
-- Unsloth 在 macOS 上不可用，训练不放在 MacBook。
+- **暂定 Colab。** Lenovo 的 CUDA 环境已实测可用于 YOLO 训练（torch 2.14.1+cu130），
+  但 LoRA 训练（Unsloth）尚未在任何 GPU 上验证，不因此勾选验收。
+- Unsloth 在 macOS 上不可用，训练不放在 MacBook；Windows 本机跑 Linux 版
+  Unsloth 的 WSL 方案以后再修，不阻塞 C1。
 - 安装：`pip install -r requirements-lora-train.txt`（装完重启 runtime / 激活环境）。
 - 基座：Qwen3.5 小尺寸（先 0.8B）；兼容问题换 Qwen3 1.7B（对应本机 Ollama 预拉基座 `qwen3:1.7b`）。
 - bf16 LoRA（rank 16 / alpha 16–32 / lr 2e-4 / 2–3 epoch / max_len 4096），不做 4-bit 训练。

@@ -17,18 +17,19 @@ A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改�
 
 ## 三套环境（分开管理）
 
-| 环境 | 位置 | 用途 | 机器 |
+| 环境 | 位置 | 用途 | 机器与 Python |
 | --- | --- | --- | --- |
-| 运行环境 | `.venv`（仓库根） | Agent 服务、render_ping、SonarDetector CPU 推理、自检 | MacBook（开发/演示主机） |
-| YOLO 训练 | `.venv-yolo-train` / Colab | `yolo detect train`（50 epoch） | Lenovo GPU / Colab |
-| LoRA 训练 | Colab / Lenovo（requirements-lora-train.txt） | Unsloth + TRL SFT | Colab 或经验证可用的 Lenovo CUDA 环境；**当前尚未验证训练 GPU** |
+| 运行环境 | `.venv`（仓库根） | Agent 服务、render_ping、SonarDetector CPU 推理、自检 | MacBook（开发/演示主机）· Python 3.11（实测） |
+| YOLO 训练 | `.venv-yolo-train` / Colab | `yolo detect train`（50 epoch） | ✅ Lenovo 已实测：Windows · Python 3.12.10 · cu130；Colab 备选 |
+| LoRA 训练 | Colab（暂定） | Unsloth + TRL SFT | 暂定 Colab；Unsloth 在 GPU 上未验证（WSL 方案以后修，不阻塞 C1） |
 
 ```bash
-# 运行环境（MacBook）
+# 运行环境（MacBook，Python 3.11）
 bash scripts/setup_env_runtime.sh
-# YOLO 训练环境（有 NVIDIA GPU 的机器上才真正创建）
-bash scripts/setup_env_yolo_train.sh
-# LoRA 训练：见 requirements-lora-train.txt 头部注释与 ml/lora/README.md（仅 Colab）
+# YOLO 训练环境（Linux bash；CUDA 源与 Python 版本可配置，脚本本身未实测）
+PYTHON_VERSION=3.12 YOLO_CUDA_INDEX=cu130 bash scripts/setup_env_yolo_train.sh
+# Windows 训练环境：用 requirements-yolo-train.txt 头部的 PowerShell 说明（Lenovo 实测路径 Scripts\python.exe）
+# LoRA 训练：暂定 Colab，见 requirements-lora-train.txt 头部注释与 ml/lora/README.md
 ```
 
 > 本 MacBook 注意：macOS 26 上 brew 版 Python 的 `platform.mac_ver()` 返回空串，
@@ -67,7 +68,12 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   `ANTHROPIC_BASE_URL` + `ANTHROPIC_AUTH_TOKEN`，Token 不入库不外显），响应
   `model=claude-sonnet-5`，回复正常
 - ⏸ 手动待验收①：关闭 Wi-Fi 后 Ollama 仍能对话（`ollama run qwen3:1.7b`）——**未验证**
-- ⏸ 手动待验收②：训练 GPU（Colab 分到 GPU / Lenovo CUDA 可用）——**未验证**
+- ✅ 手动验收②a：YOLO 训练 GPU（Lenovo）——负责人 2026-10-16 实测通过：
+  Windows · Python 3.12.10 · RTX 5060 Laptop GPU（8151 MiB，sm_120）·
+  torch 2.14.1+cu130 · torchvision 0.29.1+cu130 · ultralytics 8.4.178；
+  CUDA 运算、反向传播、YOLO26 `device=0` 推理全部通过。
+  以上为实测记录（不代表"当前最新版本"）；Lenovo 已验证环境不再重建
+- ⏸ 手动验收②b：LoRA 训练 GPU（Colab / Unsloth）——**未验证**，暂定 Colab
 - ℹ️ 思考型模型注意：Sonnet 5 与 qwen3 默认带推理块，小 `max_tokens` 会被耗尽返回空文本；
   自检脚本已加预算，C3 调用时同样处理
 
