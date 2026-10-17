@@ -1,0 +1,414 @@
+{
+  "tested_at_utc": "2026-10-17T11:46:50.956222+00:00",
+  "a_pr7": "dc69ad28ac37e8d0592d9271f9d61e28c79ff27c",
+  "b_code": "04de0fe7abb9eb52ba7ae806beb30131d4b04a8e",
+  "c_template": "78d39574266b01a582b0626c17021181749271c8",
+  "local_candidate": "b48cac76e301a047afa330bced2eae6e388d534c",
+  "scope": "Actual IAB browser + real B/C services. Isolated same-origin QA proxy5174 -> B8004/C8006. Stable preview5173/B8003/C8001 left untouched. No production source edits. No remote writes.",
+  "build_and_checks": {
+    "npm_ci": "PASS,119 packages/0 vulnerabilities",
+    "build": "PASS; Scene chunk995.19KB warning",
+    "lint": "PASS",
+    "a1_a6": "PASS",
+    "a_check_recovery": "PASS",
+    "existing_b_c_pytest": {
+      "passed": 120,
+      "skipped": 2,
+      "seconds": 68.57,
+      "scope": "candidate before new B-only regression tests; same-drive temporary dir"
+    },
+    "b_history_pytest": {
+      "passed": 18,
+      "seconds": 5.07,
+      "includes_new_tests": 3,
+      "scope": "main B checkout, contract fixture, not browser scenario evidence"
+    },
+    "ruff_history_tests": "PASS"
+  },
+  "concurrent_real_agent": {
+    "history_response_ready": 1792236971.132031,
+    "real_C_recommendation_observed": 1792236971.7657905,
+    "history_delivered": 1792236976.123303,
+    "recommendation": {
+      "type": "event",
+      "seq": 666,
+      "t": 484.0,
+      "event": "recommendation",
+      "data": {
+        "recommendation": {
+          "id": "rec-d89ea3415187",
+          "kind": "security",
+          "alert_id": "A1",
+          "model": "template",
+          "summary": "推荐 最小封闭：残余风险 0.00，延误 6.0 船时",
+          "explanation": "警报 A1（3 级，风险 0.71，主导因素 D 1.00）。目标 T3（uuv，置信度 0.83，速度 2.0 m/s，深度 10.2 m，2 个浮标覆盖）。按排序推荐方案 opt-1：最小封闭，关闭 5 个分区，影响 3 艘船、延误 6.0 船时，残余风险 0.00。最终处置由值班员决定。",
+          "recommended_option_id": "opt-1",
+          "evidence_ids": [
+            "A1",
+            "T3",
+            "det-5",
+            "B3",
+            "B4"
+          ],
+          "uncertainties": [],
+          "confidence": "high",
+          "created_t": 484.0,
+          "latency_ms": 44.8
+        }
+      }
+    },
+    "browser_ax_file": "concurrent-agent-ax.txt"
+  },
+  "original_race_exact_repro": {
+    "api_timing": {
+      "log_get_finished_wall": 1792237037.8162887,
+      "options_ready_wall": 1792237037.8212864,
+      "new_log_post_finished_wall": 1792237037.8568919,
+      "decision_before": [
+        {
+          "type": "event",
+          "seq": 887,
+          "t": 484.0,
+          "event": "decision",
+          "data": {
+            "alert_id": "A1",
+            "option_id": "opt-1",
+            "action": "reject",
+            "operator": "操作员 A"
+          }
+        }
+      ],
+      "delayed_options_delivered_wall": 1792237040.8267763
+    },
+    "browser": {
+      "new_log_count": 1,
+      "old_live_log_count": 1,
+      "rejected": true,
+      "false_restart": false,
+      "recovery_still_loading": false
+    }
+  },
+  "duplicate_log_remaining_failure": {
+    "backend": {
+      "expected_log_count": 2,
+      "structured_events": [
+        {
+          "type": "event",
+          "seq": 143,
+          "t": 0.0,
+          "event": "log",
+          "data": {
+            "log": {
+              "t": 0.0,
+              "level": "info",
+              "source": "operator",
+              "text": "QA_DUPLICATE_SAME_TEXT_AND_TIME"
+            }
+          }
+        },
+        {
+          "type": "event",
+          "seq": 144,
+          "t": 0.0,
+          "event": "log",
+          "data": {
+            "log": {
+              "t": 0.0,
+              "level": "info",
+              "source": "operator",
+              "text": "QA_DUPLICATE_SAME_TEXT_AND_TIME"
+            }
+          }
+        }
+      ],
+      "t": 0.0
+    },
+    "browser": {
+      "before": 2,
+      "after": 1,
+      "false_restart_banner": false
+    },
+    "owner": "A: mergeRecoveredLogs collapses distinct seq at same t/text into one"
+  },
+  "approval_identity_remaining_failure": {
+    "backend": {
+      "http": 200,
+      "latest_decision": {
+        "type": "event",
+        "seq": 1520,
+        "t": 484.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A1",
+          "option_id": "opt-1",
+          "action": "approve",
+          "operator": "QA_REMOTE_2"
+        }
+      }
+    },
+    "live_browser": {
+      "approval_rows": [
+        "已批准 · 08:04 · QA_REMOTE"
+      ],
+      "same_db_reconnected": true
+    },
+    "after_refresh": {
+      "approval_rows": [
+        "\t\t\t\t206 text 已批准  ·  08:04  ·  QA_REMOTE_2"
+      ]
+    },
+    "owner": "A: decision eventIdentity omits operator and seq for same alert/option/action/t"
+  },
+  "decision_failure": {
+    "decision_count": 0,
+    "restricted_count": 0
+  },
+  "authoritative_decisions": [
+    {
+      "type": "event",
+      "seq": 887,
+      "t": 484.0,
+      "event": "decision",
+      "data": {
+        "alert_id": "A1",
+        "option_id": "opt-1",
+        "action": "reject",
+        "operator": "操作员 A"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 1322,
+      "t": 484.0,
+      "event": "decision",
+      "data": {
+        "alert_id": "A1",
+        "option_id": "opt-1",
+        "action": "approve",
+        "operator": "QA_REMOTE"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 1520,
+      "t": 484.0,
+      "event": "decision",
+      "data": {
+        "alert_id": "A1",
+        "option_id": "opt-1",
+        "action": "approve",
+        "operator": "QA_REMOTE_2"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 3064,
+      "t": 486.0,
+      "event": "decision",
+      "data": {
+        "alert_id": "A11",
+        "option_id": "opt-1",
+        "action": "approve",
+        "operator": "操作员 A"
+      }
+    }
+  ],
+  "reconnect": {
+    "approved": true,
+    "operator": true,
+    "connected": true,
+    "false_restart": false,
+    "log_order": [
+      "QA_OFFLINE_ORDER_3",
+      "QA_OFFLINE_ORDER_2",
+      "QA_OFFLINE_ORDER_1"
+    ]
+  },
+  "same_database_restart": {
+    "before_seq": 1421,
+    "after_seq": 1519,
+    "same_except_seq": true,
+    "events_equal": true,
+    "paused": true
+  },
+  "manual_approval": {
+    "decision": {
+      "type": "event",
+      "seq": 3064,
+      "t": 486.0,
+      "event": "decision",
+      "data": {
+        "alert_id": "A11",
+        "option_id": "opt-1",
+        "action": "approve",
+        "operator": "操作员 A"
+      }
+    },
+    "restricted": [
+      "channel_entrance",
+      "channel_main_s",
+      "berth_container_1",
+      "anchorage_outer",
+      "anchorage_north"
+    ],
+    "browser_refresh": {
+      "approved": true,
+      "alert": true,
+      "false_restart": false
+    }
+  },
+  "window_500": {
+    "backend": {
+      "injected": 520,
+      "elapsed_s": 5.1913838386535645,
+      "api_count": 500,
+      "old_decisions_in_api": 0,
+      "db_events": 596,
+      "db_decisions": 3,
+      "seq_sorted_unique": true
+    },
+    "browser": {
+      "partial500": true,
+      "false_restart": false,
+      "has_confirmed_approval": false,
+      "unknown_history": true,
+      "loading": false
+    },
+    "limitation": "Frozen v1: recent500 only; archive has no public pagination"
+  },
+  "recovery": {
+    "state_t": 208.0,
+    "empty_track_id_debris": [
+      {
+        "id": "det-6",
+        "track_id": "",
+        "model": "stub"
+      },
+      {
+        "id": "det-7",
+        "track_id": "",
+        "model": "stub"
+      },
+      {
+        "id": "det-8",
+        "track_id": "",
+        "model": "stub"
+      },
+      {
+        "id": "det-9",
+        "track_id": "",
+        "model": "stub"
+      }
+    ],
+    "png_browser": [
+      {
+        "id": "det-6",
+        "complete": true,
+        "height": 640,
+        "src": "/api/sonar/det-6.png",
+        "width": 640
+      },
+      {
+        "id": "det-7",
+        "complete": true,
+        "height": 640,
+        "src": "/api/sonar/det-7.png",
+        "width": 640
+      },
+      {
+        "id": "det-8",
+        "complete": true,
+        "height": 640,
+        "src": "/api/sonar/det-8.png",
+        "width": 640
+      },
+      {
+        "id": "det-9",
+        "complete": true,
+        "height": 640,
+        "src": "/api/sonar/det-9.png",
+        "width": 640
+      }
+    ],
+    "reopen_plan": {
+      "route_zone_ids": [
+        "channel_entrance",
+        "channel_main_s"
+      ],
+      "reopen_berth_zone_ids": [
+        "berth_container_1"
+      ],
+      "unsurveyed_zone_ids": [
+        "berth_container_3",
+        "berth_cruise"
+      ],
+      "blocked_zone_ids": [
+        "anchorage_north",
+        "berth_fuel",
+        "channel_main_n",
+        "channel_turning"
+      ],
+      "est_hours_saved": 9.0
+    },
+    "3d": "Screenshot smoke, not formal FPS/geographic acceptance"
+  },
+  "fresh_database_sequence_rollback": {
+    "old_seq": 3267,
+    "new_seq_observed": 30,
+    "old_database_preserved_decisions": 4,
+    "browser": {
+      "seq_rollback_banner": true,
+      "no_old_approval": true,
+      "no_old_alert": true,
+      "idle_clock": true,
+      "loading": false
+    },
+    "scope": "Intentional new QA DB while old options response delayed, not ordinary service restart/history loss"
+  },
+  "replay": {
+    "a": {
+      "end_sim_20min": true,
+      "approve_disabled": true,
+      "read_only": true,
+      "backend_disconnected": true
+    },
+    "b": {
+      "end_sim_10min": true,
+      "four_debris": true,
+      "read_only": true,
+      "backend_disconnected": true
+    },
+    "b_image": "/replay_assets/b/det-1.png 640x640"
+  },
+  "health": {
+    "scope": "8s idle candidate WS proxy observation, not active 10x or endurance",
+    "seconds": 8.142373500006215,
+    "frames_excluding_initial": 40,
+    "hz": 4.990759353119172,
+    "max_interval_ms": 216.62850000575418,
+    "max_state_bytes": 1809,
+    "seq_increasing": true,
+    "health": {
+      "8004": 200,
+      "8006": 200,
+      "8003": 200,
+      "8001": 200,
+      "5173": 200
+    }
+  },
+  "overall": "Original recovery race fixed in browser; partial acceptance, two remaining frontend identity defects. Standard single-operator demo works. No algorithm change. 20ms remains best effort. No Push/PR edits/Merge main.",
+  "cleanup": {
+    "candidate_services_stopped": true,
+    "original_service_health": {
+      "5173": 200,
+      "8003": 200,
+      "8001": 200
+    },
+    "qa_databases_and_screenshots_preserved": true,
+    "candidate_worktree_archived": true
+  },
+  "pr7_at_finish": {
+    "sha": "b549515337e0a50889d331ae397e4f381e4694ca",
+    "scope": "English UI translation; identity/merge logic unchanged by source comparison, not revalidated in browser"
+  }
+}
