@@ -68,3 +68,12 @@ buoy_changed 全部四类事件，截取 **51 条唯一真实上下文**（secur
 buoy 7；offline 12 条），走 C3 同一 collect_* 代码路径（UTF-8 ≤ 3 KB）。
 固定种子的场景重复跑会产生重复事件，脚本按 key 去重、跳过已有；
 事件缓存里旧会话的失效警报计入 dropped（HTTPStatusError 39/36/36），不入库。
+
+## 线上切换与回退（2026-10-17，C4 format=json 候选）
+
+当前 .env：`OLLAMA_MODEL=harborguard-lora` + `OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json`。
+完整 schema 约束下该 LoRA 在 Mac/Ollama grammar 解码中循环不终止（见 ml/lora/metrics.json
+的 `history_schema_mode`），故本模型以 `format=json` 运行；qwen3:1.7b 等未列入覆盖表的模型
+仍走完整 schema。回退：`OLLAMA_MODEL=qwen3:1.7b`、清空 `OLLAMA_FORMAT_OVERRIDES`，
+重启 Agent（`python -m agent.main`）并检查 `GET :8001/health`。
+部署注意：若未来改用原生 llama.cpp 运行 LoRA，schema 必须保持 pydantic 声明序（勿排序键）。

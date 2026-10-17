@@ -249,6 +249,27 @@ def build_cloud_provider(settings: Settings) -> CompletionProvider:
 CloudProvider = AnthropicCloudProvider
 
 
+def parse_format_overrides(raw: str | None) -> dict[str, str]:
+    """解析 OLLAMA_FORMAT_OVERRIDES："model:json,model2:schema"。空/未设 = 无覆盖。
+
+    只接受显式 model:format 对（format ∈ {json, schema}）；按模型名精确匹配，
+    不做名称模式猜测，也不提供全局开关。配置非法直接抛错——显式配置不允许静默降级。
+    """
+    overrides: dict[str, str] = {}
+    for part in (raw or "").split(","):
+        entry = part.strip()
+        if not entry:
+            continue
+        model, sep, fmt = entry.partition(":")
+        model, fmt = model.strip(), fmt.strip().lower()
+        if not sep or not model or fmt not in ("json", "schema"):
+            raise ValueError(
+                f"OLLAMA_FORMAT_OVERRIDES 条目非法：{entry!r}（应为 model:json 或 model:schema）"
+            )
+        overrides[model] = fmt
+    return overrides
+
+
 class LocalProvider:
     def __init__(self, settings: Settings):
         self.provider = "ollama"
@@ -257,6 +278,7 @@ class LocalProvider:
         self.base_url = settings.ollama_base_url
         self.keep_alive = settings.ollama_keep_alive
         self.timeout_s = settings.ollama_timeout_s
+        self.format_overrides = parse_format_overrides(settings.ollama_format_overrides)
         self._http = httpx.AsyncClient(timeout=settings.ollama_timeout_s)
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
@@ -273,7 +295,10 @@ class LocalProvider:
             },
         }
         if system == SYSTEM_PROMPT:
-            payload["format"] = RecommendationDraft.model_json_schema()
+            override = self.format_overrides.get(self.request_model)
+            # 默认完整 schema（C3 现状）；仅当该模型在 OLLAMA_FORMAT_OVERRIDES 中显式
+            # 配置为 json 时放宽为任意合法 JSON——候选验收用，回退=清空环境变量。
+            payload["format"] = "json" if override == "json" else RecommendationDraft.model_json_schema()
         response = await self._http.post(
             self._native_url("/api/chat"),
             json=payload,
