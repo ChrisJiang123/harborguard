@@ -1,0 +1,87 @@
+"""Fast offline recording using exactly the same engine as the live server."""
+import argparse
+import copy
+import json
+import logging
+from pathlib import Path
+
+from backend.app import config
+from backend.app.engine import GameEngine
+from backend.app.models import Recommendation
+
+
+def template_recommendation(game, alert_id):
+    data = game.decision.options[alert_id]
+    alert = game.decision.alerts[alert_id]
+    return Recommendation(
+        id=f"rec-template-{game.bus.seq + 1}", kind="security", alert_id=alert_id, model="template",
+        summary="建议审核排名首位方案，由操作员确认后执行",
+        explanation="依据当前预测路径、残余风险和延误船时排序。此建议由离线演示模板生成，须人工核对。",
+        recommended_option_id=data["ranked"][0] if data["ranked"] else None,
+        evidence_ids=[alert_id, alert["track_id"]], uncertainties=["声呐模型可能为桩实现", "目标预测基于匀速假设"],
+        confidence="medium", created_t=game.world.t, latency_ms=0,
+    )
+
+
+def record(scenario, speed, out, *, duration=None, public_assets=True):
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    game = GameEngine(debug_truth=False)
+    pending_recommendations = set()
+    asset_dir = out.parent / "replay_assets" / scenario
+    count = 0
+    max_state_bytes = 0
+    with out.open("w", encoding="utf-8", newline="\n") as handle:
+        def save(msg):
+            nonlocal count, max_state_bytes
+            stored = copy.deepcopy(msg)
+            if msg["type"] == "event" and msg["event"] == "detection" and public_assets:
+                detection = stored["data"]["detection"]
+                asset_dir.mkdir(parents=True, exist_ok=True)
+                (asset_dir / f"{detection['id']}.png").write_bytes(game.decision.images[detection["id"]])
+                # Same contract; portable static URL allows demonstration with the backend stopped.
+                detection["image_url"] = f"/replay_assets/{scenario}/{detection['id']}.png"
+            encoded = json.dumps(stored, ensure_ascii=False, separators=(",", ":"))
+            if msg["type"] == "state":
+                max_state_bytes = max(max_state_bytes, len(encoded.encode()))
+            if msg["type"] == "event" and msg["event"] == "options_ready":
+                pending_recommendations.add(msg["data"]["alert_id"])
+            line = {"wall_ms": round(msg["t"] / speed * 1000, 3), "msg": stored}
+            handle.write(json.dumps(line, ensure_ascii=False, separators=(",", ":")) + "\n")
+            count += 1
+
+        game.bus.listeners.append(save)
+        game.start(scenario, speed)
+        game.publish_state()
+        tick = 0
+        stop_at = min(game.world.duration_s, duration) if duration is not None else game.world.duration_s
+        while game.world.t < stop_at - 1e-8:
+            game.step(min(speed / config.TICK_HZ, stop_at-game.world.t))
+            for aid in sorted(pending_recommendations):
+                if aid in game.decision.alerts and aid in game.decision.options:
+                    game.recommend(template_recommendation(game, aid))
+            pending_recommendations.clear()
+            tick += 1
+            if tick % (config.TICK_HZ // config.STATE_HZ) == 0:
+                game.publish_state()
+        if tick % (config.TICK_HZ // config.STATE_HZ):
+            game.publish_state()
+    return {"scenario":scenario, "messages":count,"duration_s":game.world.t,"speed":speed,
+            "max_state_bytes":max_state_bytes,"path":str(out)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scenario", choices=["a","b"], required=True)
+    parser.add_argument("--speed", type=float, default=10)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--duration", type=float, help="Shorten for a smoke test")
+    args = parser.parse_args()
+    if not 0 < args.speed <= config.MAX_SPEED or (args.duration is not None and args.duration <= 0):
+        parser.error("speed must be in (0,100] and duration must be positive")
+    logging.basicConfig(level=logging.ERROR)
+    print(json.dumps(record(args.scenario,args.speed,args.out,duration=args.duration),ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

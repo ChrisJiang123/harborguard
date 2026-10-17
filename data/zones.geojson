@@ -1,0 +1,527 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "channel_entrance",
+        "name": "演示入口航道",
+        "kind": "channel",
+        "sensitivity": 0.6,
+        "berths": 0,
+        "neighbors": [
+          "channel_main_s",
+          "anchorage_outer",
+          "anchorage_north"
+        ],
+        "entrance": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2729616536,
+              33.7141686267
+            ],
+            [
+              -118.2675609646,
+              33.7141686267
+            ],
+            [
+              -118.2675609646,
+              33.720501176
+            ],
+            [
+              -118.2729616536,
+              33.720501176
+            ],
+            [
+              -118.2729616536,
+              33.7141686267
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "channel_main_s",
+        "name": "演示主航道南段",
+        "kind": "channel",
+        "sensitivity": 0.6,
+        "berths": 0,
+        "neighbors": [
+          "channel_entrance",
+          "channel_main_n",
+          "berth_container_1"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2675609646,
+              33.7168825764
+            ],
+            [
+              -118.2616202067,
+              33.7168825764
+            ],
+            [
+              -118.2616202067,
+              33.720953501
+            ],
+            [
+              -118.2675609646,
+              33.720953501
+            ],
+            [
+              -118.2675609646,
+              33.7168825764
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "channel_main_n",
+        "name": "演示主航道北段",
+        "kind": "channel",
+        "sensitivity": 0.6,
+        "berths": 0,
+        "neighbors": [
+          "channel_main_s",
+          "channel_turning",
+          "berth_container_1"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2637804823,
+              33.720953501
+            ],
+            [
+              -118.2616202067,
+              33.720953501
+            ],
+            [
+              -118.2616202067,
+              33.7218581509
+            ],
+            [
+              -118.2583797933,
+              33.7218581509
+            ],
+            [
+              -118.2583797933,
+              33.7250244255
+            ],
+            [
+              -118.2637804823,
+              33.7250244255
+            ],
+            [
+              -118.2637804823,
+              33.720953501
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "channel_turning",
+        "name": "演示掉头水域",
+        "kind": "channel",
+        "sensitivity": 0.6,
+        "berths": 0,
+        "neighbors": [
+          "channel_main_n",
+          "berth_container_2",
+          "berth_container_3",
+          "berth_fuel",
+          "berth_cruise",
+          "berth_bulk"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2637804823,
+              33.7250244255
+            ],
+            [
+              -118.2572996555,
+              33.7250244255
+            ],
+            [
+              -118.2572996555,
+              33.7313569749
+            ],
+            [
+              -118.2637804823,
+              33.7313569749
+            ],
+            [
+              -118.2637804823,
+              33.7250244255
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "berth_container_1",
+        "name": "演示集装箱泊位一",
+        "kind": "berth",
+        "sensitivity": 0.7,
+        "berths": 3,
+        "neighbors": [
+          "channel_main_s",
+          "channel_main_n"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2616202067,
+              33.7198226886
+            ],
+            [
+              -118.2583797933,
+              33.7198226886
+            ],
+            [
+              -118.2583797933,
+              33.7218581509
+            ],
+            [
+              -118.2616202067,
+              33.7218581509
+            ],
+            [
+              -118.2616202067,
+              33.7198226886
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "berth_container_2",
+        "name": "演示集装箱泊位二",
+        "kind": "berth",
+        "sensitivity": 0.7,
+        "berths": 2,
+        "neighbors": [
+          "channel_turning"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2670208957,
+              33.7250244255
+            ],
+            [
+              -118.2637804823,
+              33.7250244255
+            ],
+            [
+              -118.2637804823,
+              33.7272860503
+            ],
+            [
+              -118.2670208957,
+              33.7272860503
+            ],
+            [
+              -118.2670208957,
+              33.7250244255
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "berth_container_3",
+        "name": "演示集装箱泊位三",
+        "kind": "berth",
+        "sensitivity": 0.7,
+        "berths": 2,
+        "neighbors": [
+          "channel_turning"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2637804823,
+              33.7313569749
+            ],
+            [
+              -118.2605400689,
+              33.7313569749
+            ],
+            [
+              -118.2605400689,
+              33.7340709246
+            ],
+            [
+              -118.2637804823,
+              33.7340709246
+            ],
+            [
+              -118.2637804823,
+              33.7313569749
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "berth_fuel",
+        "name": "演示液体散货泊位",
+        "kind": "berth",
+        "sensitivity": 1.0,
+        "berths": 2,
+        "neighbors": [
+          "channel_turning"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2572996555,
+              33.7250244255
+            ],
+            [
+              -118.2540592421,
+              33.7250244255
+            ],
+            [
+              -118.2540592421,
+              33.7277383752
+            ],
+            [
+              -118.2572996555,
+              33.7277383752
+            ],
+            [
+              -118.2572996555,
+              33.7250244255
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "berth_cruise",
+        "name": "演示邮轮泊位",
+        "kind": "berth",
+        "sensitivity": 0.9,
+        "berths": 2,
+        "neighbors": [
+          "channel_turning"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2605400689,
+              33.7313569749
+            ],
+            [
+              -118.2572996555,
+              33.7313569749
+            ],
+            [
+              -118.2572996555,
+              33.7340709246
+            ],
+            [
+              -118.2605400689,
+              33.7340709246
+            ],
+            [
+              -118.2605400689,
+              33.7313569749
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "berth_bulk",
+        "name": "演示杂货泊位",
+        "kind": "berth",
+        "sensitivity": 0.7,
+        "berths": 1,
+        "neighbors": [
+          "channel_turning"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2670208957,
+              33.7272860503
+            ],
+            [
+              -118.2637804823,
+              33.7272860503
+            ],
+            [
+              -118.2637804823,
+              33.7313569749
+            ],
+            [
+              -118.2670208957,
+              33.7313569749
+            ],
+            [
+              -118.2670208957,
+              33.7272860503
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchorage_outer",
+        "name": "演示外侧锚地",
+        "kind": "anchorage",
+        "sensitivity": 0.3,
+        "berths": 0,
+        "neighbors": [
+          "channel_entrance",
+          "anchorage_north"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2837630316,
+              33.711454677
+            ],
+            [
+              -118.270801378,
+              33.711454677
+            ],
+            [
+              -118.270801378,
+              33.7168825764
+            ],
+            [
+              -118.2805226182,
+              33.7168825764
+            ],
+            [
+              -118.2805226182,
+              33.7182395513
+            ],
+            [
+              -118.2837630316,
+              33.7182395513
+            ],
+            [
+              -118.2837630316,
+              33.711454677
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchorage_north",
+        "name": "演示北侧锚地",
+        "kind": "anchorage",
+        "sensitivity": 0.3,
+        "berths": 0,
+        "neighbors": [
+          "channel_entrance",
+          "anchorage_outer"
+        ],
+        "entrance": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -118.2805226182,
+              33.7168825764
+            ],
+            [
+              -118.2729616536,
+              33.7168825764
+            ],
+            [
+              -118.2729616536,
+              33.7218581509
+            ],
+            [
+              -118.2805226182,
+              33.7218581509
+            ],
+            [
+              -118.2805226182,
+              33.7168825764
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

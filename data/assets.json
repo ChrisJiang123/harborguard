@@ -1,0 +1,67 @@
+[
+  {
+    "id": "asset_container_1",
+    "name": "演示集装箱码头一",
+    "kind": "container_terminal",
+    "lat": 33.720953501,
+    "lon": -118.2605400689,
+    "sensitivity": 0.7,
+    "rings_m": [
+      1500,
+      800,
+      400
+    ]
+  },
+  {
+    "id": "asset_container_2",
+    "name": "演示集装箱码头二",
+    "kind": "container_terminal",
+    "lat": 33.7263814004,
+    "lon": -118.265400689,
+    "sensitivity": 0.7,
+    "rings_m": [
+      1500,
+      800,
+      400
+    ]
+  },
+  {
+    "id": "asset_container_3",
+    "name": "演示集装箱码头三",
+    "kind": "container_terminal",
+    "lat": 33.7327139497,
+    "lon": -118.2621602756,
+    "sensitivity": 0.7,
+    "rings_m": [
+      1500,
+      800,
+      400
+    ]
+  },
+  {
+    "id": "asset_fuel",
+    "name": "演示燃料码头",
+    "kind": "fuel_terminal",
+    "lat": 33.7263814004,
+    "lon": -118.2556794488,
+    "sensitivity": 1.0,
+    "rings_m": [
+      1500,
+      800,
+      400
+    ]
+  },
+  {
+    "id": "asset_cruise",
+    "name": "演示邮轮码头",
+    "kind": "cruise_terminal",
+    "lat": 33.7327139497,
+    "lon": -118.2589198622,
+    "sensitivity": 0.9,
+    "rings_m": [
+      1500,
+      800,
+      400
+    ]
+  }
+]

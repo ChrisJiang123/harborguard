@@ -1,0 +1,41 @@
+# Synthetic demonstration geometry; see ../README.md.
+id: b
+seed: 7
+mode: disaster
+duration_s: 600
+default_speed: 10
+targets:
+- id: debris1
+  cls: debris
+  center:
+  - 33.7227628008
+  - -118.2623763032
+  drift: false
+- id: debris2
+  cls: debris
+  center:
+  - 33.7268337253
+  - -118.26
+  drift: false
+- id: debris3
+  cls: debris
+  center:
+  - 33.7263814004
+  - -118.2562195177
+  drift: false
+- id: debris4
+  cls: debris
+  center:
+  - 33.7186918762
+  - -118.2767421359
+  drift: false
+events:
+- t: 0
+  type: log
+  text: 场景 B 开始：灾后分区勘测与复航评估
+- t: 60
+  type: buoy_down
+  target: B4
+- t: 60
+  type: buoy_down
+  target: B7
