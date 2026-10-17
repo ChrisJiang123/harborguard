@@ -17,7 +17,7 @@ const demUrl = exportUrl('https://elevation.nationalmap.gov/arcgis/rest/services
 })
 const imageryUrl = exportUrl('https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage', {
   bbox: `${bounds.west},${bounds.south},${bounds.east},${bounds.north}`,
-  bboxSR: '4326', imageSR: '4326', size: '1536,834', format: 'png32', interpolation: 'RSP_Bilinear', f: 'image',
+  bboxSR: '4326', imageSR: '4326', size: '3072,1668', format: 'png32', interpolation: 'RSP_Bilinear', f: 'image',
 })
 
 const [response, imageryResponse] = await Promise.all([
@@ -65,7 +65,7 @@ const output = {
     imagery_url: 'https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer',
     imagery_date_note: 'Image service copyright date: January 09, 2025; underlying acquisition dates vary by location.',
     imagery_file: 'shore-ortho-usgs-naip.png',
-    imagery_grid: '1536×834 RGB orthophoto, exported to the same EPSG:4326 bounding box and draped over the land-only terrain mesh.',
+    imagery_grid: '3072×1668 RGB orthophoto, exported to the same EPSG:4326 bounding box and draped over the land-only terrain mesh. Display pixels are not a claim of source ground accuracy.',
     horizontal_crs: 'EPSG:4326', horizontal_units: 'degrees',
     vertical_datum: 'NAVD88', vertical_units: 'm', elevation_positive: 'up',
     vertical_alignment: 'NAVD88 values displayed with zero offset against the NOAA MSL water plane; datum transformation has not been applied.',
@@ -79,4 +79,4 @@ const output = {
 await writeFile(new URL('../public/data/shore-dem-usgs-3dep.json', import.meta.url), `${JSON.stringify(output)}\n`)
 await writeFile(new URL('../public/data/shore-ortho-usgs-naip.png', import.meta.url), imageryBytes)
 console.log(`Wrote USGS shore DEM snapshot: ${width}×${height}, ${valid.length} land samples, ${output.metadata.min_elevation_m.toFixed(1)}..${output.metadata.max_elevation_m.toFixed(1)} m NAVD88.`)
-console.log(`Wrote USGS/USDA NAIP orthophoto texture: ${imageryBytes.length.toLocaleString()} bytes, 1536×834 PNG.`)
+console.log(`Wrote USGS/USDA NAIP orthophoto texture: ${imageryBytes.length.toLocaleString()} bytes, 3072×1668 PNG.`)

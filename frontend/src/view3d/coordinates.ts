@@ -65,7 +65,8 @@ export function sceneBounds(resources: MapResources | null, bathymetry?: Bathyme
   return { center: [(minX + maxX) / 2, -SEABED_DEPTH_M / 3, (minZ + maxZ) / 2], span: Math.max(maxX - minX, maxZ - minZ), width: maxX - minX, length: maxZ - minZ }
 }
 
-export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: Pick<Track, 'lat' | 'lon' | 'depth_m'>, asset?: { lat: number; lon: number }, verticalScale = VZ): { position: Point3; target: Point3 } {
+export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: Pick<Track, 'lat' | 'lon' | 'depth_m'>, asset?: { lat: number; lon: number }, verticalScale = VZ, viewportAspect = 16 / 9): { position: Point3; target: Point3 } {
+  const framingSpan = bounds.span * Math.max(1, 1.5 / Math.max(.25, viewportAspect))
   if (mode === 'follow' && selected) {
     const target = worldPosition(selected.lat, selected.lon, selected.depth_m, verticalScale)
     return { target, position: [target[0] + 230, target[1] + 150, target[2] + 330] }
@@ -76,7 +77,7 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
   }
   if (mode === 'surface') {
     const target: Point3 = [bounds.center[0], 0, bounds.center[2]]
-    return { target, position: [target[0] + bounds.span * .27, Math.max(260, bounds.span * .13), target[2] + bounds.span * .52] }
+    return { target, position: [target[0] + framingSpan * .27, Math.max(260, framingSpan * .13), target[2] + framingSpan * .52] }
   }
   if (mode === 'underwater') {
     // Use a close, downward-looking underwater inspection angle. A span-scaled
@@ -85,7 +86,7 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
     return { target, position: [target[0] + 80, -2 * verticalScale, target[2] + 100] }
   }
   const target: Point3 = [bounds.center[0], -8 * verticalScale, bounds.center[2]]
-  return { target, position: [bounds.center[0] + bounds.span * .3, bounds.span * .45, bounds.center[2] + bounds.span * .72] }
+  return { target, position: [bounds.center[0] + framingSpan * .3, framingSpan * .45, bounds.center[2] + framingSpan * .72] }
 }
 
 export function seabedElevation(x: number, z: number): number {
