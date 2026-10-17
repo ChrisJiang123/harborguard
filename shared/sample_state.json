@@ -1,0 +1,268 @@
+{
+  "type": "state",
+  "seq": 1,
+  "t": 120.0,
+  "mode": "security",
+  "network": "online",
+  "scenario": "a",
+  "paused": false,
+  "speed": 10.0,
+  "buoys": [
+    {
+      "id": "B1",
+      "lat": 33.7173349014,
+      "lon": -118.2832229627,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B2",
+      "lat": 33.7168825764,
+      "lon": -118.2783623426,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B3",
+      "lat": 33.7177872263,
+      "lon": -118.2735017225,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B4",
+      "lat": 33.7200488511,
+      "lon": -118.2686411024,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B5",
+      "lat": 33.7218581509,
+      "lon": -118.2637804823,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B6",
+      "lat": 33.7236674507,
+      "lon": -118.2589198622,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B7",
+      "lat": 33.7268337253,
+      "lon": -118.2610801378,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B8",
+      "lat": 33.721134431,
+      "lon": -118.2589198622,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B9",
+      "lat": 33.7263814004,
+      "lon": -118.265400689,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    },
+    {
+      "id": "B10",
+      "lat": 33.7263814004,
+      "lon": -118.2562195177,
+      "status": "ok",
+      "range_m": 600.0,
+      "pinging": false
+    }
+  ],
+  "tracks": [
+    {
+      "id": "T1",
+      "status": "confirmed",
+      "cls": "uuv",
+      "conf": 0.85,
+      "cue": "narrowband",
+      "lat": 33.71914420119902,
+      "lon": -118.2605400689,
+      "depth_m": 12.0,
+      "vel_e": 0.0,
+      "vel_n": 2.0,
+      "vel_d": 0.0,
+      "speed_mps": 2.0,
+      "heading_deg": 0.0,
+      "err": {
+        "a_m": 25.0,
+        "b_m": 15.0,
+        "angle_deg": 0.0
+      },
+      "history": [
+        [
+          33.718058621318434,
+          -118.2605400689,
+          12.0,
+          60.0
+        ],
+        [
+          33.71914420119902,
+          -118.2605400689,
+          12.0,
+          120.0
+        ]
+      ],
+      "predicted": [
+        [
+          33.71968699113931,
+          -118.2605400689,
+          12.0,
+          150.0
+        ]
+      ],
+      "level": 3,
+      "risk": 0.867,
+      "detection_id": "det-1"
+    },
+    {
+      "id": "T2",
+      "status": "confirmed",
+      "cls": "vessel",
+      "conf": 0.85,
+      "cue": "broadband",
+      "lat": 33.71914420119902,
+      "lon": -118.2605400689,
+      "depth_m": 0.0,
+      "vel_e": 0.0,
+      "vel_n": 2.0,
+      "vel_d": 0.0,
+      "speed_mps": 2.0,
+      "heading_deg": 0.0,
+      "err": {
+        "a_m": 25.0,
+        "b_m": 15.0,
+        "angle_deg": 0.0
+      },
+      "history": [
+        [
+          33.718058621318434,
+          -118.2605400689,
+          0.0,
+          60.0
+        ],
+        [
+          33.71914420119902,
+          -118.2605400689,
+          0.0,
+          120.0
+        ]
+      ],
+      "predicted": [
+        [
+          33.71968699113931,
+          -118.2605400689,
+          0.0,
+          150.0
+        ]
+      ],
+      "level": 0,
+      "risk": 0.0,
+      "detection_id": null
+    }
+  ],
+  "alerts": [
+    {
+      "id": "A1",
+      "track_id": "T1",
+      "level": 3,
+      "risk": 0.867,
+      "breakdown": {
+        "C": 0.94,
+        "P": 0.9,
+        "B": 1.0,
+        "Z": 0.6,
+        "D": 0.4
+      },
+      "zone_id": "channel_main_s",
+      "asset_id": "asset_container_1",
+      "distance_m": 200.0,
+      "eta_s": 100.0,
+      "raised_t": 60.0,
+      "updated_t": 120.0,
+      "options_ready": true
+    }
+  ],
+  "zones": [
+    {
+      "id": "channel_entrance",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "channel_main_s",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "channel_main_n",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "channel_turning",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "berth_container_1",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "berth_container_2",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "berth_container_3",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "berth_fuel",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "berth_cruise",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "berth_bulk",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "anchorage_outer",
+      "state": "open",
+      "coverage": 0.0
+    },
+    {
+      "id": "anchorage_north",
+      "state": "open",
+      "coverage": 0.0
+    }
+  ]
+}

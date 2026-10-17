@@ -1,0 +1,126 @@
+{
+  "scenario": "a",
+  "seed": 42,
+  "seconds": 1200.0,
+  "debug_truth": false,
+  "first_detected_t": 1.0,
+  "reached_asset_t": 1066.0,
+  "confirmed_track_ids": {
+    "T3": 965,
+    "T60": 233
+  },
+  "samples": 1200,
+  "matched_samples": 1198,
+  "dominant_id_fraction_all_samples": 0.8041666666666667,
+  "track_ids_first_detection_to_arrival": {
+    "T3": 965,
+    "T60": 99
+  },
+  "first_detection_to_arrival_samples": 1066,
+  "dominant_id_fraction_first_detection_to_arrival": 0.9052532833020638,
+  "position_rmse_m": 12.239708305979471,
+  "velocity_rmse_after_30s_mps": 0.4536053091647343,
+  "classifications": {
+    "unknown": 341,
+    "uuv": 857
+  },
+  "anonymous_false_confirmed_ids_per_300s": [
+    [],
+    [],
+    [],
+    []
+  ],
+  "ais_vessel_alert_violations": 0,
+  "first_level_t": {
+    "1": 1.0,
+    "2": 150.7,
+    "3": 483.1
+  },
+  "options_ready_t": [
+    483.1,
+    543.1,
+    573.1,
+    673.0,
+    733.0,
+    793.0,
+    823.0,
+    997.1,
+    1177.2
+  ],
+  "detections": [
+    {
+      "t": 150.7,
+      "cls": "unknown",
+      "model": "stub"
+    },
+    {
+      "t": 170.7,
+      "cls": "unknown",
+      "model": "stub"
+    },
+    {
+      "t": 190.7,
+      "cls": "unknown",
+      "model": "stub"
+    },
+    {
+      "t": 343.9,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 363.9,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 919.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 939.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 959.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 979.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 999.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 1089.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 1100.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 1121.0,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 1153.0,
+      "cls": "uuv",
+      "model": "stub"
+    }
+  ],
+  "max_state_bytes": 26620,
+  "tick_p99_ms": 5.262724999547573,
+  "tick_max_ms": 36.87990000071295,
+  "elapsed_wall_s": 17.138707999999497
+}
