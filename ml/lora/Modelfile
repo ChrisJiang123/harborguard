@@ -1,0 +1,9 @@
+# HarborGuard 本地 LoRA 模型（C4）
+# 部署：把 train_lora.ipynb 导出的 harborguard.gguf 放到本目录（与本文件同目录），
+# 然后在 ml/lora/ 下执行：
+#   ollama create harborguard-lora -f Modelfile
+#   ollama run harborguard-lora "你好"          # 冒烟
+#   python -m ml.lora.eval                      # 基座 vs LoRA 对比 -> metrics.json
+# 系统提示词不写入 Modelfile：由 Agent 请求携带，与蒸馏训练时保持一致。
+FROM ./harborguard.gguf
+PARAMETER temperature 0.2

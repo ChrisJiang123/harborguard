@@ -42,7 +42,8 @@ python -m agent.main        # 默认监听 127.0.0.1:8001
 
 旧 `CLOUD_PROVIDER=anthropic` 适配仍可显式启用；协议兼容不证明实际服务是 Anthropic Claude。
 本轮不再访问 Z.ai。`OLLAMA_MODEL` 当前应为已验证的 `qwen3:1.7b`；
-`harborguard-lora` 尚未训练或部署。
+`harborguard-lora` 尚未训练或部署（C4 蒸馏/训练/评估管线见 `ml/lora/README.md`；
+蒸馏教师与本服务共用 `prompts.SYSTEM_PROMPT` 与同一套校验，训练分布与运行时一致）。
 
 ```bash
 curl http://127.0.0.1:8001/health

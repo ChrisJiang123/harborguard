@@ -9,8 +9,8 @@ A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改�
 | --- | --- | --- | --- |
 | `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据 + **后端真实调用联调通过** |
 | `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | 🟨 推理接口/训练说明/评估脚本就绪，数据经实际加载器验证 3400/600；**未训练，无权重无 metrics** |
-| `agent/` | Agent 服务（端口 8001）：上下文/三级路由/问答 | C3 | 🟨 云端→本地→模板完成；云端账户当前 429 |
-| `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | ⏳ 待实现 |
+| `agent/` | Agent 服务（端口 8001）：上下文/三级路由/问答 | C3 | ✅ 云端(OpenRouter)→本地→模板闭环，20/20 实测 `model=cloud` |
+| `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | 🟨 生成/蒸馏/截取/评估脚本完成，450/50 样本就绪，基座已评；**待 Colab 训练与部署** |
 
 共享接口（`render_ping` / `SonarDetector` / REST / Recommendation）严格按
 **`docs/shared-contract-v1.md`**（共享契约 v1，B 维护，H2 冻结），字段名一字不改。
@@ -121,8 +121,9 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   只允许对合法长文本做契约截断；非法输出附错误重试一次
 - ✅ 路由为云端→本地 Ollama→模板；事件总预算 9.5 秒并预留 0.5 秒 POST，
   SDK 隐式重试关闭，超时请求由协程取消；提交前继续检查场景代际和任务版本
-- ✅ 云端按事实记录为 `provider=z.ai-anthropic-compatible`，请求模型与响应模型分开；
-  当前真实请求返回 429（余额/资源包不足），**未计作 cloud 成功**
+- ✅ 云端已切到 OpenRouter 结构化路由（`google/gemini-2.5-flash`，json_schema strict +
+  `require_parameters`，禁 fallback，SDK 不重试）；2026-10-17 隔离实测 20/20 次真实生成
+  与 POST 全部 `model=cloud` 且首次结构/事实双合格（详见 agent/README.md）
 - ✅ 本地仅使用已安装的 `qwen3:1.7b`，显式关闭思考并用 JSON Schema；
   `harborguard-lora` 尚未训练或部署。连续 20 次真实 POST：local 20、cloud 0、template 0，
   当时记录的结构与 ID 合格率为 20/20，平均 5.153 秒、最大 8.650 秒，全部低于 10 秒；
@@ -139,7 +140,37 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   evidence 全部为后端真实 ID；生成中 reset 后无迟到建议
 - ✅ 明确事实矛盾的脱敏失败样例写入被忽略的 `agent/runtime/`，不自动混入蒸馏集；
   自由文本无法被规则完全验证，README 与 `/health` 均保留这一评估局限
-- ⏸ 云端成功验收仍受 Z.ai 账户 429 阻塞；本轮离线联调未重复发送付费请求探测
+- ⏸ 旧 Z.ai 账户 429 的问题由切换 OpenRouter 解决；本轮未再对旧服务发送付费探测
+
+## C4 LoRA 蒸馏状态（2026-10-17）
+
+- ✅ `ml/lora/gen_contexts.py`：合成上下文 500 条（seed=0 一键重跑，另有 80 条 seed=1 补充）。
+  kind 70/20/10；risk = 加权和；ranked 符合「残余风险 ≤ 0.2 按延误升序在前」且与
+  `factcheck.security_selection` 零冲突；全部使用真实 B1–B10 / 分区 / 资产 ID；
+  每条经 `agent.context._trim` 压缩 ≤ 3 KB，与 C3 collect_* 输出同构；
+  浮标失效的 coverage_impact 用真实浮标/分区几何复算；pytest 逐条锁定一致性
+- ✅ `ml/lora/capture_real.py`：本机后端实跑场景 A/B 三轮（含一轮 `network_down` /
+  `noise_up` / `buoy_down` 故障注入），按 C3 四类触发规则截取 **51 条唯一真实上下文**
+  （security 23 / disaster 21 / buoy 7；offline 12 条）；旧会话失效警报计入 dropped 不入库
+- ✅ `ml/lora/distill.py`：OpenRouter（gemini-2.5-flash 结构化输出）× C3 同一系统提示词、
+  同一套校验（`parse_model_draft` + `check_draft_facts`），8 路并发；不合格附错误重试一次，
+  仍失败做一次教师侧格式引导（引导文本只给教师、不入库，训练分布与运行时一致）。
+  **合格率 95.2%**，实测总花费 ≈ $0.50；按「与路由器同序列化的 SHA256」幂等缓存，
+  补跑/重试绝不重复请求已合格样本。合成精确 450/50 划分（seed=0）；
+  51 条真实场景样本经 `--append-train` 只追加进训练集，测试集保持固定可比，
+  **最终训练集 501 条 / 测试集 50 条**；人工抽查 30 条：方案全对、无编造 ID、中文简洁
+- ✅ `ml/lora/train_lora.ipynb`：Colab Unsloth + TRL SFT，rank 16 / alpha 32 / lr 2e-4 /
+  3 epoch / max_len 4096 / bf16（不做 4-bit）；基座候选链 Qwen3.5-0.8B → Qwen3-1.7B → 0.6B
+  （模型名以 Unsloth 文档为准，兼容问题自动降级）；只对 assistant 段计损失；
+  导出 q4_k_m GGUF。`Modelfile`：`FROM ./harborguard.gguf`，temperature 0.2，
+  系统提示词仍由请求携带（与训练一致）
+- ✅ `ml/lora/eval.py`：50 条测试集串行对比「基座+提示词」vs「harborguard-lora」：
+  json_valid（C3 同一 parse，含一次重试）/ option_agree（对 ranked[0]，不合法计不一致）/
+  latency；两者都评测成功才写 `ml/lora/metrics.json`（后端 /api/metrics 读取）。
+  基座实测（qwen3:1.7b，2026-10-17）：**json_valid=0.96、option_agree=0.455、latency≈4.9 s**
+- ⏸ **Colab 训练未跑**：无 GGUF、`harborguard-lora` 未部署、`metrics.json` 未生成
+  （无 LoRA 不写占位数据，与 ml/yolo/eval.py 同约定）。LoRA 验收线：
+  json_valid ≥ 0.90、option_agree ≥ 0.80、本地单条 ≤ 10 s、断网 `ollama run` 可用
 
 ## 不入库的内容（.gitignore）
 
