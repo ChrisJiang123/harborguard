@@ -1,0 +1,10 @@
+# HarborGuard 未微调配对基座（C4 训练前检查新增）
+# 与 harborguard-lora 配对：同一基座、同一 GGUF 量化（Modelfile/Modelfile.base 必须同步）、
+# 同一 chat template（导出自同一 tokenizer）、同一推理参数（temperature 0.2）。
+# 部署：把 train_lora.ipynb 导出的 harborguard-base.gguf 放到本目录，然后：
+#   ollama create harborguard-base -f Modelfile.base
+# 用途：python -m ml.lora.eval 中与 LoRA 同测试集对比的「base」项——
+# LoRA 与基座的差异才能归因于微调；qwen3:1.7b 只作为「当前系统基线」单列。
+# 系统提示词不写入 Modelfile：由 Agent 请求携带，与训练时一致。
+FROM ./harborguard-base.gguf
+PARAMETER temperature 0.2

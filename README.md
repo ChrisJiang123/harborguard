@@ -158,16 +158,27 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   **合格率 95.2%**，实测总花费 ≈ $0.50；按「与路由器同序列化的 SHA256」幂等缓存，
   补跑/重试绝不重复请求已合格样本。合成精确 450/50 划分（seed=0）；
   51 条真实场景样本经 `--append-train` 只追加进训练集，测试集保持固定可比，
-  **最终训练集 501 条 / 测试集 50 条**；人工抽查 30 条：方案全对、无编造 ID、中文简洁
+  **最终训练集 501 条 / 测试集 50 条**；AI 抽查（脚本复核）30 条：方案全对、
+  无编造 ID、中文简洁（人工复核待负责人确认）
 - ✅ `ml/lora/train_lora.ipynb`：Colab Unsloth + TRL SFT，rank 16 / alpha 32 / lr 2e-4 /
   3 epoch / max_len 4096 / bf16（不做 4-bit）；基座候选链 Qwen3.5-0.8B → Qwen3-1.7B → 0.6B
   （模型名以 Unsloth 文档为准，兼容问题自动降级）；只对 assistant 段计损失；
   导出 q4_k_m GGUF。`Modelfile`：`FROM ./harborguard.gguf`，temperature 0.2，
   系统提示词仍由请求携带（与训练一致）
-- ✅ `ml/lora/eval.py`：50 条测试集串行对比「基座+提示词」vs「harborguard-lora」：
-  json_valid（C3 同一 parse，含一次重试）/ option_agree（对 ranked[0]，不合法计不一致）/
-  latency；两者都评测成功才写 `ml/lora/metrics.json`（后端 /api/metrics 读取）。
-  基座实测（qwen3:1.7b，2026-10-17）：**json_valid=0.96、option_agree=0.455、latency≈4.9 s**
+- ✅ `ml/lora/eval.py`：50 条测试集串行评测，分模型分别报告：结构合法率（首次/重试后）、
+  ID+事实合格率、有方案 security 的方案一致率（含分母）、disaster/buoy 的 null 推荐正确率、
+  耗时；评测无模板兜底，失败计入分母不计成功。**配对原则**：`base` 是与 LoRA 同一基座的
+  未微调 GGUF（`train_lora.ipynb` 成对导出，同量化/同模板/同参数），差异才能归因微调；
+  qwen3:1.7b 单列为 system_baseline（当前系统兜底，规模不同）。配对两者齐才写
+  `ml/lora/metrics.json`（后端 /api/metrics 读取）。
+  系统基线实测（qwen3:1.7b，2026-10-17）：结构合法 100%/100%（首/重试后）、
+  **ID+事实合格 16%**、方案一致 45.5%（n=33）、≈9.9 s/条 —— 结构满分主要来自
+  Ollama schema 约束，事实层面缺口大，正是 LoRA 要补的（详见 ml/lora/README.md）
+- ✅ `train_lora.ipynb` 训练前检查：基座只在「模型不存在」时按候选链降级且每次醒目留痕
+  （写入 `training_meta.json`，含实际模型 ID/revision/精度/超参/token 审计），其他异常直接
+  终止不静默换模型；GPU 支持 bf16 用 bf16、否则兼容 fp16（互斥、不硬编码，Qwen3.5 非 4-bit）；
+  训练前审计 token 长度并断言 4096 不截断 assistant 答案；训练集尾部留 8 条验证切片，
+  **test.jsonl 不进笔记本**；依赖按当前官方 Unsloth 指南（pip install unsloth）
 - ⏸ **Colab 训练未跑**：无 GGUF、`harborguard-lora` 未部署、`metrics.json` 未生成
   （无 LoRA 不写占位数据，与 ml/yolo/eval.py 同约定）。LoRA 验收线：
   json_valid ≥ 0.90、option_agree ≥ 0.80、本地单条 ≤ 10 s、断网 `ollama run` 可用

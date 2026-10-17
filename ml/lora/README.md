@@ -20,26 +20,32 @@
 | ①b 真实上下文 | 后端跑场景时 `python -m ml.lora.capture_real --seconds 235` | `datasets/real_contexts.jsonl`（C3 触发规则截取，key 去重追加） |
 | ② 云端蒸馏 | `python -m ml.lora.distill`（8 路并发；`--limit` 冒烟、`--retry-failed` 重试失败） | `datasets/distilled.jsonl`（合格样本+元数据）、`distill_failures.jsonl` |
 | ②b 补充蒸馏 | `python -m ml.lora.distill --contexts datasets/real_contexts.jsonl --append-train` | 只蒸馏新增；新样本**只追加进训练集**，测试集保持合成基准 |
-| ③ Colab 训练 | 上传 `train.jsonl` 跑 `train_lora.ipynb` | `harborguard.gguf`（q4_k_m） |
-| ④ 本地部署 | `cd ml/lora && ollama create harborguard-lora -f Modelfile` | Ollama 模型 `harborguard-lora` |
-| ⑤ 对比评估 | `python -m ml.lora.eval`（`--skip-lora` 只评基座） | `metrics.json`（后端 `/api/metrics` 的 lora 字段） |
+| ③ Colab 训练 | 上传 `train.jsonl` 跑 `train_lora.ipynb` | 配对 GGUF：`harborguard.gguf` + `harborguard-base.gguf`（同量化），`harborguard-lora-adapter/`（适配器+tokenizer）与 `training_meta.json`（实际模型 ID/revision/精度/超参/token 审计） |
+| ④ 本地部署 | `cd ml/lora && ollama create harborguard-lora -f Modelfile && ollama create harborguard-base -f Modelfile.base` | Ollama 模型 `harborguard-lora` + 配对 `harborguard-base` |
+| ⑤ 对比评估 | `python -m ml.lora.eval`（`--skip-lora` 只评系统基线） | `metrics.json`（后端 `/api/metrics` 的 lora 字段） |
 
 ## 当前状态（2026-10-17）
 
 - ✅ 生成器/蒸馏/截取/评估四脚本 + pytest（`tests/test_lora_*.py`）
 - ✅ 训练集 **501 条** = 450 合成（精确 450/50 划分，seed=0）+ 51 条真实场景样本
-  （`--append-train` 只进训练集）；测试集固定 50 条合成样本
+  （`--append-train` 只进训练集）；测试集固定 50 条合成样本，不参与训练与提示词改动
 - ✅ 蒸馏：OpenRouter（gemini-2.5-flash 结构化输出），合成 552/580 = 95.2% 合格，
   真实 51/51 = 100% 合格；实测总花费 ≈ $0.55
 - ✅ 真实上下文 51 条（security 23 / disaster 21 / buoy 7；network offline 12 条，
   来自真实故障注入），来源：本机后端场景 A/B 三轮实跑 + inject 故障
-- ✅ 基座评测（qwen3:1.7b + 提示词，50 条测试集，串行含一次重试）：
-  **json_valid=0.96，option_agree=0.455，latency≈4.9 s**
-- ✅ 人工抽查 30 条蒸馏样本：方案全部与 ranked[0]（或 null）一致、无编造 ID、
-  中文简洁（摘要 ≤60 字、说明 ≤300 字）
-- ⏸ `metrics.json` 未生成：等 `harborguard-lora` 部署后跑 `python -m ml.lora.eval`
-  一次性写入（无 LoRA 不写占位数据，与 ml/yolo/eval.py 同约定）
-- ⏸ Colab 训练待跑（LoRA 验收线：json_valid ≥ 0.90、option_agree ≥ 0.80、单条 ≤ 10 s）
+- ✅ 系统基线（qwen3:1.7b + 提示词，50 条测试集，串行含一次重试，2026-10-17 复测）：
+  **结构合法 100%/100%（首/重试后），ID+事实合格 16%/16%，方案一致 45.5%（n=33），
+  null 推荐正确 100%（n=14），≈9.9 s/条**。
+  结构 100% 主要来自 Ollama json_schema 约束（与 C3 运行时同构）；但通过 C3 全套
+  确定性事实校验（离线数量/ID、覆盖、置信度、方案规则等）的只有 16% ——
+  旧口径 `json_valid=0.96` 只含结构+ID，事实缺口此前不可见。
+  注意：这是「当前系统基线」，与 0.8B 级 LoRA 的对比必须经过
+  **配对基座**（同一基座的未微调 GGUF，同量化/同模板/同参数），规模差异不能归因微调
+- ✅ **AI 抽查**（脚本复核）30 条蒸馏样本：方案全部与 ranked[0]（或 null）一致、
+  无编造 ID、中文简洁（摘要 ≤60 字、说明 ≤300 字）；**人工复核待负责人确认**
+- ⏸ `metrics.json` 未生成：等配对部署（lora + base）后跑 `python -m ml.lora.eval`
+  一次性写入（配对两者齐才写，无 LoRA 不写占位数据，与 ml/yolo/eval.py 同约定）
+- ⏸ Colab 训练待跑（LoRA 验收线：结构合法 ≥ 0.90、方案一致 ≥ 0.80、单条 ≤ 10 s）
 
 ## 设计要点
 
