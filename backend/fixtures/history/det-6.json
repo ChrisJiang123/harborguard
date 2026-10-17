@@ -1,0 +1,16 @@
+{
+  "id": "det-6",
+  "track_id": "",
+  "buoy_id": "B2",
+  "t": 0.1,
+  "cls": "debris",
+  "conf": 0.8631389100866287,
+  "bbox": [
+    316.0,
+    97.0,
+    323.0,
+    115.0
+  ],
+  "image_url": "/api/sonar/det-6.png",
+  "model": "stub"
+}

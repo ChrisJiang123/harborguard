@@ -42,7 +42,7 @@ class Tracker:
             track.filter.predict(dt)
         self._t += dt
 
-    def update(self, measurements: list[dict], t: float, targets=()):
+    def update(self, measurements: list[dict], t: float, targets=(), *, return_tracks=True):
         self._t = t
         for track_id in list(self._tracks):
             if t - self._tracks[track_id].updated_t >= config.TRACK_DELETE_S:
@@ -50,12 +50,12 @@ class Tracker:
         candidates = []
         for track in self._tracks.values():
             track.hits.append(0)
+            cue = Counter(track.cues).most_common(1)[0][0] if track.cues else "none"
             for i, measurement in enumerate(measurements):
                 residual = np.array([measurement["x"], measurement["y"]]) - track.filter.x[:2]
                 innovation = track.filter.P[:2, :2] + np.asarray(measurement["covariance"])[:2, :2]
                 distance = float(residual @ np.linalg.solve(innovation, residual))
                 # Incompatible acoustic cues do not exchange tracks at crossings.
-                cue = Counter(track.cues).most_common(1)[0][0] if track.cues else "none"
                 compatible = cue == "none" or measurement.get("cue", "none") in (cue, "none")
                 if distance <= config.ASSOCIATION_GATE and compatible:
                     # Established tracks receive gated nearest-neighbor matches
@@ -95,7 +95,9 @@ class Tracker:
             if not track.history or t - track.history[-1][3] >= config.HISTORY_EVERY_S - 1e-8:
                 lat, lon = to_geo(track.filter.x[0], track.filter.x[1])
                 track.history.append([lat, lon, float(track.filter.x[2]), t])
-        return self.tracks(t)
+        # The engine immediately materializes tracks after applying the scan.
+        # Callers that need the snapshot keep the original default behavior.
+        return self.tracks(t) if return_tracks else None
 
     def tracks(self, t: float | None = None):
         t = self._t if t is None else t

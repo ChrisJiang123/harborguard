@@ -1,0 +1,347 @@
+{
+  "tested_at": "2026-10-17",
+  "scope": "Actual local browser + B FastAPI + verified C template, no frontend production edits",
+  "commits": {
+    "b": "04de0fe7abb9eb52ba7ae806beb30131d4b04a8e",
+    "a_pr7": "98505588c643d55174acf399bb597ca8c9260ec0",
+    "c_template": "78d39574266b01a582b0626c17021181749271c8",
+    "integration": "1269f3eea1c47a19a6c94ab56699322a62282f98"
+  },
+  "automated": {
+    "build": "PASS",
+    "lint": "PASS",
+    "a1_a6": "PASS",
+    "pytest": {
+      "passed": 120,
+      "skipped": 2,
+      "failed": 0,
+      "duration_s": 66.77,
+      "temporary_directory": "same C: drive",
+      "initial_cross_drive_failures": 3,
+      "skips_reason": "YOLO weights unavailable"
+    }
+  },
+  "security": {
+    "level3_first_sim_t": 483.1,
+    "observed_pause_sim_t": 487.0,
+    "agent": {
+      "ok": true,
+      "service": "agent",
+      "model": "template",
+      "phase": "c3-stage1",
+      "pending_tasks": 0,
+      "stats": {
+        "processed": 2,
+        "submitted": 2,
+        "errors": 0,
+        "dropped": 0
+      },
+      "backend": "http://127.0.0.1:8003"
+    },
+    "approval_and_reject_events": [
+      {
+        "type": "event",
+        "seq": 1035,
+        "t": 487.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A1",
+          "option_id": "opt-1",
+          "action": "approve",
+          "operator": "操作员 A"
+        }
+      },
+      {
+        "type": "event",
+        "seq": 1887,
+        "t": 487.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A11",
+          "option_id": "opt-1",
+          "action": "reject",
+          "operator": "操作员 A"
+        }
+      }
+    ],
+    "decision_http_results": [
+      {
+        "wall": 1792233667.1865325,
+        "kind": "http-end",
+        "method": "POST",
+        "path": "/api/decision",
+        "status": 200
+      },
+      {
+        "wall": 1792233814.4054875,
+        "kind": "http-end",
+        "method": "POST",
+        "path": "/api/decision",
+        "status": 503
+      },
+      {
+        "wall": 1792233825.5198205,
+        "kind": "http-end",
+        "method": "POST",
+        "path": "/api/decision",
+        "status": 200
+      }
+    ],
+    "reject_failure": {
+      "decisions": [],
+      "restricted": []
+    }
+  },
+  "restart_approval": {
+    "previous_seq": 1174,
+    "new_seq": 1255,
+    "same_t": true,
+    "paused": true,
+    "same_alerts": true,
+    "same_state_except_seq": true,
+    "events_preserved": true
+  },
+  "restart_reject": {
+    "restart_state_equal_except_seq": true,
+    "restart_seq": 1997,
+    "restart_decisions_same": true
+  },
+  "history_window": {
+    "injected_logs": 520,
+    "elapsed_s": 5.0649354457855225,
+    "api_count": 500,
+    "first_seq": 2018,
+    "last_seq": 2542,
+    "sorted_unique": true,
+    "api_decision_count": 0,
+    "durable_event_count": 647,
+    "durable_decisions": [
+      {
+        "type": "event",
+        "seq": 1035,
+        "t": 487.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A1",
+          "option_id": "opt-1",
+          "action": "approve",
+          "operator": "操作员 A"
+        }
+      },
+      {
+        "type": "event",
+        "seq": 1887,
+        "t": 487.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A11",
+          "option_id": "opt-1",
+          "action": "reject",
+          "operator": "操作员 A"
+        }
+      }
+    ]
+  },
+  "rest_recovery_race": {
+    "log_response_wall": 1792233734.4879885,
+    "options_started_wall": 1792233734.4674268,
+    "injected_wall": 1792233734.639122,
+    "status": 200,
+    "options_completed_wall": 1792233737.48278,
+    "frontend_marker_after_recovery": false,
+    "frontend_false_restart_banner": true,
+    "live_marker_in_durable_archive": [
+      {
+        "type": "event",
+        "seq": 1373,
+        "t": 487.0,
+        "event": "log",
+        "data": {
+          "log": {
+            "t": 487.0,
+            "level": "info",
+            "source": "operator",
+            "text": "QA_RESTORE_RACE_MARKER_02"
+          }
+        }
+      }
+    ],
+    "note": "Current /api/log resets on new scenario; archive checked after next scenario start"
+  },
+  "recovery": {
+    "sim_t": 107.0,
+    "png_checks": [
+      {
+        "id": "det-11",
+        "track_id": "",
+        "model": "stub",
+        "http": 200,
+        "bytes": 195913,
+        "dimensions": [
+          640,
+          640
+        ],
+        "sha256": "6ce2136a81e8f3eedc348527089925803d02e0e0a4a8c1ca39c0331f8e737ca7"
+      },
+      {
+        "id": "det-12",
+        "track_id": "",
+        "model": "stub",
+        "http": 200,
+        "bytes": 186021,
+        "dimensions": [
+          640,
+          640
+        ],
+        "sha256": "958ed097d50917e7ef1100b2acc93cf7e1f1bf6f69e5eaa7e4a13d0f60a90949"
+      },
+      {
+        "id": "det-13",
+        "track_id": "",
+        "model": "stub",
+        "http": 200,
+        "bytes": 177806,
+        "dimensions": [
+          640,
+          640
+        ],
+        "sha256": "c9e0386867178eb3d3b794883ba7c78f6f5dfdbed7b734d1d53b8434064b967c"
+      },
+      {
+        "id": "det-14",
+        "track_id": "",
+        "model": "stub",
+        "http": 200,
+        "bytes": 157682,
+        "dimensions": [
+          640,
+          640
+        ],
+        "sha256": "c99cd5d79ce9a1ef231087e14a0c6f8335b1a7e788df28e5c91eda9432590b8a"
+      }
+    ],
+    "reopen_plan": {
+      "route_zone_ids": [
+        "channel_entrance",
+        "channel_main_s"
+      ],
+      "reopen_berth_zone_ids": [
+        "berth_container_1"
+      ],
+      "unsurveyed_zone_ids": [
+        "berth_container_3",
+        "berth_cruise"
+      ],
+      "blocked_zone_ids": [
+        "anchorage_north",
+        "berth_fuel",
+        "channel_main_n",
+        "channel_turning"
+      ],
+      "est_hours_saved": 9.0
+    },
+    "browser_png": "4/4 decoded at 640x640; track_id empty; stub label visible"
+  },
+  "faults_browser": [
+    {
+      "type": "buoy_down",
+      "target": "B1",
+      "elapsed_ms": 383,
+      "visible": true
+    },
+    {
+      "type": "buoy_up",
+      "target": "B1",
+      "elapsed_ms": 382,
+      "visible": true
+    },
+    {
+      "type": "network_up",
+      "elapsed_ms": 378,
+      "visible": true
+    },
+    {
+      "type": "network_down",
+      "elapsed_ms": 383,
+      "visible": true
+    },
+    {
+      "id": "down-measured",
+      "type": "noise_down",
+      "start_wall": 1792233996.4898653,
+      "end_wall": 1792233996.5686662,
+      "status": 200,
+      "visible": true,
+      "observation_upper_bound_ms": 214.134765625
+    },
+    {
+      "id": "up-measured",
+      "type": "noise_up",
+      "start_wall": 1792233996.7224796,
+      "end_wall": 1792233996.7370672,
+      "status": 200,
+      "visible": true,
+      "observation_upper_bound_ms": 191.5205078125
+    }
+  ],
+  "replay": {
+    "files": [
+      "replay_a.jsonl",
+      "replay_b.jsonl"
+    ],
+    "seek_end": "PASS",
+    "read_only_buttons": "PASS",
+    "debris_local_image": "/replay_assets/b/det-1.png 640x640",
+    "observed_interval_s": 46.1583890914917,
+    "backend_posts_during_replay": 0
+  },
+  "ws_short_sample": {
+    "duration_s": 10.11081589999958,
+    "state_count": 52,
+    "measured_hz": 5.0731531273089026,
+    "interval_mean_ms": 197.11606862741368,
+    "interval_max_ms": 223.72680000262335,
+    "max_state_bytes": 1845,
+    "strictly_increasing_seq": true,
+    "scenario": "b",
+    "paused": true,
+    "process_tree_rss": [
+      {
+        "pid": 35588,
+        "name": "python.exe",
+        "rss_mb": 4.26953125
+      },
+      {
+        "pid": 35712,
+        "name": "conhost.exe",
+        "rss_mb": 7.28515625
+      },
+      {
+        "pid": 7408,
+        "name": "python.exe",
+        "rss_mb": 89.515625
+      }
+    ],
+    "process_tree_rss_mb": 101.0703125,
+    "note": "Short paused Recovery sample, includes initial one-off WS snapshot. Not active 10x performance or 20-minute endurance."
+  },
+  "rendering": {
+    "2d": "PASS",
+    "3d": "Smoke PASS screenshot + camera + target selector; no formal FPS benchmark",
+    "viewport": "893x759",
+    "narrow_layout": "metadata overlays crowded",
+    "canvas_fallback_text": "AX includes canvas fallback but locator isVisible=false; screenshot confirms rendered scene"
+  },
+  "open_items": [
+    "A recovery races: live log overwritten; false restart banner",
+    "Frozen public 500-event window: archive pagination pending owner approval",
+    "C template has no Recovery recommendation event handling",
+    "20ms strict maximum previously FAIL, not rerun here",
+    "Real sonar/model weights, target projector, true offline, formal team rehearsals PENDING"
+  ],
+  "final_backend_health": 200,
+  "qa_triggers_removed": true,
+  "db_integrity": "ok",
+  "frontend_and_c_source_untouched": true,
+  "remote_mutations": false
+}

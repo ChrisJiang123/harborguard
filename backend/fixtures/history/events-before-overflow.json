@@ -1,0 +1,1199 @@
+[
+  {
+    "type": "event",
+    "seq": 4,
+    "t": 0.0,
+    "event": "scenario_changed",
+    "data": {
+      "scenario": "a",
+      "status": "started"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 5,
+    "t": 0.0,
+    "event": "mode_changed",
+    "data": {
+      "mode": "security"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 6,
+    "t": 0.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 0.0,
+        "level": "info",
+        "source": "sim",
+        "text": "场景 A 开始，speed=10"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 7,
+    "t": 0.1,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 0.0,
+        "level": "info",
+        "source": "sim",
+        "text": "场景 A 开始：示意港区 UUV 接近受保护资产"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 8,
+    "t": 1.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A1",
+        "track_id": "T3",
+        "level": 1,
+        "risk": 0.22499999999999998,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.0,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_2",
+        "distance_m": 2020.2332444706246,
+        "eta_s": null,
+        "raised_t": 1.0,
+        "updated_t": 1.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 9,
+    "t": 1.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 1.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T3 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 28,
+    "t": 38.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A2",
+        "track_id": "T5",
+        "level": 1,
+        "risk": 0.2260240161221284,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.00409606448851374,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_2",
+        "distance_m": 1991.8078710229724,
+        "eta_s": null,
+        "raised_t": 38.0,
+        "updated_t": 38.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 29,
+    "t": 38.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 38.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T5 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 35,
+    "t": 48.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A2"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 36,
+    "t": 48.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 48.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T5 消失，警报 A2 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 89,
+    "t": 150.7,
+    "event": "alert_changed",
+    "data": {
+      "alert": {
+        "id": "A1",
+        "track_id": "T3",
+        "level": 2,
+        "risk": 0.4000343623479987,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.10033744939199518,
+          "B": 0.5,
+          "Z": 0.3,
+          "D": 0.49899999999999994
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_2",
+        "distance_m": 1799.3251012160097,
+        "eta_s": 1259.9488201020574,
+        "raised_t": 1.0,
+        "updated_t": 150.7,
+        "options_ready": false
+      },
+      "from_level": 1,
+      "to_level": 2
+    }
+  },
+  {
+    "type": "event",
+    "seq": 90,
+    "t": 150.7,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 150.7,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T3 警报等级 1 → 2"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 91,
+    "t": 150.7,
+    "event": "detection",
+    "data": {
+      "detection": {
+        "id": "det-1",
+        "track_id": "T3",
+        "buoy_id": "B2",
+        "t": 150.7,
+        "cls": "unknown",
+        "conf": 0.0,
+        "bbox": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "image_url": "/api/sonar/det-1.png",
+        "model": "stub"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 100,
+    "t": 168.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A3",
+        "track_id": "T11",
+        "level": 1,
+        "risk": 0.2384996870278217,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.0539987481112868,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_2",
+        "distance_m": 1892.0025037774265,
+        "eta_s": null,
+        "raised_t": 168.0,
+        "updated_t": 168.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 101,
+    "t": 168.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 168.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T11 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 104,
+    "t": 170.7,
+    "event": "detection",
+    "data": {
+      "detection": {
+        "id": "det-2",
+        "track_id": "T3",
+        "buoy_id": "B2",
+        "t": 170.7,
+        "cls": "unknown",
+        "conf": 0.0,
+        "bbox": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "image_url": "/api/sonar/det-2.png",
+        "model": "stub"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 105,
+    "t": 172.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A4",
+        "track_id": "T12",
+        "level": 1,
+        "risk": 0.36219893224275634,
+        "breakdown": {
+          "C": 0.2,
+          "P": 0.8487957289710254,
+          "B": 0.0,
+          "Z": 0.6,
+          "D": 0.0
+        },
+        "zone_id": "channel_turning",
+        "asset_id": "asset_container_2",
+        "distance_m": 302.40854205794926,
+        "eta_s": null,
+        "raised_t": 172.0,
+        "updated_t": 172.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 106,
+    "t": 172.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 172.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T12 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 110,
+    "t": 178.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A3"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 111,
+    "t": 178.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 178.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T11 消失，警报 A3 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 114,
+    "t": 182.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A4"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 115,
+    "t": 182.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 182.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T12 消失，警报 A4 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 121,
+    "t": 190.7,
+    "event": "detection",
+    "data": {
+      "detection": {
+        "id": "det-3",
+        "track_id": "T3",
+        "buoy_id": "B2",
+        "t": 190.7,
+        "cls": "unknown",
+        "conf": 0.0,
+        "bbox": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "image_url": "/api/sonar/det-3.png",
+        "model": "stub"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 135,
+    "t": 216.3,
+    "event": "alert_changed",
+    "data": {
+      "alert": {
+        "id": "A1",
+        "track_id": "T3",
+        "level": 1,
+        "risk": 0.36141875518835476,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.15214168742008571,
+          "B": 0.25,
+          "Z": 0.3,
+          "D": 0.7176666666666667
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_1",
+        "distance_m": 1695.7166251598285,
+        "eta_s": 944.4296512637978,
+        "raised_t": 1.0,
+        "updated_t": 216.3,
+        "options_ready": false
+      },
+      "from_level": 2,
+      "to_level": 1
+    }
+  },
+  {
+    "type": "event",
+    "seq": 136,
+    "t": 216.3,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 216.3,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T3 警报等级 2 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 149,
+    "t": 241.1,
+    "event": "alert_changed",
+    "data": {
+      "alert": {
+        "id": "A1",
+        "track_id": "T3",
+        "level": 2,
+        "risk": 0.4333419920619275,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.1733013015810433,
+          "B": 0.5,
+          "Z": 0.3,
+          "D": 0.8003333333333333
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_1",
+        "distance_m": 1653.3973968379134,
+        "eta_s": 942.9086863181113,
+        "raised_t": 1.0,
+        "updated_t": 241.1,
+        "options_ready": false
+      },
+      "from_level": 1,
+      "to_level": 2
+    }
+  },
+  {
+    "type": "event",
+    "seq": 150,
+    "t": 241.1,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 241.1,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T3 警报等级 1 → 2"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 151,
+    "t": 242.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A5",
+        "track_id": "T17",
+        "level": 1,
+        "risk": 0.2632987444268366,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.15319497770734647,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_1",
+        "distance_m": 1693.6100445853072,
+        "eta_s": null,
+        "raised_t": 242.0,
+        "updated_t": 242.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 152,
+    "t": 242.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 242.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T17 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 158,
+    "t": 252.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A5"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 159,
+    "t": 252.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 252.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T17 消失，警报 A5 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 197,
+    "t": 325.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A6",
+        "track_id": "T22",
+        "level": 1,
+        "risk": 0.2868991572628349,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.2475966290513395,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_1",
+        "distance_m": 1504.806741897321,
+        "eta_s": null,
+        "raised_t": 325.0,
+        "updated_t": 325.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 198,
+    "t": 325.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 325.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T22 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 204,
+    "t": 335.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A6"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 205,
+    "t": 335.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 335.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T22 消失，警报 A6 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 210,
+    "t": 343.9,
+    "event": "detection",
+    "data": {
+      "detection": {
+        "id": "det-4",
+        "track_id": "T3",
+        "buoy_id": "B3",
+        "t": 343.9,
+        "cls": "uuv",
+        "conf": 0.8957912057022395,
+        "bbox": [
+          318.0,
+          2.0,
+          324.0,
+          12.0
+        ],
+        "image_url": "/api/sonar/det-4.png",
+        "model": "stub"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 221,
+    "t": 363.9,
+    "event": "detection",
+    "data": {
+      "detection": {
+        "id": "det-5",
+        "track_id": "T3",
+        "buoy_id": "B3",
+        "t": 363.9,
+        "cls": "uuv",
+        "conf": 0.7671407142457525,
+        "bbox": [
+          321.0,
+          60.0,
+          327.0,
+          70.0
+        ],
+        "image_url": "/api/sonar/det-5.png",
+        "model": "stub"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 245,
+    "t": 410.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A7",
+        "track_id": "T29",
+        "level": 1,
+        "risk": 0.3568153939625307,
+        "breakdown": {
+          "C": 0.2,
+          "P": 0.8272615758501228,
+          "B": 0.0,
+          "Z": 0.6,
+          "D": 0.0
+        },
+        "zone_id": "channel_turning",
+        "asset_id": "asset_container_2",
+        "distance_m": 345.4768482997543,
+        "eta_s": null,
+        "raised_t": 410.0,
+        "updated_t": 410.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 246,
+    "t": 410.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 410.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T29 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 252,
+    "t": 420.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A7"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 253,
+    "t": 420.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 420.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T29 消失，警报 A7 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 262,
+    "t": 436.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A8",
+        "track_id": "T30",
+        "level": 1,
+        "risk": 0.3143232565035785,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.3572930260143141,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_1",
+        "distance_m": 1285.4139479713717,
+        "eta_s": null,
+        "raised_t": 436.0,
+        "updated_t": 436.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 263,
+    "t": 436.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 436.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T30 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 269,
+    "t": 446.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A8"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 270,
+    "t": 446.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 446.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T30 消失，警报 A8 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 273,
+    "t": 450.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A9",
+        "track_id": "T32",
+        "level": 1,
+        "risk": 0.3038951574650733,
+        "breakdown": {
+          "C": 0.6,
+          "P": 0.31558062986029334,
+          "B": 0.0,
+          "Z": 0.3,
+          "D": 0.0
+        },
+        "zone_id": "anchorage_outer",
+        "asset_id": "asset_container_1",
+        "distance_m": 1368.8387402794133,
+        "eta_s": null,
+        "raised_t": 450.0,
+        "updated_t": 450.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 274,
+    "t": 450.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 450.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T32 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 280,
+    "t": 460.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A9"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 281,
+    "t": 460.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 460.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T32 消失，警报 A9 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 288,
+    "t": 472.0,
+    "event": "alert_raised",
+    "data": {
+      "alert": {
+        "id": "A10",
+        "track_id": "T34",
+        "level": 1,
+        "risk": 0.3648832701171737,
+        "breakdown": {
+          "C": 0.2,
+          "P": 0.8595330804686948,
+          "B": 0.0,
+          "Z": 0.6,
+          "D": 0.0
+        },
+        "zone_id": "channel_main_n",
+        "asset_id": "asset_container_1",
+        "distance_m": 280.93383906261045,
+        "eta_s": null,
+        "raised_t": 472.0,
+        "updated_t": 472.0,
+        "options_ready": false
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 289,
+    "t": 472.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 472.0,
+        "level": "info",
+        "source": "decision",
+        "text": "航迹 T34 警报等级 0 → 1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 291,
+    "t": 473.0,
+    "event": "alert_cleared",
+    "data": {
+      "alert_id": "A10"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 292,
+    "t": 473.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 473.0,
+        "level": "info",
+        "source": "decision",
+        "text": "警报 A10 已解除"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 298,
+    "t": 483.1,
+    "event": "alert_changed",
+    "data": {
+      "alert": {
+        "id": "A1",
+        "track_id": "T3",
+        "level": 3,
+        "risk": 0.7042166146629084,
+        "breakdown": {
+          "C": 0.906856285698301,
+          "P": 0.41863891581367274,
+          "B": 0.75,
+          "Z": 0.6,
+          "D": 1.0
+        },
+        "zone_id": "channel_entrance",
+        "asset_id": "asset_container_1",
+        "distance_m": 1162.7221683726546,
+        "eta_s": 578.8946381004956,
+        "raised_t": 1.0,
+        "updated_t": 483.1,
+        "options_ready": false
+      },
+      "from_level": 2,
+      "to_level": 3
+    }
+  },
+  {
+    "type": "event",
+    "seq": 299,
+    "t": 483.1,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 483.1,
+        "level": "critical",
+        "source": "decision",
+        "text": "航迹 T3 警报等级 2 → 3"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 300,
+    "t": 483.1,
+    "event": "options_ready",
+    "data": {
+      "alert_id": "A1",
+      "options": [
+        {
+          "id": "opt-1",
+          "label": "最小封闭",
+          "is_baseline": false,
+          "zones_closed": [
+            "anchorage_north",
+            "anchorage_outer",
+            "berth_container_1",
+            "channel_entrance",
+            "channel_main_s"
+          ],
+          "speed_limit_zones": [],
+          "berths_open_pct": 0.75,
+          "vessels_affected": 3,
+          "delay_vessel_hours": 6.0,
+          "residual_risk": 0.0
+        },
+        {
+          "id": "opt-2",
+          "label": "扩大缓冲 + 限速",
+          "is_baseline": false,
+          "zones_closed": [
+            "anchorage_north",
+            "anchorage_outer",
+            "berth_container_1",
+            "channel_entrance",
+            "channel_main_n",
+            "channel_main_s"
+          ],
+          "speed_limit_zones": [
+            "channel_turning"
+          ],
+          "berths_open_pct": 0.75,
+          "vessels_affected": 3,
+          "delay_vessel_hours": 6.0,
+          "residual_risk": 0.0
+        },
+        {
+          "id": "opt-3",
+          "label": "资产周边封闭",
+          "is_baseline": false,
+          "zones_closed": [
+            "berth_bulk",
+            "berth_container_1",
+            "berth_container_2",
+            "berth_fuel",
+            "channel_entrance",
+            "channel_main_n",
+            "channel_main_s",
+            "channel_turning"
+          ],
+          "speed_limit_zones": [],
+          "berths_open_pct": 0.33333333333333337,
+          "vessels_affected": 7,
+          "delay_vessel_hours": 14.0,
+          "residual_risk": 0.0
+        },
+        {
+          "id": "port-closure",
+          "label": "全港关闭",
+          "is_baseline": true,
+          "zones_closed": [
+            "anchorage_north",
+            "anchorage_outer",
+            "berth_bulk",
+            "berth_container_1",
+            "berth_container_2",
+            "berth_container_3",
+            "berth_cruise",
+            "berth_fuel",
+            "channel_entrance",
+            "channel_main_n",
+            "channel_main_s",
+            "channel_turning"
+          ],
+          "speed_limit_zones": [],
+          "berths_open_pct": 0.0,
+          "vessels_affected": 27,
+          "delay_vessel_hours": 162.0,
+          "residual_risk": 0.0
+        }
+      ],
+      "ranked": [
+        "opt-1",
+        "opt-2",
+        "opt-3",
+        "port-closure"
+      ]
+    }
+  },
+  {
+    "type": "event",
+    "seq": 302,
+    "t": 484.0,
+    "event": "recommendation",
+    "data": {
+      "recommendation": {
+        "id": "rec-history-A1",
+        "kind": "security",
+        "alert_id": "A1",
+        "model": "template",
+        "summary": "持久化验收建议样例",
+        "explanation": "B 接口验证 fixture；未调用 C Agent。请由操作员确认。",
+        "recommended_option_id": "opt-1",
+        "evidence_ids": [
+          "A1",
+          "T3"
+        ],
+        "uncertainties": [
+          "合成数据，非真实识别验收"
+        ],
+        "confidence": "medium",
+        "created_t": 484.0,
+        "latency_ms": 0.0
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 303,
+    "t": 485.0,
+    "event": "decision",
+    "data": {
+      "alert_id": "A1",
+      "option_id": "opt-1",
+      "action": "reject",
+      "operator": "history-smoke"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 304,
+    "t": 485.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 485.0,
+        "level": "info",
+        "source": "operator",
+        "text": "history-smoke reject A1/opt-1"
+      }
+    }
+  },
+  {
+    "type": "event",
+    "seq": 305,
+    "t": 485.0,
+    "event": "decision",
+    "data": {
+      "alert_id": "A1",
+      "option_id": "opt-1",
+      "action": "approve",
+      "operator": "history-smoke"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 306,
+    "t": 485.0,
+    "event": "zone_changed",
+    "data": {
+      "zone_id": "anchorage_north",
+      "state": "restricted"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 307,
+    "t": 485.0,
+    "event": "zone_changed",
+    "data": {
+      "zone_id": "anchorage_outer",
+      "state": "restricted"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 308,
+    "t": 485.0,
+    "event": "zone_changed",
+    "data": {
+      "zone_id": "berth_container_1",
+      "state": "restricted"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 309,
+    "t": 485.0,
+    "event": "zone_changed",
+    "data": {
+      "zone_id": "channel_entrance",
+      "state": "restricted"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 310,
+    "t": 485.0,
+    "event": "zone_changed",
+    "data": {
+      "zone_id": "channel_main_s",
+      "state": "restricted"
+    }
+  },
+  {
+    "type": "event",
+    "seq": 311,
+    "t": 485.0,
+    "event": "log",
+    "data": {
+      "log": {
+        "t": 485.0,
+        "level": "info",
+        "source": "operator",
+        "text": "history-smoke approve A1/opt-1"
+      }
+    }
+  }
+]

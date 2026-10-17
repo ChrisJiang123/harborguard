@@ -1,0 +1,137 @@
+{
+  "scope": "offline engine, real disk SQLite; no frontend/C Agent/network rate claim",
+  "python": "3.11.17",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "speed": 10.0,
+  "scenarios": {
+    "a": {
+      "elapsed_s": 34.544,
+      "sim_t": 1200.0,
+      "timings": {
+        "outer_tick": {
+          "n": 1200,
+          "mean_ms": 23.1807,
+          "p95_ms": 31.5246,
+          "max_ms": 76.3968,
+          "over_20ms": 865
+        },
+        "compute": {
+          "n": 1200,
+          "mean_ms": 13.2952,
+          "p95_ms": 16.5515,
+          "max_ms": 52.6367,
+          "over_20ms": 21
+        },
+        "publish_state": {
+          "n": 600,
+          "mean_ms": 10.5526,
+          "p95_ms": 17.1986,
+          "max_ms": 26.7356,
+          "over_20ms": 14
+        },
+        "capture": {
+          "n": 3602,
+          "mean_ms": 1.8873,
+          "p95_ms": 2.8039,
+          "max_ms": 20.476,
+          "over_20ms": 1
+        },
+        "sqlite_commit": {
+          "n": 1801,
+          "mean_ms": 3.2758,
+          "p95_ms": 4.986,
+          "max_ms": 13.4677,
+          "over_20ms": 0
+        },
+        "classify_png": {
+          "n": 14,
+          "mean_ms": 23.4004,
+          "p95_ms": 32.167,
+          "max_ms": 32.167,
+          "over_20ms": 14
+        }
+      },
+      "message_sha256": "fadb098fa451ae9cbf497d0660a5fa109a2267849d164db43e7587a7bc50d3a0",
+      "png_sha256": {
+        "det-1": "afff6bfaefff994172c02b560095b83e1f5c9a4025328782d83956ff077fb214",
+        "det-2": "59bfd134ccf8ecd19d6771f47ce238e7081ca96184223a0e679012afffb9705a",
+        "det-3": "f4547ff181a23822282e04e83826e42748e6f29a32f8adcff1c2675ce7836da1",
+        "det-4": "fa139459b7cd772677b936909bdb6869dbb2d55eb8507f80cee673823dcc6820",
+        "det-5": "da0d145bb6984146e6ae8c9ed9292c0461ff6f38da6d77be07fd13ecfcf2379d",
+        "det-6": "43381d4b5b1986cf355457d6a541aee6ea76a04f5491ad238eb05c27a1e1e37c",
+        "det-7": "8b16794d78b61257b1c33fc0d7c9ed102e8ceed263e00c7e7877837937210a90",
+        "det-8": "3ba90126694254d9797205ad9dbb945f6ec1d782d1b4661b8f6b061c36842f03",
+        "det-9": "f6ad0f560c2c07515bd79b5159999118fb1d223520a2ec5e7dd85e87e1daf520",
+        "det-10": "16c7ca2fb84bfd623294d5e55b38a631ccdfeb30f0500842cc69959e9585a94a",
+        "det-11": "a8078ea3083d38f8009cd62207560318c40b0072b741f6ab002ddac71579060c",
+        "det-12": "512c7da45c3e6620f5e05d887a6976cc70e59f3febb68371965ac3acabd22a0c",
+        "det-13": "62c98e5bfb03407f8b562e2506126ebe55d9e2719c8309571c85200f330403f6",
+        "det-14": "393a022c279af2492f1761bd9ce61e411c90588650d6c28ba3d4613e8a01f09a"
+      },
+      "models": [
+        "stub"
+      ],
+      "last_seq": 712
+    },
+    "b": {
+      "elapsed_s": 2.208,
+      "sim_t": 600.0,
+      "timings": {
+        "outer_tick": {
+          "n": 600,
+          "mean_ms": 2.6358,
+          "p95_ms": 2.9031,
+          "max_ms": 115.3724,
+          "over_20ms": 1
+        },
+        "compute": {
+          "n": 600,
+          "mean_ms": 0.8152,
+          "p95_ms": 0.8423,
+          "max_ms": 99.2202,
+          "over_20ms": 1
+        },
+        "publish_state": {
+          "n": 300,
+          "mean_ms": 1.943,
+          "p95_ms": 2.3875,
+          "max_ms": 2.8457,
+          "over_20ms": 0
+        },
+        "capture": {
+          "n": 1802,
+          "mean_ms": 0.373,
+          "p95_ms": 0.5213,
+          "max_ms": 0.7367,
+          "over_20ms": 0
+        },
+        "sqlite_commit": {
+          "n": 901,
+          "mean_ms": 0.7777,
+          "p95_ms": 0.927,
+          "max_ms": 15.1434,
+          "over_20ms": 0
+        },
+        "classify_png": {
+          "n": 4,
+          "mean_ms": 23.7764,
+          "p95_ms": 24.0927,
+          "max_ms": 24.0927,
+          "over_20ms": 4
+        }
+      },
+      "message_sha256": "7192f62a4c60073e77373af0dd10d09504c5e1815e851f9d2ac077e2e6f2085b",
+      "png_sha256": {
+        "det-1": "88f9dae8ca47eef31eed8786825417ea55583aeaf3f99fe0d15ecdb6d28eff99",
+        "det-2": "d7e27f1b779343a79bd07d0731d51183e8d6db62315e378037f206f44cd0bf95",
+        "det-3": "87c4b5bbf9a31ea02ef51ce1cc0ce8876f809ef6ff79cf08daf1829ef06a24d4",
+        "det-4": "f741b5fccef50c680017547709c574f6be6d4ab8608f67bdb54b99dd8d4c6380"
+      },
+      "models": [
+        "stub"
+      ],
+      "last_seq": 334
+    }
+  },
+  "storage_measurement_note": "Database byte counts omitted: initial baseline sampled before WAL checkpoint; timing and hash measurements are comparable."
+}

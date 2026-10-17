@@ -1,0 +1,19 @@
+{
+  "id": "rec-history-A1",
+  "kind": "security",
+  "alert_id": "A1",
+  "model": "template",
+  "summary": "持久化验收建议样例",
+  "explanation": "B 接口验证 fixture；未调用 C Agent。请由操作员确认。",
+  "recommended_option_id": "opt-1",
+  "evidence_ids": [
+    "A1",
+    "T3"
+  ],
+  "uncertainties": [
+    "合成数据，非真实识别验收"
+  ],
+  "confidence": "medium",
+  "created_t": 484.0,
+  "latency_ms": 0
+}
