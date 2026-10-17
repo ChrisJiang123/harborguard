@@ -39,6 +39,7 @@ export type HarborStore = ReturnType<typeof initialData> & {
   setDecisionRequest: (alertId: string, body: DecisionInput | null) => void
   cacheOptions: (alertId: string, options: Option[]) => void
   cacheDetection: (detection: Detection) => void
+  recoverLive: (snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]>, detections: Record<string, Detection>) => void
 }
 
 export const useHarbor = create<HarborStore>((set) => ({
@@ -57,8 +58,32 @@ export const useHarbor = create<HarborStore>((set) => ({
   }),
   cacheOptions: (alertId, options) => set(state => ({ optionsByAlert: { ...state.optionsByAlert, [alertId]: options } })),
   cacheDetection: detection => set(state => ({ detections: { ...state.detections, [detection.id]: detection } })),
+  recoverLive: (snapshot, events, logs, options, detections) => set(state => recoverLiveState(state, snapshot, events, logs, options, detections)),
   ingest: msg => set(state => reduceMessage(state, msg)),
 }))
+
+/** Rebuild event-derived UI state after refresh/reconnect, then keep the newest live snapshot. */
+export function recoverLiveState(state: HarborStore, snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]> = {}, detections: Record<string, Detection> = {}): Partial<HarborStore> {
+  const byIdentity = new Map<string, EventMsg>()
+  for (const event of [...events, ...state.events]) byIdentity.set(`${event.seq}:${event.event}:${event.t}`, event)
+  const ordered = [...byIdentity.values()].sort((a, b) => a.seq - b.seq || a.t - b.t)
+  let recovered = { ...state, ...initialData(), conn: state.conn, view: state.view } as HarborStore
+  for (const event of ordered) recovered = { ...recovered, ...reduceMessage(recovered, event) }
+  const latest = state.latest && state.latest.seq > snapshot.seq ? state.latest : snapshot
+  recovered = { ...recovered, ...reduceMessage(recovered, latest) }
+  const decisionsByAlert = recovered.decisionsByAlert
+  const decisionRequests = Object.fromEntries(Object.entries(state.decisionRequests).filter(([alertId]) => !decisionsByAlert[alertId]))
+  return {
+    ...recovered,
+    logs: logs.length ? [...logs].reverse().slice(-200) : recovered.logs,
+    optionsByAlert: { ...recovered.optionsByAlert, ...options },
+    detections: { ...recovered.detections, ...detections },
+    decisionRequests,
+    session: state.session,
+    error: state.error,
+    selectedTrackId: state.selectedTrackId && latest.tracks.some(track => track.id === state.selectedTrackId) ? state.selectedTrackId : null,
+  }
+}
 
 // Replay seeks use the same reducer without publishing thousands of intermediate UI states.
 export function reduceMessage(state: HarborStore, msg: HarborMsg): Partial<HarborStore> {

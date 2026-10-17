@@ -68,7 +68,7 @@ export function AgentCard() {
         {confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">{confirmed.action === 'approve' ? '已批准' : '已驳回'} · {clock(confirmed.t)} · {confirmed.operator}</p>}
         {requested && !confirmed && <p className="decision-waiting" role="status">等待后端确认，请勿重复操作。</p>}
       </div>}
-    </div> : <div className="agent-body"><div className="agent-waiting"><span>✦</span><strong>{selected && !alertId ? '该目标暂无活动警报' : mode === 'disaster' ? '等待勘测与复航建议' : '等待警报与处置建议'}</strong></div><p>{mode === 'disaster' ? '灾害模式下显示数据源发来的复航建议。' : '选中目标后显示对应建议；未选中时显示等级最高的活动警报。'}</p>{conn === 'mock' && <p className="hint">{mode === 'disaster' ? '场景 B 第 45 秒生成模板建议。' : '场景 A 第 66 秒生成模板建议。'}可使用 10× 加速。</p>}</div>}
+    </div> : <div className="agent-body"><div className="agent-waiting"><span>✦</span><strong>{selected && !alertId ? '该目标暂无活动警报' : mode === 'disaster' ? '等待勘测与复航建议' : '等待警报与处置建议'}</strong></div><p>{mode === 'disaster' ? '灾害模式下显示数据源发来的复航建议。' : '选中目标后显示对应建议；未选中时显示等级最高的活动警报。'}</p>{confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">该警报{confirmed.action === 'approve' ? '已批准' : '已驳回'} · {clock(confirmed.t)} · {confirmed.operator}</p>}{requested && !confirmed && <p className="decision-waiting" role="status">操作已提交，等待后端确认。</p>}{conn === 'mock' && <p className="hint">{mode === 'disaster' ? '场景 B 第 45 秒生成模板建议。' : '场景 A 第 66 秒生成模板建议。'}可使用 10× 加速。</p>}</div>}
   </section>
 }
 

@@ -82,7 +82,7 @@ export const api = {
     return result
   },
   sonarURL: (detectionId: string) => `${BASE}/sonar/${id(detectionId)}.png`,
-  logs: (limit = 100) => request<LogEntry[]>(`/log?limit=${Math.min(200, Math.max(1, Math.floor(limit)))}`),
+  logs: (limit = 100, signal?: AbortSignal) => request<LogEntry[]>(`/log?limit=${Math.min(200, Math.max(1, Math.floor(limit)))}`, 'GET', undefined, signal),
   metrics: (signal?: AbortSignal) => request<MetricsResponse>('/metrics', 'GET', undefined, signal),
   startScenario: (scenario: 'a' | 'b', speed?: number) => command(`/scenario/${scenario}/start`, { speed }),
   control: (body: ControlInput) => command('/control', body),

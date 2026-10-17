@@ -12,7 +12,7 @@ import type { Track } from '../types/contract'
 import { updateLine } from './lineBuffers'
 
 const blank = (count: number): Point3[] => Array.from({ length: count }, () => [0, 0, 0])
-function Trail({ id }: { id: string }) {
+function Trail({ id, verticalScale }: { id: string; verticalScale: number }) {
   const level = useHarbor(s => s.tracks[id]?.level ?? 0)
   const tentative = useHarbor(s => s.tracks[id]?.status === 'tentative')
   const selected = useHarbor(s => s.selectedTrackId === id)
@@ -21,20 +21,22 @@ function Trail({ id }: { id: string }) {
   const projectionLine = useRef<Line2>(null)
   const surfaceRing = useRef<Group>(null)
   const previous = useRef<Track | null>(null)
+  const previousScale = useRef(verticalScale)
   const historyPoints = useMemo(() => blank(HISTORY_CAPACITY), [])
   const predictionPoints = useMemo(() => blank(PREDICTED_CAPACITY), [])
   const projectionPoints = useMemo(() => blank(2), [])
-  const motion = useMemo(() => createTrackMotion(useHarbor.getState().tracks[id]), [id])
+  const motion = useMemo(() => createTrackMotion(useHarbor.getState().tracks[id], verticalScale), [id, verticalScale])
   const vertical = useRef(blank(2))
   useFrame(({ clock }) => {
     const track = useHarbor.getState().tracks[id]
     if (!track) return
-    if (track !== previous.current) {
-      updateLine(historyLine.current, track.history.slice(-HISTORY_CAPACITY).map(point => worldPosition(point[0], point[1], point[2])))
-      updateLine(predictionLine.current, [worldPosition(track.lat, track.lon, track.depth_m), ...track.predicted.slice(0, PREDICTED_CAPACITY - 1).map(point => worldPosition(point[0], point[1], point[2]))])
+    if (track !== previous.current || verticalScale !== previousScale.current) {
+      updateLine(historyLine.current, track.history.slice(-HISTORY_CAPACITY).map(point => worldPosition(point[0], point[1], point[2], verticalScale)))
+      updateLine(predictionLine.current, [worldPosition(track.lat, track.lon, track.depth_m, verticalScale), ...track.predicted.slice(0, PREDICTED_CAPACITY - 1).map(point => worldPosition(point[0], point[1], point[2], verticalScale))])
       previous.current = track
+      previousScale.current = verticalScale
     }
-    const position = sampleTrackMotion(motion, track, clock.elapsedTime)
+    const position = sampleTrackMotion(motion, track, clock.elapsedTime, verticalScale)
     const points = vertical.current
     points[0]![0] = position[0]; points[0]![1] = position[1]; points[0]![2] = position[2]
     points[1]![0] = position[0]; points[1]![1] = 1; points[1]![2] = position[2]
@@ -48,7 +50,7 @@ function Trail({ id }: { id: string }) {
     <group ref={surfaceRing}><mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><ringGeometry args={[13, 16, 32]} /><meshBasicMaterial color={LEVEL_COLORS[level]} transparent opacity={.8} depthWrite={false} side={2} /></mesh></group>
   </group>
 }
-export function Track3D() {
+export function Track3D({ verticalScale }: { verticalScale: number }) {
   const ids = useHarbor(useShallow(s => Object.keys(s.tracks)))
-  return <group>{ids.map(id => <Trail key={id} id={id} />)}</group>
+  return <group>{ids.map(id => <Trail key={id} id={id} verticalScale={verticalScale} />)}</group>
 }

@@ -1,19 +1,54 @@
 import { useEffect, useMemo } from 'react'
-import { DoubleSide, PlaneGeometry } from 'three'
-import { seabedElevation } from './coordinates'
-import type { SceneBounds } from './coordinates'
+import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute } from 'three'
+import type { BathymetryGrid } from '../data/bathymetry'
+import { worldPosition } from './coordinates'
 
-export function Seabed({ bounds }: { bounds: SceneBounds }) {
+function depthColor(depth: number, minDepth: number, maxDepth: number): Color {
+  const stops = [new Color('#b8b08a'), new Color('#4d8f91'), new Color('#245477'), new Color('#102d4d')]
+  const normalized = Math.max(0, Math.min(1, (depth - minDepth) / Math.max(1, maxDepth - minDepth)))
+  const scaled = normalized * (stops.length - 1)
+  const index = Math.min(stops.length - 2, Math.floor(scaled))
+  return stops[index]!.clone().lerp(stops[index + 1]!, scaled - index)
+}
+
+export function Seabed({ grid, verticalScale }: { grid: BathymetryGrid; verticalScale: number }) {
   const geometry = useMemo(() => {
-    const size = Math.max(8000, bounds.span * 2.2)
-    const plane = new PlaneGeometry(size, size, 48, 48)
-    plane.rotateX(-Math.PI / 2)
-    const points = plane.attributes.position!
-    for (let i = 0; i < points.count; i++) points.setY(i, seabedElevation(points.getX(i) + bounds.center[0], points.getZ(i) + bounds.center[2]))
-    points.needsUpdate = true
-    plane.computeVertexNormals()
-    return plane
-  }, [bounds])
+    const result = new BufferGeometry()
+    const { width, height, bounds, nodata_value, min_depth_m, max_depth_m } = grid.metadata
+    const positions: number[] = []
+    const colors: number[] = []
+    const indices: number[] = []
+    for (let row = 0; row < height; row++) {
+      const lat = bounds.north - row / (height - 1) * (bounds.north - bounds.south)
+      for (let column = 0; column < width; column++) {
+        const lon = bounds.west + column / (width - 1) * (bounds.east - bounds.west)
+        const raw = grid.values[row * width + column]!
+        const depth = raw === nodata_value ? max_depth_m : raw
+        positions.push(...worldPosition(lat, lon, depth, verticalScale))
+        const color = raw === nodata_value ? new Color('#172838') : depthColor(depth, min_depth_m, max_depth_m)
+        colors.push(color.r, color.g, color.b)
+      }
+    }
+    for (let row = 0; row < height - 1; row++) {
+      for (let column = 0; column < width - 1; column++) {
+        const a = row * width + column
+        const b = a + 1
+        const c = a + width
+        const d = c + 1
+        if ([a, b, c, d].some(index => grid.values[index] === nodata_value)) continue
+        indices.push(a, c, b, b, c, d)
+      }
+    }
+    result.setAttribute('position', new Float32BufferAttribute(positions, 3))
+    result.setAttribute('color', new Float32BufferAttribute(colors, 3))
+    result.setIndex(indices)
+    result.computeVertexNormals()
+    result.computeBoundingSphere()
+    return result
+  }, [grid, verticalScale])
   useEffect(() => () => geometry.dispose(), [geometry])
-  return <mesh geometry={geometry} position={[bounds.center[0], 0, bounds.center[2]]} raycast={() => {}}><meshStandardMaterial color="#574b38" roughness={1} side={DoubleSide} /></mesh>
+  return <group>
+    <mesh geometry={geometry} raycast={() => {}}><meshStandardMaterial vertexColors roughness={.96} side={DoubleSide} /></mesh>
+    <mesh geometry={geometry} position={[0, -.04, 0]} raycast={() => {}}><meshBasicMaterial color="#a8c8d8" wireframe transparent opacity={.08} depthWrite={false} /></mesh>
+  </group>
 }

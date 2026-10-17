@@ -37,7 +37,7 @@ function TargetBody({ cls, color, tentative }: { cls: Cls; color: string; tentat
   return <mesh><octahedronGeometry args={[2]} />{material}</mesh>
 }
 
-function Target({ id }: { id: string }) {
+function Target({ id, verticalScale }: { id: string; verticalScale: number }) {
   const cls = useHarbor(s => s.tracks[id]?.cls ?? 'unknown')
   const level = useHarbor(s => s.tracks[id]?.level ?? 0)
   const tentative = useHarbor(s => s.tracks[id]?.status === 'tentative')
@@ -45,11 +45,11 @@ function Target({ id }: { id: string }) {
   const group = useRef<Group>(null)
   const model = useRef<Group>(null)
   const label = useRef<HTMLSpanElement>(null)
-  const motion = useMemo(() => createTrackMotion(useHarbor.getState().tracks[id]), [id])
+  const motion = useMemo(() => createTrackMotion(useHarbor.getState().tracks[id], verticalScale), [id, verticalScale])
   useFrame(({ clock }) => {
     const track = useHarbor.getState().tracks[id]
     if (!track || !group.current) return
-    group.current.position.fromArray(sampleTrackMotion(motion, track, clock.elapsedTime))
+    group.current.position.fromArray(sampleTrackMotion(motion, track, clock.elapsedTime, verticalScale))
     if (model.current) model.current.rotation.y = -track.heading_deg * Math.PI / 180
     const text = track.cls === 'vessel' ? `${id} · 船舶 · ${Math.round(track.heading_deg)}°` : `${id} · L${track.level} · ${track.depth_m.toFixed(1)} m`
     if (label.current && label.current.textContent !== text) label.current.textContent = text
@@ -57,11 +57,11 @@ function Target({ id }: { id: string }) {
   return <group ref={group} onClick={event => { event.stopPropagation(); useHarbor.getState().selectTrack(id) }}>
     <group ref={model} scale={5}><TargetBody cls={cls} color={LEVEL_COLORS[level]} tentative={tentative} /></group>
     {selected && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -6, 0]} raycast={() => {}}><ringGeometry args={[19, 22, 40]} /><meshBasicMaterial color="#ffffff" transparent opacity={.85} depthWrite={false} side={2} /></mesh>}
-    <Html position={[0, 32, 0]} center zIndexRange={[40, 0]} pointerEvents="none"><span ref={label} className={`target-3d-label ${selected ? 'selected' : ''}`} style={{ color: LEVEL_COLORS[level] }}>{id}</span></Html>
+    {(selected || level > 0) && <Html position={[0, 32, 0]} center zIndexRange={[40, 0]} pointerEvents="none"><span ref={label} className={`target-3d-label ${selected ? 'selected' : ''}`} style={{ color: LEVEL_COLORS[level] }}>{id}</span></Html>}
   </group>
 }
 
-export function Target3D() {
+export function Target3D({ verticalScale }: { verticalScale: number }) {
   const ids = useHarbor(useShallow(s => Object.keys(s.tracks)))
-  return <group>{ids.map(id => <Target key={id} id={id} />)}</group>
+  return <group>{ids.map(id => <Target key={id} id={id} verticalScale={verticalScale} />)}</group>
 }

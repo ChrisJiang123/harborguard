@@ -51,6 +51,22 @@ engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operato
 assert.deepEqual(useHarbor.getState().latest.zones.filter(zone => zone.state === 'restricted').map(zone => zone.id), ['Z4', 'Z5'])
 assert.throws(() => engine.decision({ alert_id: 'missing', option_id: 'opt-1', action: 'approve', operator: 'test' }))
 
+// A hard refresh starts with an empty store; bounded REST history must reconstruct event-derived UI state.
+const recoveredSnapshot = useHarbor.getState().latest
+const recoveredEvents = messages.filter(msg => msg.type === 'event')
+const recoveredLogsNewestFirst = [...useHarbor.getState().logs].reverse()
+useHarbor.getState().reset()
+useHarbor.getState().recoverLive(recoveredSnapshot, recoveredEvents, recoveredLogsNewestFirst, {}, {})
+assert.equal(useHarbor.getState().events.filter(event => event.event === 'decision').length, 1)
+assert.equal(useHarbor.getState().decisionsByAlert.A1.action, 'approve')
+assert.equal(useHarbor.getState().decisionsByAlert.A1.operator, 'test')
+assert.equal(useHarbor.getState().optionsByAlert.A1.length, 2)
+assert.equal(useHarbor.getState().detections['det-1'].cls, 'uuv')
+assert.equal(useHarbor.getState().latest.seq, recoveredSnapshot.seq)
+assert.deepEqual(useHarbor.getState().logs, [...recoveredLogsNewestFirst].reverse())
+useHarbor.getState().recoverLive(recoveredSnapshot, recoveredEvents, recoveredLogsNewestFirst, {}, {})
+assert.equal(useHarbor.getState().events.filter(event => event.event === 'decision').length, 1)
+
 const before = useHarbor.getState().events.length
 receiveMessage(events.find(msg => msg.event === 'recommendation'))
 assert.equal(useHarbor.getState().events.length, before)
@@ -84,7 +100,7 @@ const Module = require('node:module')
 const wsPath = path.join(__dirname, '../src/data/ws.ts')
 const wsCode = ts.transpileModule(readFileSync(wsPath, 'utf8').replace('import.meta.env.VITE_WS_URL', 'undefined'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2023 } }).outputText
 const wsModule = new Module(wsPath, module)
-wsModule.require = name => name === '../store/useHarbor' ? { receiveMessage, useHarbor } : require(name)
+wsModule.require = name => name === '../store/useHarbor' ? { receiveMessage, useHarbor } : name === './liveRecovery' ? { recoverLiveFromBackend: async () => {} } : require(name)
 wsModule._compile(wsCode, wsPath)
 const original = { WebSocket: global.WebSocket, setTimeout: global.setTimeout, clearTimeout: global.clearTimeout }
 const timers = new Map()
@@ -127,4 +143,4 @@ try {
   global.clearTimeout = original.clearTimeout
 }
 
-console.log('PASS A0-A1: 200ms cadence; 10/35/60/66s events; pause/resume/speed; selection; mock approval; reset; event/log caps; malformed envelopes; static buoy fallback; WebSocket 1s/2s/5s/5s reconnect; LIVE on valid data; timer cleanup.')
+console.log('PASS A0-A1: 200ms cadence; 10/35/60/66s events; pause/resume/speed; selection; mock approval; refresh reconstruction of events/options/detections/decision/logs with deduplication; reset; event/log caps; malformed envelopes; static buoy fallback; WebSocket 1s/2s/5s/5s reconnect; LIVE on valid data; timer cleanup.')

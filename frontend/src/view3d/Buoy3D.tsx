@@ -7,10 +7,9 @@ import { useShallow } from 'zustand/react/shallow'
 import type { StaticBuoy } from '../data/mapGeometry'
 import { useHarbor } from '../store/useHarbor'
 import { useMapData } from '../store/useMapData'
-import { SEABED_DEPTH_M, VZ } from '../theme'
 import { pingEnvelope, worldPosition } from './coordinates'
 
-function Buoy({ id, baseline }: { id: string; baseline?: StaticBuoy }) {
+function Buoy({ id, baseline, verticalScale, maxDepth }: { id: string; baseline?: StaticBuoy; verticalScale: number; maxDepth: number }) {
   const status = useHarbor(s => s.latest?.buoys.find(buoy => buoy.id === id)?.status ?? 'pending')
   const range = useHarbor(s => s.latest?.buoys.find(buoy => buoy.id === id)?.range_m ?? baseline?.range_m ?? 650)
   const initial = useMemo(() => {
@@ -22,7 +21,7 @@ function Buoy({ id, baseline }: { id: string; baseline?: StaticBuoy }) {
   const waveMaterial = useRef<MeshBasicMaterial>(null)
   const pulse = useRef({ previous: false, at: -Infinity, lat: NaN, lon: NaN })
   const color = status === 'ok' ? '#38bdf8' : '#6B7280'
-  const height = SEABED_DEPTH_M * VZ
+  const height = maxDepth * verticalScale
   useFrame(({ clock }) => {
     const buoy = useHarbor.getState().latest?.buoys.find(item => item.id === id)
     const current = buoy ?? baseline
@@ -42,15 +41,15 @@ function Buoy({ id, baseline }: { id: string; baseline?: StaticBuoy }) {
     }
   })
   return <group ref={group} position={initial}>
-    <mesh position={[0, 3, 0]}><cylinderGeometry args={[3, 3, 6, 12]} /><meshStandardMaterial color={status === 'ok' ? '#f9bc49' : '#6B7280'} emissive={color} emissiveIntensity={.4} /></mesh>
+    <mesh position={[0, 3, 0]}><cylinderGeometry args={[3, 3, 6, 12]} /><meshStandardMaterial color={status === 'ok' ? '#f9bc49' : '#6B7280'} emissive={color} emissiveIntensity={.4} /></mesh><mesh position={[0, 9, 0]}><cylinderGeometry args={[.45, .45, 8, 8]} /><meshStandardMaterial color="#f8fafc" /></mesh><mesh position={[0, 13, 0]}><sphereGeometry args={[1.3, 10, 8]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={.7} /></mesh>
     <mesh position={[0, -height / 2, 0]} raycast={() => {}}><coneGeometry args={[range, height, 32, 1, true]} /><meshBasicMaterial color={color} transparent opacity={status === 'ok' ? .12 : .025} depthWrite={false} side={DoubleSide} /></mesh>
     <mesh ref={wave} visible={false} raycast={() => {}}><sphereGeometry args={[1, 24, 12]} /><meshBasicMaterial ref={waveMaterial} color="#7dd3fc" transparent wireframe opacity={0} depthWrite={false} /></mesh>
     <Html position={[0, 22, 0]} center zIndexRange={[20, 0]} pointerEvents="none"><span className={`buoy-3d-label ${status}`}>{id}{status === 'down' ? ' ×' : status === 'pending' ? ' · 待连接' : ''}</span></Html>
   </group>
 }
-export function Buoy3D() {
+export function Buoy3D({ verticalScale, maxDepth }: { verticalScale: number; maxDepth: number }) {
   const ids = useHarbor(useShallow(s => (s.latest?.buoys ?? []).map(buoy => buoy.id)))
   const baseline = useMapData(s => s.resources?.buoys)
   const combined = useMemo(() => [...new Set([...(baseline ?? []).map(buoy => buoy.id), ...ids])], [ids, baseline])
-  return <group>{combined.map(id => <Buoy key={id} id={id} baseline={baseline?.find(buoy => buoy.id === id)} />)}</group>
+  return <group>{combined.map(id => <Buoy key={id} id={id} baseline={baseline?.find(buoy => buoy.id === id)} verticalScale={verticalScale} maxDepth={maxDepth} />)}</group>
 }
