@@ -1,5 +1,7 @@
 # 后端 MVP 验证记录
 
+历史说明：下文73项/桩识别数据来自初始MVP，不代表当前main。2026-10-17主线已包含B #10、C #4和A #11；新版交接与实际执行结果见 [最终集成报告](final-integration-report.md)、[机器记录](final-integration-results.json) 和 [声呐安全验收](../backend/docs/sonar-safety-integration.md)。20ms现为尽力目标；真实YOLO三级505秒的500秒任务指标仍FAIL。
+
 在 Windows、CPython 3.11.17、requirements-lock.txt 所列依赖上验证。正常模式关闭 DEBUG_TRUTH_TRACKS；C 的渲染器、YOLO 权重与 Agent 尚未提供，因此识别使用明确标注的 stub。
 
 ## 自动化验证
