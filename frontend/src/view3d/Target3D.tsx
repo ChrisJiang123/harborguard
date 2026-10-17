@@ -57,7 +57,7 @@ function Target({ id, verticalScale }: { id: string; verticalScale: number }) {
   return <group ref={group} onClick={event => { event.stopPropagation(); useHarbor.getState().selectTrack(id) }}>
     <group ref={model} scale={5}><TargetBody cls={cls} color={LEVEL_COLORS[level]} tentative={tentative} /></group>
     {selected && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -6, 0]} raycast={() => {}}><ringGeometry args={[19, 22, 40]} /><meshBasicMaterial color="#ffffff" transparent opacity={.85} depthWrite={false} side={2} /></mesh>}
-    {(selected || level > 0) && <SceneLabel position={[0, 32, 0]} text={labelText} color={LEVEL_COLORS[level]} selected={selected} pixelHeight={24} />}
+    {(selected || level > 0) && <SceneLabel position={[0, 32, 0]} text={labelText} color={LEVEL_COLORS[level]} selected={selected} pixelHeight={24} maxDistance={6000} importance="high" />}
   </group>
 }
 

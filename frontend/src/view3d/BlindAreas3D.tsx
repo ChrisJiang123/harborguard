@@ -14,7 +14,7 @@ function BlindCircle({ buoy }: { buoy: Buoy }) {
     // Parallel diagonal chords clipped to the coverage circle.
     return [[(offset - half) / Math.SQRT2, 0, (offset + half) / Math.SQRT2], [(offset + half) / Math.SQRT2, 0, (offset - half) / Math.SQRT2]] as [number, number, number][]
   }), [buoy.range_m])
-  return <group position={center}>{stripes.map((points, index) => <Line key={index} points={points} color="#9ca3af" transparent opacity={.6} lineWidth={1} raycast={() => {}} />)}<SceneLabel text={`${buoy.id} 离线 · 潜在盲区`} color="#cbd5e1" borderColor="#4a5365" pixelHeight={16} /></group>
+  return <group position={center}>{stripes.map((points, index) => <Line key={index} points={points} color="#9ca3af" transparent opacity={.6} lineWidth={1} raycast={() => {}} />)}<SceneLabel text={`${buoy.id} 离线 · 潜在盲区`} color="#cbd5e1" borderColor="#4a5365" pixelHeight={16} maxDistance={5000} importance="high" /></group>
 }
 export function BlindAreas3D() {
   const buoys = useHarbor(useShallow(s => s.latest?.buoys.filter(buoy => buoy.status === 'down') ?? []))

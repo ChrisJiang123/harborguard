@@ -37,7 +37,7 @@ function ZoneOutline({ feature }: { feature: ZoneFeature }) {
   return <group>
     {kind === 'berth' && !disaster && geometry.structure ? <mesh geometry={geometry.structure} rotation={[-Math.PI / 2, 0, 0]} position={[0, 1, 0]} raycast={() => {}}><meshStandardMaterial color={color} transparent opacity={state === 'restricted' ? .55 : .42} roughness={.9} metalness={.05} depthWrite={false} /></mesh> : <mesh geometry={geometry.surface} rotation={[-Math.PI / 2, 0, 0]} position={[0, 1, 0]} raycast={() => {}}><meshBasicMaterial color={color} transparent opacity={disaster ? .3 : kind === 'channel' ? .16 : .22} side={DoubleSide} depthWrite={false} /></mesh>}
     {rings.map((points, index) => <Line key={index} points={points} color={hovered ? '#EF4444' : focused ? '#7dd3fc' : color} lineWidth={hovered || focused ? 3 : kind === 'channel' ? 1.8 : 1.2} dashed={hovered} dashSize={45} gapSize={30} raycast={() => {}} />)}
-    {showLabel && <SceneLabel position={center} text={`${id} · ${disaster ? coverage === undefined ? '—' : `${Math.round(coverage * 100)}%` : feature.properties.name}`} color={disaster ? ZONE_COLORS[state] : '#bde8ff'} pixelHeight={16} />}
+    {showLabel && <SceneLabel position={center} text={`${id} · ${disaster ? coverage === undefined ? '—' : `${Math.round(coverage * 100)}%` : feature.properties.name}`} color={disaster ? ZONE_COLORS[state] : '#bde8ff'} pixelHeight={16} maxDistance={6000} importance={focused || state !== 'open' ? 'high' : 'normal'} />}
   </group>
 }
 export function Zone3D() {

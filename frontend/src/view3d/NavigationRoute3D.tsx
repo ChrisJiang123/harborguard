@@ -21,6 +21,6 @@ export function NavigationRoute3D() {
   return <group>
     <Line points={route} color={color} lineWidth={planned ? 4 : 2.2} dashed={!planned} dashSize={55} gapSize={32} transparent opacity={planned ? .95 : .7} raycast={() => {}} />
     {route.map((point, index) => <mesh key={index} position={point} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><ringGeometry args={[10, 15, 24]} /><meshBasicMaterial color={color} transparent opacity={.8} depthWrite={false} side={2} /></mesh>)}
-    <SceneLabel position={[middle[0], middle[1] + 18, middle[2]]} text={label} color={planned ? '#8ce9ae' : '#72d8f7'} borderColor={planned ? '#50b881' : '#2686a6'} pixelHeight={17} />
+    <SceneLabel position={[middle[0], middle[1] + 18, middle[2]]} text={label} color={planned ? '#8ce9ae' : '#72d8f7'} borderColor={planned ? '#50b881' : '#2686a6'} pixelHeight={17} maxDistance={6500} importance={planned ? 'high' : 'normal'} />
   </group>
 }

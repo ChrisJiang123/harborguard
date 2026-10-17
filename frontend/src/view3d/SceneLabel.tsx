@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useContext, useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { CanvasTexture, LinearFilter, MathUtils, PerspectiveCamera, SRGBColorSpace, Vector3 } from 'three'
 import type { Sprite } from 'three'
+import { SceneLabelMode } from './SceneLabelContext'
 
 interface SceneLabelProps {
   text: string
@@ -10,6 +11,8 @@ interface SceneLabelProps {
   position?: [number, number, number]
   selected?: boolean
   pixelHeight?: number
+  maxDistance?: number
+  importance?: 'low' | 'normal' | 'high'
 }
 
 const worldPosition = new Vector3()
@@ -24,9 +27,10 @@ function roundedRect(context: CanvasRenderingContext2D, width: number, height: n
  * second React DOM root for every target, which is both lighter and safe to
  * dispose when a layer or the whole 3D view is removed.
  */
-export function SceneLabel({ text, color = '#bde8ff', borderColor = '#31526b', position = [0, 0, 0], selected = false, pixelHeight = 24 }: SceneLabelProps) {
+export function SceneLabel({ text, color = '#bde8ff', borderColor = '#31526b', position = [0, 0, 0], selected = false, pixelHeight = 24, maxDistance = Infinity, importance = 'normal' }: SceneLabelProps) {
   const sprite = useRef<Sprite>(null)
   const size = useThree(state => state.size)
+  const labelMode = useContext(SceneLabelMode)
   const texture = useMemo(() => {
     const scale = 2
     const canvas = document.createElement('canvas')
@@ -61,6 +65,8 @@ export function SceneLabel({ text, color = '#bde8ff', borderColor = '#31526b', p
     if (!sprite.current) return
     sprite.current.getWorldPosition(worldPosition)
     const distance = camera.position.distanceTo(worldPosition)
+    sprite.current.visible = labelMode === 'all' || selected || (labelMode === 'minimal' ? importance === 'high' : distance <= maxDistance)
+    if (!sprite.current.visible) return
     const verticalFov = camera instanceof PerspectiveCamera ? MathUtils.degToRad(camera.fov) : Math.PI / 4
     const worldHeight = 2 * Math.tan(verticalFov / 2) * distance * pixelHeight / Math.max(size.height, 1)
     sprite.current.scale.set(worldHeight * texture.aspect, worldHeight, 1)
