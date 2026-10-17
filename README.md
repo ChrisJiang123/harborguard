@@ -9,7 +9,7 @@ A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改�
 | --- | --- | --- | --- |
 | `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据 + **后端真实调用联调通过** |
 | `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | 🟨 推理接口/训练说明/评估脚本就绪，数据经实际加载器验证 3400/600；**未训练，无权重无 metrics** |
-| `agent/` | Agent 服务（端口 8001）：上下文/提示词/路由/问答 | C3 | ⏳ 待实现（`config.py` 已就绪） |
+| `agent/` | Agent 服务（端口 8001）：上下文/模板建议/问答 | C3 | 🟨 模板在线闭环完成；云端/本地路由暂缓 |
 | `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | ⏳ 待实现 |
 
 共享接口（`render_ping` / `SonarDetector` / REST / Recommendation）严格按
@@ -105,6 +105,20 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   **权重缺失直接报错退出，不写占位数据**）
 - ⏸ **未训练**：无 `best.pt`、未生成 `metrics.json`；`GET /api/metrics` 的 yolo
   字段为 null（契约预期），模型验收不勾选
+
+## C3 模板闭环状态（2026-10-17）
+
+- ✅ `python -m agent.main` 启动 8001 服务，`GET /health` 与 `POST /ask` 可用；
+  `/ask` 当前只给后端实时事实型模板回答，`model=template`，硬预算 18 秒
+- ✅ 订阅真实后端 `/ws`，首次连接和断线重连均用 `/api/events?since_seq=` 补事件；
+  修复 REST `/api` 与 WS `/ws` 地址语义，支持后端重启后的 seq 回退
+- ✅ `options_ready` 经确定性 REST 上下文收集（UTF-8 ≤ 3 KB）、pydantic 校验、
+  上下文真实 ID 校验后，POST `/api/recommendations` 并由后端实时广播 `recommendation`
+- ✅ 去重覆盖实时/补发重叠及已处理的相同方案载荷；方案指标变化时只保留最新任务；
+  `alert_cleared`、场景 reset/start 会使排队和处理中旧任务失效
+- ✅ 本阶段明确不接云端、Ollama、LoRA，建议 `model` 恒为 `template`；不修改警报等级，
+  不调用 `/api/decision`
+- ⏸ C3 后续的云端/本地模型路由、二级警报、灾害及浮标建议触发不在本轮范围
 
 ## 不入库的内容（.gitignore）
 
