@@ -17,7 +17,7 @@
 
 ## 2. Mac 评估（现有 .venv 环境，全部 CPU）
 
-命令：`.venv/bin/python -m ml.yolo.eval`（600 张合成 val 全量验证 + SonarDetector
+命令：`.venv/bin/python -m ml.yolo.eval`（或 `python ml/yolo/eval.py`，已支持两种调用）（600 张合成 val 全量验证 + SonarDetector
 CPU 路径预热 1 张后连续计时 20 张，强制 `device="cpu"`）。
 
 | 指标 | 实测 | 验收线 |
@@ -25,7 +25,7 @@ CPU 路径预热 1 张后连续计时 20 张，强制 `device="cpu"`）。
 | mAP50 | **0.9771** | ≥ 0.8 ✅ |
 | mAP50–95 | 0.7485 | — |
 | 召回 uuv / fish_school / debris / marine_mammal | 0.9774 / 0.9439 / 0.9962 / 0.9314 | — |
-| CPU 平均耗时 | **52.1 ms/张** | < 100 ms ✅ |
+| CPU 平均耗时 | **49.7 ms/张**（首测 52.1，复测 49.7，负载抖动，均 < 100 ms）| < 100 ms ✅ |
 
 与 Lenovo 端报告 mAP50=0.97763 吻合（同一权重、两台机器分别验证）。
 `ml/yolo/metrics.json` 已生成（schema 与任务书一致），本次实测取代任何占位数值。

@@ -20,6 +20,8 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:  # 允许 .venv/bin/python ml/yolo/eval.py 直接运行
+    sys.path.insert(0, str(ROOT))
 DEFAULT_WEIGHTS = ROOT / "ml/yolo/weights/best.pt"
 DEFAULT_DATA = ROOT / "ml/yolo/sonar.yaml"
 METRICS_PATH = ROOT / "ml/yolo/metrics.json"

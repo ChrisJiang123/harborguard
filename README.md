@@ -8,7 +8,7 @@ A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改�
 | 目录 | 内容 | 步骤 | 状态 |
 | --- | --- | --- | --- |
 | `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据 + **后端真实调用联调通过** |
-| `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | ✅ Lenovo 训练交付已通过 **Mac 验收**：mAP50=0.9771、CPU 52.1ms/张（600 张合成 val）；后端 detection.model=yolo26n，/api/metrics 已出数（见 ml/yolo/ACCEPTANCE-MAC.md） |
+| `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | ✅ Lenovo 训练交付已通过 **Mac 验收**：mAP50=0.9771、CPU 49.7ms/张（600 张合成 val）；后端 detection.model=yolo26n，/api/metrics 已出数（见 ml/yolo/ACCEPTANCE-MAC.md） |
 | `agent/` | Agent 服务（端口 8001）：上下文/三级路由/问答 | C3 | ✅ 云端(OpenRouter)→本地→模板闭环，20/20 实测 `model=cloud` |
 | `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | 🟨 生成/蒸馏/截取/评估脚本完成，450/50 样本就绪，基座已评；**待 Colab 训练与部署** |
 
@@ -106,7 +106,7 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
 - ✅ **Lenovo 训练交付已通过 Mac 验收**（`ml/yolo/ACCEPTANCE-MAC.md`）：ZIP 与 best.pt
   SHA256 逐项核对、MANIFEST 全部复算、类别顺序三处（classes.json / portable_data.yaml /
   checkpoint 内部 names）与契约逐字一致；600 张合成 val 实测
-  **mAP50=0.9771（≥0.8 ✅）、CPU 52.1 ms/张（<100ms ✅）**，与 Lenovo 端报告吻合；
+  **mAP50=0.9771（≥0.8 ✅）、CPU 49.7 ms/张（首测 52.1，<100ms ✅）**，与 Lenovo 端报告吻合；
   重启后端后 detection `model=yolo26n`（真实识别 det-5 uuv conf=0.72），
   `GET /api/metrics` 的 yolo 字段为 Mac 实测值
 - ℹ️ 指标全部来自合成数据；真实声呐泛化与 UATD 迁移增益未做对照，不宣称

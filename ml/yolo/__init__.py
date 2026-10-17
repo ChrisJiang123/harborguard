@@ -5,6 +5,6 @@
 - train.md: Lenovo/Colab 可重跑训练命令 ✅
 - eval.py: mAP/召回/CPU 耗时 -> metrics.json ✅（无权重时不写占位数据）
 - weights/best.pt: ✅ Lenovo 训练交付（UATD 初始化，e50/b16/seed0），
-  Mac 验收 mAP50=0.9771 / CPU 52.1ms，后端 detection.model=yolo26n（见 ACCEPTANCE-MAC.md）
+  Mac 验收 mAP50=0.9771 / CPU 49.7ms，后端 detection.model=yolo26n（见 ACCEPTANCE-MAC.md）
 - metrics.json: ✅ Mac 实测（2026-10-17），后端 /api/metrics 的 yolo 字段
 """
