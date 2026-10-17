@@ -4,8 +4,8 @@
 ml/
   __init__.py
   sonar/    __init__.py  render.py  gen_dataset.py  preview.py     # C1 已实现
-  yolo/     __init__.py  sonar.yaml  train.md  infer.py  eval.py   # C2 接口就绪，训练进行中
-            weights/best.pt  metrics.json
+  yolo/     __init__.py  sonar.yaml  train.md  infer.py  eval.py   # C2 已验收（Mac 演示机）
+            weights/best.pt  metrics.json  ACCEPTANCE-MAC.md
   lora/     __init__.py  gen_contexts.py  capture_real.py           # C4 脚本已实现
             distill.py  train_lora.ipynb  Modelfile  eval.py
             metrics.json  datasets/ (gitignored，全部脚本可重跑)

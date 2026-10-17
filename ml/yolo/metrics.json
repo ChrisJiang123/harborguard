@@ -1,0 +1,14 @@
+{
+  "model": "yolo26n",
+  "data": "synthetic",
+  "n_val": 600,
+  "mAP50": 0.9771,
+  "mAP50_95": 0.7485,
+  "recall": {
+    "uuv": 0.9774,
+    "fish_school": 0.9439,
+    "debris": 0.9962,
+    "marine_mammal": 0.9314
+  },
+  "cpu_ms_per_image": 52.1
+}
