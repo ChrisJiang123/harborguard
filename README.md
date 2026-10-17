@@ -7,7 +7,7 @@ A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改�
 
 | 目录 | 内容 | 步骤 | 状态 |
 | --- | --- | --- | --- |
-| `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ⏳ 待实现（C0 已建骨架） |
+| `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据完成；**B 的 import 联调未完成，未勾选** |
 | `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | ⏳ 待实现 |
 | `agent/` | Agent 服务（端口 8001）：上下文/提示词/路由/问答 | C3 | ⏳ 待实现（`config.py` 已就绪） |
 | `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | ⏳ 待实现 |
@@ -76,6 +76,18 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
 - ⏸ 手动验收②b：LoRA 训练 GPU（Colab / Unsloth）——**未验证**，暂定 Colab
 - ℹ️ 思考型模型注意：Sonnet 5 与 qwen3 默认带推理块，小 `max_tokens` 会被耗尽返回空文本；
   自检脚本已加预算，C3 调用时同样处理
+
+## C1 状态（2026-10-16）
+
+- ✅ 渲染器 / 数据生成器 / 预览完成；pytest 13/13 通过
+- ✅ **4000 张合成数据**已生成（`--seed 0`，实测 31 s）：train 3400 / val 600，
+  负样本 10.9%，类别占比偏差 ≤0.1pp，生成目标 8935 / 有标注 8926
+  （9 个 <16px² 被契约下限丢弃，小目标不另删除）。
+  **数据全部为合成数据**，指标仅代表仿真分布，不得当作真实声呐性能
+- ⏸ **B 的实际 import 联调尚未完成（H4 检查点）**：在 B 确认后端成功调用
+  `render_ping` 之前，验收清单中该项不得勾选
+- 样本预览：`ml/sonar/samples.png`（4×4，取自数据集）；数据集 321 MB 不入库，
+  由 `python -m ml.sonar.gen_dataset --n 4000 --seed 0` 一键重跑
 
 ## 不入库的内容（.gitignore）
 
