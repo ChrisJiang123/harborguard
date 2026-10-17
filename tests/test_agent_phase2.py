@@ -176,6 +176,7 @@ def test_empty_bad_id_and_non_json_exhaust_retries_then_template():
         assert health["providers"]["cloud"]["draft_invalid"] == 2
         assert health["providers"]["local"]["draft_invalid"] == 2
         assert health["generated_routes"] == {"cloud": 0, "local": 0, "template": 1}
+        assert health["cloud_circuit"]["open"] is False
 
     asyncio.run(run())
 

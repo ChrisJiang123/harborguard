@@ -294,7 +294,8 @@ async def announce_model_switch(result: GenerationResult | AnswerResult) -> None
         text = (
             f"Agent 模型路由 {previous} → {result.model}；provider={result.provider}；"
             f"request_model={result.request_model or 'none'}；"
-            f"response_model={result.response_model or 'none'}"
+            f"response_model={result.response_model or 'none'}；"
+            f"upstream_provider={result.upstream_provider or 'unknown'}"
         )
         try:
             await client.post_log("info", text)
@@ -386,7 +387,7 @@ async def health() -> dict:
         "ok": True,
         "service": "agent",
         "model": current_model,
-        "phase": "c3-stage3",
+        "phase": "c3-openrouter",
         "pending_tasks": len(queue),
         "stats": dict(stats),
         "router": route_health,

@@ -137,9 +137,12 @@ def _check_offline(draft: RecommendationDraft, context: dict, result: FactCheckR
         elif kind == "some" and not down:
             result.errors.append(f"声称存在浮标离线，但上下文离线列表为空：{clause[:80]}")
         elif kind == "some" and down:
-            if count != len(down):
+            # “B4 离线”是可验证的单项事实，并不等于声称离线总数未知或为零。
+            # 只有显式写出数量时才把该句视为总量陈述；完整总量与全部 ID
+            # 仍由下方 uncertainties 的强制规则保证。
+            if count is not None and count != len(down):
                 result.errors.append(f"浮标离线数量 {count!r} 与上下文 {len(down)} 不一致")
-            if ids != down:
+            if ids - down or (count is not None and ids != down):
                 result.errors.append(f"浮标离线 ID {sorted(ids)} 与上下文 {sorted(down)} 不一致")
 
     weak = False

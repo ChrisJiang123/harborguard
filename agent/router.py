@@ -19,6 +19,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 
 from .config import Settings, get_settings
 from .context import context_ids
@@ -34,6 +35,9 @@ Route = Literal["cloud", "local", "template"]
 class RawResponse:
     text: str
     response_model: str | None
+    upstream_provider: str | None = None
+    usage: dict | None = None
+    cost: float | None = None
 
 
 @dataclass(frozen=True)
@@ -45,6 +49,9 @@ class GenerationResult:
     request_model: str | None
     response_model: str | None
     attempts: int
+    upstream_provider: str | None = None
+    usage: dict | None = None
+    cost: float | None = None
 
 
 @dataclass(frozen=True)
@@ -55,6 +62,9 @@ class AnswerResult:
     provider: str
     request_model: str | None
     response_model: str | None
+    upstream_provider: str | None = None
+    usage: dict | None = None
+    cost: float | None = None
 
 
 class CompletionProvider(Protocol):
@@ -76,7 +86,7 @@ def _provider_label(base_url: str | None) -> str:
     return f"anthropic-compatible:{host}"
 
 
-class CloudProvider:
+class AnthropicCloudProvider:
     def __init__(self, settings: Settings):
         self.provider = _provider_label(settings.anthropic_base_url)
         self.request_model = settings.anthropic_model
@@ -112,6 +122,131 @@ class CloudProvider:
     async def aclose(self) -> None:
         if self._client is not None:
             await self._client.close()
+
+
+def _number(value) -> int | float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return value
+
+
+class OpenRouterProvider:
+    """OpenRouter Chat Completions adapter using the async OpenAI SDK.
+
+    Structured recommendation calls always send the exact RecommendationDraft schema.
+    OpenRouter must reject endpoints that do not support it; schema constraints are never
+    silently removed. SDK retries and OpenRouter provider fallbacks are both disabled so the
+    caller's asyncio deadline remains the only retry/time budget authority.
+    """
+
+    def __init__(self, settings: Settings):
+        self.provider = "openrouter"
+        self.request_model = settings.openrouter_model
+        self.enabled = bool(settings.openrouter_api_key)
+        self._client = (
+            AsyncOpenAI(
+                api_key=settings.openrouter_api_key,
+                base_url=settings.openrouter_base_url,
+                timeout=settings.openrouter_timeout_s,
+                max_retries=0,
+            )
+            if self.enabled
+            else None
+        )
+
+    @staticmethod
+    def _response_diagnostics(response) -> tuple[str | None, dict | None, float | None]:
+        dumped = response.model_dump() if hasattr(response, "model_dump") else {}
+        extra = getattr(response, "model_extra", None) or {}
+        upstream = dumped.get("provider") or extra.get("provider")
+        raw_usage = dumped.get("usage") or {}
+        if hasattr(raw_usage, "model_dump"):
+            raw_usage = raw_usage.model_dump()
+        usage = {
+            key: value
+            for key in ("prompt_tokens", "completion_tokens", "total_tokens", "reasoning_tokens")
+            if (value := _number(raw_usage.get(key))) is not None
+        }
+        details = raw_usage.get("completion_tokens_details") or {}
+        if "reasoning_tokens" not in usage:
+            reasoning = _number(details.get("reasoning_tokens"))
+            if reasoning is not None:
+                usage["reasoning_tokens"] = reasoning
+        cost = _number(raw_usage.get("cost"))
+        return (str(upstream) if upstream else None, usage or None, float(cost) if cost is not None else None)
+
+    async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
+        if self._client is None:
+            raise RuntimeError("OpenRouter credentials are not configured")
+        extra_body = {
+            "provider": {
+                "require_parameters": True,
+                "allow_fallbacks": False,
+            },
+            "usage": {"include": True},
+        }
+        kwargs = {
+            "model": self.request_model,
+            "messages": [{"role": "system", "content": system}, *messages],
+            "max_tokens": 1200 if system == SYSTEM_PROMPT else 300,
+            "temperature": 0.0,
+            "timeout": timeout_s,
+            "extra_body": extra_body,
+        }
+        if system == SYSTEM_PROMPT:
+            kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "recommendation_draft",
+                    "strict": True,
+                    "schema": RecommendationDraft.model_json_schema(),
+                },
+            }
+        response = await self._client.chat.completions.create(**kwargs)
+        message = response.choices[0].message if response.choices else None
+        text = getattr(message, "content", None) or ""
+        upstream, usage, cost = self._response_diagnostics(response)
+        return RawResponse(
+            text=text,
+            response_model=str(getattr(response, "model", "")) or None,
+            upstream_provider=upstream,
+            usage=usage,
+            cost=cost,
+        )
+
+    async def aclose(self) -> None:
+        if self._client is not None:
+            await self._client.close()
+
+
+class DisabledCloudProvider:
+    provider = "disabled"
+    request_model = "none"
+    enabled = False
+
+    async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
+        raise RuntimeError("cloud provider is disabled")
+
+    async def aclose(self) -> None:
+        return None
+
+
+def build_cloud_provider(settings: Settings) -> CompletionProvider:
+    """Build only the explicitly selected cloud adapter; credentials never select a provider."""
+    if settings.cloud_provider == "openrouter":
+        return OpenRouterProvider(settings)
+    if settings.cloud_provider == "anthropic":
+        return AnthropicCloudProvider(settings)
+    if settings.cloud_provider == "disabled":
+        return DisabledCloudProvider()
+    raise ValueError(
+        "CLOUD_PROVIDER must be one of: openrouter, anthropic, disabled "
+        f"(got {settings.cloud_provider!r})"
+    )
+
+
+# Backwards-compatible name for tests/importers of the preserved legacy adapter.
+CloudProvider = AnthropicCloudProvider
 
 
 class LocalProvider:
@@ -193,6 +328,8 @@ def _provider_stats() -> dict:
         "draft_attempts": 0,
         "draft_raw_outputs": 0,
         "draft_raw_valid": 0,
+        "draft_first_structure_valid": 0,
+        "draft_first_fact_valid": 0,
         "draft_invalid": 0,
         "draft_fact_valid": 0,
         "draft_fact_invalid": 0,
@@ -205,6 +342,14 @@ def _provider_stats() -> dict:
         "ask_success": 0,
         "request_model": None,
         "response_model": None,
+        "upstream_provider": None,
+        "usage_requests": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "reasoning_tokens": 0,
+        "total_tokens": 0,
+        "reported_cost_usd": None,
+        "cost_reports": 0,
         "last_error": None,
     }
 
@@ -223,7 +368,7 @@ class Router:
         local: CompletionProvider | None = None,
     ):
         self.settings = settings or get_settings()
-        self.cloud = cloud or CloudProvider(self.settings)
+        self.cloud = cloud or build_cloud_provider(self.settings)
         self.local = local or LocalProvider(self.settings)
         self.stats = {
             "providers": {"cloud": _provider_stats(), "local": _provider_stats()},
@@ -239,6 +384,27 @@ class Router:
         self.warmup: dict = {"ok": False, "status": "not_started"}
         self.cloud_retry_after = 0.0
         self.cloud_circuit_reason: str | None = None
+
+    @property
+    def cloud_timeout_s(self) -> float:
+        if self.settings.cloud_provider == "openrouter":
+            return self.settings.openrouter_timeout_s
+        return self.settings.anthropic_timeout_s
+
+    @staticmethod
+    def _record_response_diagnostics(stat: dict, response: RawResponse) -> None:
+        stat["response_model"] = response.response_model
+        stat["upstream_provider"] = response.upstream_provider
+        if response.usage:
+            stat["usage_requests"] += 1
+            for key in ("prompt_tokens", "completion_tokens", "reasoning_tokens", "total_tokens"):
+                value = _number(response.usage.get(key))
+                if value is not None:
+                    stat[key] += value
+        if response.cost is not None:
+            current_cost = stat["reported_cost_usd"] or 0.0
+            stat["reported_cost_usd"] = round(current_cost + response.cost, 10)
+            stat["cost_reports"] += 1
 
     async def startup(self) -> None:
         warm = getattr(self.local, "warm", None)
@@ -393,7 +559,7 @@ class Router:
                 return None
 
             stat["draft_raw_outputs"] += 1
-            stat["response_model"] = response.response_model
+            self._record_response_diagnostics(stat, response)
             raw = response.text
             try:
                 draft = parse_model_draft(raw, known_ids, option_ids)
@@ -403,6 +569,8 @@ class Router:
                 stat["last_error"] = error[:240]
                 continue
             stat["draft_raw_valid"] += 1
+            if attempt == 0:
+                stat["draft_first_structure_valid"] += 1
             fact_result = check_draft_facts(draft, context)
             if not fact_result.ok:
                 stat["draft_fact_invalid"] += 1
@@ -411,6 +579,8 @@ class Router:
                 self._record_fact_failure(route, provider, response, draft, context, fact_result.errors)
                 continue
             stat["draft_fact_valid"] += 1
+            if attempt == 0:
+                stat["draft_first_fact_valid"] += 1
             stat["success"] += 1
             if attempt:
                 stat["draft_retry_success"] += 1
@@ -424,6 +594,9 @@ class Router:
         provider: str,
         request_model: str | None,
         response_model: str | None,
+        upstream_provider: str | None = None,
+        usage: dict | None = None,
+        cost: float | None = None,
     ) -> None:
         self.stats["generated_routes"][model] += 1
         self.last_route = {
@@ -432,6 +605,9 @@ class Router:
             "provider": provider,
             "request_model": request_model,
             "response_model": response_model,
+            "upstream_provider": upstream_provider,
+            "usage": copy.deepcopy(usage),
+            "cost_usd": cost,
         }
 
     async def generate(self, context: dict, *, deadline: float) -> GenerationResult:
@@ -450,6 +626,10 @@ class Router:
             and time.perf_counter() >= self.cloud_retry_after
             and time.perf_counter() < generation_end
         ):
+            cloud_transport_failures = (
+                self.stats["providers"]["cloud"]["errors"]
+                + self.stats["providers"]["cloud"]["timeouts"]
+            )
             cloud_deadline = min(
                 generation_end,
                 time.perf_counter() + self.settings.agent_cloud_budget_s,
@@ -462,11 +642,14 @@ class Router:
                 known_ids,
                 option_ids,
                 cloud_deadline,
-                self.settings.anthropic_timeout_s,
+                self.cloud_timeout_s,
             )
             if value is not None:
                 draft, response, attempts = value
-                self._record_route("cloud", self.cloud.provider, self.cloud.request_model, response.response_model)
+                self._record_route(
+                    "cloud", self.cloud.provider, self.cloud.request_model, response.response_model,
+                    response.upstream_provider, response.usage, response.cost,
+                )
                 return GenerationResult(
                     draft=draft,
                     model="cloud",
@@ -475,8 +658,17 @@ class Router:
                     request_model=self.cloud.request_model,
                     response_model=response.response_model,
                     attempts=attempts,
+                    upstream_provider=response.upstream_provider,
+                    usage=response.usage,
+                    cost=response.cost,
                 )
-            self._trip_cloud_circuit()
+            current_transport_failures = (
+                self.stats["providers"]["cloud"]["errors"]
+                + self.stats["providers"]["cloud"]["timeouts"]
+            )
+            # 结构/事实不合格只降级当前事件；云服务本身仍健康，不能因此阻断后续事件。
+            if current_transport_failures > cloud_transport_failures:
+                self._trip_cloud_circuit()
 
         if self.local.enabled and time.perf_counter() < generation_end:
             value = await self._draft_from_provider(
@@ -491,7 +683,10 @@ class Router:
             )
             if value is not None:
                 draft, response, attempts = value
-                self._record_route("local", self.local.provider, self.local.request_model, response.response_model)
+                self._record_route(
+                    "local", self.local.provider, self.local.request_model, response.response_model,
+                    response.upstream_provider, response.usage, response.cost,
+                )
                 return GenerationResult(
                     draft=draft,
                     model="local",
@@ -500,6 +695,9 @@ class Router:
                     request_model=self.local.request_model,
                     response_model=response.response_model,
                     attempts=attempts,
+                    upstream_provider=response.upstream_provider,
+                    usage=response.usage,
+                    cost=response.cost,
                 )
 
         draft = normalize_draft(generate_recommendation(context))
@@ -554,7 +752,7 @@ class Router:
             stat["last_error"] = "ask output was blank"
             return None
         stat["ask_success"] += 1
-        stat["response_model"] = response.response_model
+        self._record_response_diagnostics(stat, response)
         return answer[:150], response
 
     async def answer(
@@ -580,9 +778,9 @@ class Router:
         elif time.perf_counter() < self.cloud_retry_after:
             self.stats["cloud_skipped_unhealthy"] += 1
         elif self.cloud.enabled and time.perf_counter() >= self.cloud_retry_after:
-            cloud_deadline = min(end, time.perf_counter() + min(8.0, self.settings.anthropic_timeout_s))
+            cloud_deadline = min(end, time.perf_counter() + min(8.0, self.cloud_timeout_s))
             value = await self._answer_from_provider(
-                "cloud", self.cloud, prompt, cloud_deadline, self.settings.anthropic_timeout_s
+                "cloud", self.cloud, prompt, cloud_deadline, self.cloud_timeout_s
             )
             if value is not None:
                 answer, response = value
@@ -593,10 +791,14 @@ class Router:
                     "provider": self.cloud.provider,
                     "request_model": self.cloud.request_model,
                     "response_model": response.response_model,
+                    "upstream_provider": response.upstream_provider,
+                    "usage": copy.deepcopy(response.usage),
+                    "cost_usd": response.cost,
                 }
                 return AnswerResult(
                     answer, "cloud", round((time.perf_counter() - started) * 1000.0, 1),
                     self.cloud.provider, self.cloud.request_model, response.response_model,
+                    response.upstream_provider, response.usage, response.cost,
                 )
             self._trip_cloud_circuit()
 
@@ -612,10 +814,14 @@ class Router:
                 "provider": self.local.provider,
                 "request_model": self.local.request_model,
                 "response_model": response.response_model,
+                "upstream_provider": response.upstream_provider,
+                "usage": copy.deepcopy(response.usage),
+                "cost_usd": response.cost,
             }
             return AnswerResult(
                 answer, "local", round((time.perf_counter() - started) * 1000.0, 1),
                 self.local.provider, self.local.request_model, response.response_model,
+                response.upstream_provider, response.usage, response.cost,
             )
 
         self.stats["ask_routes"]["template"] += 1

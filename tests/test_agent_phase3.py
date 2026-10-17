@@ -80,6 +80,19 @@ def test_offline_count_and_all_ids_must_match_context():
     assert any("ID" in error for error in errors)
 
 
+def test_single_offline_id_statement_is_valid_when_uncertainty_has_complete_total():
+    ctx = context(buoys={"ok": 1, "ok_ids": ["B3"], "down": ["B1"], "covering_track": ["B3"]})
+    good = draft(
+        summary="B1 浮标离线，需核实覆盖影响",
+        explanation="B1 离线，1 个浮标覆盖，识别置信度 0.83。",
+        uncertainties=["1 个浮标离线：B1", "仅 1 个浮标覆盖，定位证据不足"],
+        confidence="low",
+    )
+    assert check_draft_facts(good, ctx).ok
+    bad = good.model_copy(update={"summary": "B9 浮标离线，需核实覆盖影响"})
+    assert any("ID" in error for error in check_draft_facts(bad, ctx).errors)
+
+
 def test_covering_confidence_and_option_numbers_cannot_be_invented():
     bad = draft(
         explanation="没有浮标离线，1 个浮标覆盖，识别置信度 0.40，残余风险 0.70，延误 9 小时。"
