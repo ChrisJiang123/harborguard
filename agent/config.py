@@ -83,11 +83,16 @@ class Settings:
     # ---- Agent 服务自身 ----
     agent_host: str
     agent_port: int
+    agent_event_budget_s: float         # options_ready 到 POST 的整体预算
+    agent_post_reserve_s: float         # 为模板组装和 POST 预留
+    agent_cloud_budget_s: float         # 云端最多占用的整体预算切片
+    agent_ask_budget_s: float           # /ask 总预算（B 代理为 20 秒）
 
     # ---- 本地 LLM（Ollama，OpenAI 兼容接口） ----
     ollama_base_url: str
     ollama_model: str
     ollama_timeout_s: float            # 契约：本地超时 30 秒
+    ollama_keep_alive: str
 
 
 def load_settings() -> Settings:
@@ -106,10 +111,15 @@ def load_settings() -> Settings:
         # Agent 服务
         agent_host=_get_str("AGENT_HOST", "127.0.0.1"),
         agent_port=_get_int("AGENT_PORT", 8001),
+        agent_event_budget_s=_get_float("AGENT_EVENT_BUDGET_S", 9.5),
+        agent_post_reserve_s=_get_float("AGENT_POST_RESERVE_S", 0.5),
+        agent_cloud_budget_s=_get_float("AGENT_CLOUD_BUDGET_S", 4.0),
+        agent_ask_budget_s=_get_float("AGENT_ASK_BUDGET_S", 18.0),
         # 本地 LLM
         ollama_base_url=_get_str("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
-        ollama_model=_get_str("OLLAMA_MODEL", "harborguard-lora"),
+        ollama_model=_get_str("OLLAMA_MODEL", "qwen3:1.7b"),
         ollama_timeout_s=_get_float("OLLAMA_TIMEOUT_S", 30.0),
+        ollama_keep_alive=_get_str("OLLAMA_KEEP_ALIVE", "30m"),
     )
 
 

@@ -1,7 +1,7 @@
-"""上下文收集（C3 阶段一）：REST 拉齐事实，压缩到 ≤ 3 KB。
+"""上下文收集（C3）：REST 拉齐事实，压缩到 ≤ 3 KB。
 
 格式与任务书 C3 的上下文 JSON 一致（供云端/本地/模板三处共用）；
-本阶段仅模板消费。history_summary 由航迹 history 计算：
+history_summary 由航迹 history 计算：
 近 60 秒深度标准差与直线度；covering_track 为距离小于 range_m 的在线浮标。
 """
 

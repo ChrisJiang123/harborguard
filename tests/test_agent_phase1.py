@@ -231,13 +231,13 @@ def test_validate_draft_catches_fake_ids():
 def test_normalize_draft_truncates():
     draft = normalize_draft({
         "summary": "长" * 100, "explanation": "长" * 500,
-        "recommended_option_id": "", "evidence_ids": ["A1", "A1", " "],
+        "recommended_option_id": None, "evidence_ids": ["A1", "A1"],
         "uncertainties": ["u" * 100], "confidence": "low",
     })
     assert len(draft.summary) <= 60 and draft.summary.endswith("…")
     assert len(draft.explanation) <= 300
     assert draft.recommended_option_id is None
-    assert draft.evidence_ids == ["A1"], "去重并丢弃空白项"
+    assert draft.evidence_ids == ["A1", "A1"], "规范化不得删除或改写模型给出的 ID"
     assert all(len(u) <= 40 for u in draft.uncertainties)
 
 

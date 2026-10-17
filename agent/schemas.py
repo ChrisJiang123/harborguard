@@ -1,4 +1,4 @@
-"""Agent 模型与双重校验（C3 阶段一）。
+"""Agent 模型与双重校验（C3）。
 
 - RecommendationDraft：生成侧草案（云端/本地/模板三处同构）。
 - Recommendation：契约 v1 的完整建议（POST /api/recommendations 请求体）。
@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
+import json
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
 
 MAX_SUMMARY = 60
 MAX_EXPLANATION = 300
@@ -19,16 +20,22 @@ MAX_UNCERTAINTY = 40
 
 
 class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False, strict=True)
+
+
+Nonblank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+Trimmed = Annotated[str, StringConstraints(strip_whitespace=True)]
 
 
 class RecommendationDraft(StrictModel):
-    summary: str = ""
-    explanation: str = ""
-    recommended_option_id: str | None = None
-    evidence_ids: list[str] = Field(default_factory=list)
-    uncertainties: list[str] = Field(default_factory=list)
-    confidence: Literal["low", "medium", "high"] = "medium"
+    """模型必须显式给出全部六个字段；不提供任何默认值。"""
+
+    summary: Nonblank
+    explanation: Nonblank
+    recommended_option_id: Nonblank | None
+    evidence_ids: list[Nonblank]
+    uncertainties: list[Trimmed]
+    confidence: Literal["low", "medium", "high"]
 
 
 class Recommendation(StrictModel):
@@ -52,14 +59,14 @@ def clip(text: str, limit: int) -> str:
 
 
 def normalize_draft(draft: RecommendationDraft | dict) -> RecommendationDraft:
-    """截断超长字段并清洗，保证符合契约长度上限。"""
+    """只做契约允许的文本截断；不删除、替换或过滤任何模型输出 ID。"""
     d = draft if isinstance(draft, RecommendationDraft) else RecommendationDraft.model_validate(draft)
     return RecommendationDraft(
         summary=clip(d.summary, MAX_SUMMARY),
         explanation=clip(d.explanation, MAX_EXPLANATION),
-        recommended_option_id=(d.recommended_option_id or "").strip() or None,
-        evidence_ids=[e for e in dict.fromkeys(e.strip() for e in d.evidence_ids if e.strip())][:10],
-        uncertainties=[clip(u, MAX_UNCERTAINTY) for u in d.uncertainties if u.strip()][:6],
+        recommended_option_id=d.recommended_option_id,
+        evidence_ids=list(d.evidence_ids),
+        uncertainties=[clip(u, MAX_UNCERTAINTY) for u in d.uncertainties],
         confidence=d.confidence,
     )
 
@@ -80,3 +87,31 @@ def validate_draft(
     if any(len(u) > MAX_UNCERTAINTY for u in draft.uncertainties):
         errors.append("uncertainties 存在超长条目")
     return errors
+
+
+class DraftOutputError(ValueError):
+    """模型原始输出不是合法、真实 ID 的 RecommendationDraft。"""
+
+
+def parse_model_draft(raw: str, known_ids: set[str], option_ids: set[str]) -> RecommendationDraft:
+    """严格解析单个 JSON 对象，再截断合法长文本并校验全部 ID。
+
+    不尝试提取 Markdown 代码块或删除坏字段/坏 ID；模型必须自行在重试时修正。
+    """
+    try:
+        payload = json.loads(raw)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise DraftOutputError(f"输出不是 JSON 对象: {exc.msg if hasattr(exc, 'msg') else exc}") from exc
+    if not isinstance(payload, dict):
+        raise DraftOutputError("JSON 顶层必须是对象")
+    try:
+        draft = normalize_draft(RecommendationDraft.model_validate(payload))
+    except ValidationError as exc:
+        details = "; ".join(
+            f"{'.'.join(str(p) for p in item['loc'])}: {item['msg']}" for item in exc.errors()[:8]
+        )
+        raise DraftOutputError(f"结构校验失败: {details}") from exc
+    errors = validate_draft(draft, known_ids, option_ids)
+    if errors:
+        raise DraftOutputError("; ".join(errors))
+    return draft
