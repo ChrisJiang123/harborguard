@@ -1,0 +1,44 @@
+{
+  "scope": "B backend REST/WebSocket only; no frontend or live C Agent",
+  "status": "passed",
+  "port": 8004,
+  "levels": {
+    "1": {
+      "sim_t": 38.0,
+      "wall_s": 3.72
+    },
+    "2": {
+      "sim_t": 150.7,
+      "wall_s": 15.069
+    },
+    "3": {
+      "sim_t": 483.1,
+      "wall_s": 48.339
+    }
+  },
+  "errors": [],
+  "startup_s": [
+    1.576,
+    1.551,
+    1.541
+  ],
+  "live_state_hz": 5.009,
+  "max_state_bytes": 25381,
+  "detection_models": [
+    "stub"
+  ],
+  "restart_before_overflow": "PASS: paused state, restrictions, details, recommendations and both decisions retained",
+  "archive_events": 587,
+  "public_events": 500,
+  "public_old_decision_history": "PENDING contract approval: archive exists but v1 cannot query beyond recent 500",
+  "recovery_debris_png": {
+    "count": 4,
+    "models": [
+      "stub"
+    ],
+    "status": "PASS backend PNG; not real model acceptance"
+  },
+  "elapsed_s": 60.157,
+  "production_commit": "d9a2e89",
+  "database_size_note": "Omitted: reported before all read connections close/WAL checkpoint; not a comparable storage benchmark."
+}

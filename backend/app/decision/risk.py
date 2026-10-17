@@ -17,7 +17,8 @@ class RiskScorer:
 
     def score(self, track: dict, t: float) -> dict:
         history = track.get("history", [])
-        self.first_seen.setdefault(track["id"], min((p[3] for p in history), default=t))
+        if track["id"] not in self.first_seen:
+            self.first_seen[track["id"]] = min((p[3] for p in history), default=t)
         x, y = to_local(track["lat"], track["lon"])
         asset, distance = self.zones.nearest_asset(x, y)
         zone_id = self.zones.zone_of(x, y)

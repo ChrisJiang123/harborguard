@@ -1,0 +1,395 @@
+{
+  "scope": "Isolated offline stage probe, B04de0fe + C78d3957 renderer; no active Agent. No production changes. Nested timings overlap. Instrumentation overhead and warm-cache differences apply. Not an optimization comparison.",
+  "fixed_substep_s": 0.1,
+  "outer_sim_dt_at_10x_s": 1,
+  "first_instrumentation_attempt": "Discarded: instance Tracker methods entered checkpoint vars; corrected to class wrappers, isolated DB only. Control A run reused.",
+  "acceptance_policy": {
+    "20ms": "best-effort target; no hard rejection gate",
+    "priorities": [
+      "simulation correctness",
+      "durable history and decision consistency",
+      "5Hz push",
+      "demo stability"
+    ],
+    "changed_by": "project owner in current thread, 2026-10-17",
+    "production_changes": false
+  },
+  "versions": {
+    "backend_code": "04de0fe7abb9eb52ba7ae806beb30131d4b04a8e",
+    "c_template": "78d39574266b01a582b0626c17021181749271c8",
+    "tested_a": "98505588c643d55174acf399bb597ca8c9260ec0",
+    "pr7_checked_head": "17d440bf03f4db7dbf41d16c511fa8bd7325a7dd",
+    "pr7_recovery_files_changed_since_tested_a": false
+  },
+  "runs": {
+    "a": {
+      "simulated_until": 510,
+      "outer_tick": {
+        "count": 510,
+        "mean_ms": 18.5822,
+        "p95_ms": 23.1448,
+        "max_ms": 66.2455,
+        "top": [
+          {
+            "sim_t": 151.0,
+            "ms": 66.24549999833107,
+            "compute_ms": 60.39030000101775
+          },
+          {
+            "sim_t": 171.0,
+            "ms": 48.506899998756126,
+            "compute_ms": 42.409800000314135
+          },
+          {
+            "sim_t": 344.0,
+            "ms": 47.00529999900027,
+            "compute_ms": 39.92350000044098
+          },
+          {
+            "sim_t": 364.0,
+            "ms": 46.196100000088336,
+            "compute_ms": 39.20229999857838
+          },
+          {
+            "sim_t": 191.0,
+            "ms": 43.60389999783365,
+            "compute_ms": 38.32699999838951
+          }
+        ]
+      },
+      "stages": {
+        "checkpoint_capture": {
+          "count": 1020,
+          "mean_ms": 0.8595,
+          "p95_ms": 2.2401,
+          "max_ms": 16.841
+        },
+        "kalman_predict": {
+          "count": 5100,
+          "mean_ms": 0.1158,
+          "p95_ms": 0.1595,
+          "max_ms": 0.4153
+        },
+        "track_materialize": {
+          "count": 5100,
+          "mean_ms": 0.3999,
+          "p95_ms": 0.5599,
+          "max_ms": 13.3393
+        },
+        "decision_including_sonar": {
+          "count": 5100,
+          "mean_ms": 0.4472,
+          "p95_ms": 0.569,
+          "max_ms": 47.3625
+        },
+        "acoustic_observe": {
+          "count": 510,
+          "mean_ms": 0.1209,
+          "p95_ms": 0.1385,
+          "max_ms": 0.2342
+        },
+        "localize": {
+          "count": 510,
+          "mean_ms": 1.9432,
+          "p95_ms": 3.2026,
+          "max_ms": 4.4686
+        },
+        "measurement_association_update": {
+          "count": 510,
+          "mean_ms": 0.393,
+          "p95_ms": 0.494,
+          "max_ms": 0.8098
+        },
+        "checkpoint_encode_and_sqlite_commit": {
+          "count": 510,
+          "mean_ms": 2.808,
+          "p95_ms": 3.8314,
+          "max_ms": 6.4229
+        },
+        "seq_commit": {
+          "count": 255,
+          "mean_ms": 0.5973,
+          "p95_ms": 0.7,
+          "max_ms": 3.7869
+        },
+        "state_publish": {
+          "count": 255,
+          "mean_ms": 1.5871,
+          "p95_ms": 2.0597,
+          "max_ms": 4.578
+        },
+        "C_sonar_renderer": {
+          "count": 5,
+          "mean_ms": 21.95,
+          "p95_ms": 30.4034,
+          "max_ms": 30.4034
+        },
+        "png_encode": {
+          "count": 5,
+          "mean_ms": 7.5115,
+          "p95_ms": 15.7172,
+          "max_ms": 15.7172
+        },
+        "classifier_including_png": {
+          "count": 5,
+          "mean_ms": 30.4884,
+          "p95_ms": 46.868,
+          "max_ms": 46.868
+        }
+      },
+      "detection_stage_markers": [
+        {
+          "stage": "png_encode",
+          "sim_t": 150.7,
+          "end_t": 150.7,
+          "ms": 15.717199999926379
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 150.7,
+          "end_t": 150.7,
+          "ms": 46.86799999763025
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 170.7,
+          "end_t": 170.7,
+          "ms": 5.634400000417372
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 170.7,
+          "end_t": 170.7,
+          "ms": 26.335400001698872
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 190.7,
+          "end_t": 190.7,
+          "ms": 5.4046999975980725
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 190.7,
+          "end_t": 190.7,
+          "ms": 25.652200001786696
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 343.9,
+          "end_t": 343.9,
+          "ms": 5.430900000646943
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 343.9,
+          "end_t": 343.9,
+          "ms": 27.29860000181361
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 363.9,
+          "end_t": 363.9,
+          "ms": 5.370299997593975
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 363.9,
+          "end_t": 363.9,
+          "ms": 26.28779999940889
+        }
+      ],
+      "public_message_parity": true,
+      "png_byte_parity": true,
+      "sequence_parity": true,
+      "png_count": 5,
+      "public_message_sha256": "34e29ca1b00dad62d403e20b2a42bf43b06e69a85e21e6e1e899825e7ce1c073"
+    },
+    "b": {
+      "simulated_until": 120,
+      "outer_tick": {
+        "count": 120,
+        "mean_ms": 3.3026,
+        "p95_ms": 2.8886,
+        "max_ms": 119.6544,
+        "top": [
+          {
+            "sim_t": 1.0,
+            "ms": 119.65439999767113,
+            "compute_ms": 114.69099999885657
+          },
+          {
+            "sim_t": 81.0,
+            "ms": 3.219799997168593,
+            "compute_ms": 1.33790000109002
+          },
+          {
+            "sim_t": 51.0,
+            "ms": 3.189900002325885,
+            "compute_ms": 0.963999998930376
+          },
+          {
+            "sim_t": 42.0,
+            "ms": 2.9118000020389445,
+            "compute_ms": 1.1134999986097682
+          },
+          {
+            "sim_t": 98.0,
+            "ms": 2.8972000000067055,
+            "compute_ms": 0.98489999800222
+          }
+        ]
+      },
+      "stages": {
+        "checkpoint_capture": {
+          "count": 240,
+          "mean_ms": 0.2358,
+          "p95_ms": 0.5718,
+          "max_ms": 0.7767
+        },
+        "kalman_predict": {
+          "count": 1200,
+          "mean_ms": 0.0014,
+          "p95_ms": 0.0023,
+          "max_ms": 0.0077
+        },
+        "track_materialize": {
+          "count": 1200,
+          "mean_ms": 0.0011,
+          "p95_ms": 0.0017,
+          "max_ms": 0.01
+        },
+        "C_sonar_renderer": {
+          "count": 4,
+          "mean_ms": 21.0187,
+          "p95_ms": 21.288,
+          "max_ms": 21.288
+        },
+        "png_encode": {
+          "count": 4,
+          "mean_ms": 5.1835,
+          "p95_ms": 5.3318,
+          "max_ms": 5.3318
+        },
+        "classifier_including_png": {
+          "count": 4,
+          "mean_ms": 27.5733,
+          "p95_ms": 27.9948,
+          "max_ms": 27.9948
+        },
+        "decision_including_sonar": {
+          "count": 1200,
+          "mean_ms": 0.1382,
+          "p95_ms": 0.061,
+          "max_ms": 113.5851
+        },
+        "acoustic_observe": {
+          "count": 120,
+          "mean_ms": 0.0279,
+          "p95_ms": 0.0421,
+          "max_ms": 0.0509
+        },
+        "localize": {
+          "count": 120,
+          "mean_ms": 0.0062,
+          "p95_ms": 0.0082,
+          "max_ms": 0.0105
+        },
+        "measurement_association_update": {
+          "count": 120,
+          "mean_ms": 0.0054,
+          "p95_ms": 0.0065,
+          "max_ms": 0.0086
+        },
+        "checkpoint_encode_and_sqlite_commit": {
+          "count": 120,
+          "mean_ms": 0.9574,
+          "p95_ms": 1.1315,
+          "max_ms": 4.454
+        },
+        "seq_commit": {
+          "count": 60,
+          "mean_ms": 0.5497,
+          "p95_ms": 0.6455,
+          "max_ms": 0.6983
+        },
+        "state_publish": {
+          "count": 60,
+          "mean_ms": 0.7346,
+          "p95_ms": 0.8696,
+          "max_ms": 0.9721
+        }
+      },
+      "detection_stage_markers": [
+        {
+          "stage": "png_encode",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 5.275199997413438
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 27.608900003542658
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 5.331799999112263
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 27.506399997946573
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 5.316899998433655
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 27.994800002488773
+        },
+        {
+          "stage": "png_encode",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 4.810300000826828
+        },
+        {
+          "stage": "classifier_including_png",
+          "sim_t": 0.1,
+          "end_t": 0.1,
+          "ms": 27.18299999833107
+        }
+      ],
+      "public_message_parity": true,
+      "png_byte_parity": true,
+      "sequence_parity": true,
+      "png_count": 4,
+      "public_message_sha256": "ad230d7a7546c75184fcc952bc8c30ae59055b2bd4d6756ae0f550e28a0b885e"
+    }
+  },
+  "post_diagnostic_live_health": {
+    "scope": "Short post-diagnostic health check, current stable paused B/C/A preview, not 20-minute soak",
+    "sample_s": 8.175849700000981,
+    "initial_snapshot_excluded": true,
+    "regular_frames": 41,
+    "regular_hz": 5.001078857734757,
+    "interval_max_ms": 218.15970000170637,
+    "max_state_bytes": 1810,
+    "seq_strictly_increasing": true,
+    "health": {
+      "backend": 200,
+      "agent": 200,
+      "frontend": 200
+    }
+  }
+}

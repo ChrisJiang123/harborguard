@@ -88,7 +88,7 @@ def test_decision_endpoint_requires_valid_human_approval(seeded_client):
 
 
 def test_websocket_rate_sequence_and_disconnect_cleanup():
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(storage_path=":memory:")) as client:
         with client.websocket_connect("/ws") as ws:
             sequence, received = [], []
             for _ in range(7):

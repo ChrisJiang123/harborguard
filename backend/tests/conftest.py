@@ -6,7 +6,7 @@ from backend.app.main import create_app
 
 @pytest.fixture
 def client():
-    with TestClient(create_app(run_loop=False, debug_truth=False)) as test_client:
+    with TestClient(create_app(run_loop=False, debug_truth=False, storage_path=":memory:")) as test_client:
         yield test_client
 
 
