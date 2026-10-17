@@ -1,6 +1,28 @@
 # 后端 MVP 验证记录
 
-在 Windows、CPython 3.11.17、requirements-lock.txt 所列依赖上验证。正常模式关闭 DEBUG_TRUTH_TRACKS；C 的渲染器、YOLO 权重与 Agent 尚未提供，因此识别使用明确标注的 stub。
+在 Windows、CPython 3.11.17、requirements-lock.txt 所列依赖上验证。正常模式关闭 DEBUG_TRUTH_TRACKS。下方原始记录中的“C 未提供”描述当时独立后端基线，最新集成以本节和最终报告为准。
+
+## 最终集成复核
+
+- main 5817b9c 的 A/B、C 分支 78d3957、B 交接 368df2e 在独立集成分支组合，生产源码与对应团队提交保持一致。
+- 本轮 B+C 全量回归 103 passed、2 skipped，57.16 秒；指定同盘 basetemp，规避 C 数据集生成器的 Windows 跨盘临时目录限制。Ruff、compileall、pip check 和前端 build/lint/A1–A6 检查全部通过。
+- 三个真实服务 20 项集成检查通过，109.718 秒；546 个 state、102 个 event、约 4.997Hz。场景 A 从启动到真实模板建议 48.485 秒，建议计算 42.8ms；拒绝/批准、精确分区状态、事件补偿、问答、重置旧审批均验证。
+- 场景 B 完成 600 秒仿真，四个碎片、6 clear/4 blocked/2 unsurveyed、9 小时计划一致；两份静态回放的 722/335 条消息和全部 18 张 PNG 校验通过。
+- A 的刷新恢复、无航迹碎片识别入口仍由 A 处理，本轮没有修复或声称通过。未提供训练权重，Detection=stub，Agent=template。
+
+完整分支/阻塞项见 [最终检查报告](final-integration-report.md)，指标见 [机器可读结果](final-integration-results.json)，现场启动与时间安排见 [五分钟操作单](demo-runbook.md)。下文保留历史验证记录，不将旧 B 耐久测试外推为最新 A/B/C 组合验收。
+
+## 本轮联调交付验证
+
+后端主体已由仓库方通过 PR #2 合入 main。本轮基于 fdf4baf，仅增加交接文档、现有 OpenAPI 导出、静态 Mock 和两项交接验证；生产 API 和冻结契约不变。
+
+- 全量 pytest 75 项通过，用时 111.51 秒；仍有下述上游 TestClient 弃用警告。Ruff、compileall、pip check 通过。
+- 21 个 REST 操作的请求/响应经真实 FastAPI 路由验证；Agent 成功回答使用 MockTransport。state/event Schema、Mock 图片解码、导出一致性、文档路由覆盖和相对链接检查通过。
+- 真实 Uvicorn 15.19 秒烟测通过：76 个 state、18 个 event、5.003 Hz、最大 state 21,534 字节、无错误。短测不代替下方原 20 分钟性能报告。
+- 发布前扫描索引 119 个文件，未发现所检查的常见密钥模式、真实 .env、缓存或日志。已有 replay_a.jsonl 为 10,901,770 字节，与 main 的 blob 相同；本轮最大文件为 58,324 字节。
+- 生产后端、shared/、C 的 agent/ml/scripts/依赖、C 契约副本和 A 前端源码相对 main 均无变更。原任务书保持未跟踪，不提交。
+
+使用方法和完整接口见 [联调交接](frontend-integration.md)。以下保留后端主体原有验收结果。
 
 ## 自动化验证
 

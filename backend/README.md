@@ -6,6 +6,10 @@
 
 本次新增文件见 [文件清单](../docs/files.md)，逐项验收范围见 [任务书验收范围](../docs/acceptance.md)。
 
+前端和 AI 队友从 [联调交接](../docs/frontend-integration.md) 开始：含全部 21 个 REST 接口、WebSocket、审批与事件恢复、数据单位、可直接加载的 Mock 和完整 OpenAPI。运行 `python -m backend.tools.integration_bundle` 可重新生成，不修改冻结契约。
+
+最终交付以 [集成检查报告](../docs/final-integration-report.md) 和 [五分钟 Demo 操作单](../docs/demo-runbook.md) 为准。当前真实 A/B/C 模板闭环已验证；A 的刷新恢复和无航迹碎片入口仍由 A 修复。
+
 ## 安装与启动
 
 要求 Python 3.11 或更新版本，命令均在仓库根目录运行。
@@ -26,7 +30,7 @@ py -3.11 -m venv .venv
 ./dev.ps1 backend
 ```
 
-若 PowerShell 的脚本执行策略阻止本地脚本，可直接执行 `.venv/Scripts/python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`。若安装了 uv，也可用 `uv venv --seed --python 3.11 .venv` 建立环境。
+若 PowerShell 的脚本执行策略阻止本地脚本，可直接执行 `.venv/Scripts/python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`。本机 Python 3.11 由 uv 管理，`py -3.11` 无法解析；请用 `uv venv --seed --python 3.11 .venv` 替代创建命令，已有虚拟环境不重复创建。
 
 后端健康检查：`http://localhost:8000/api/health`；交互式接口文档：`http://localhost:8000/docs`；WebSocket：`ws://localhost:8000/ws`。启动时处于空闲状态，先调用场景启动接口。使用单个 worker，避免产生多份仿真世界。
 
@@ -79,17 +83,17 @@ python -m backend.tools.soak --seconds 1200 --port 8000 --report artifacts/soak.
 | 后端 | B | `make backend`，8000 |
 | 前端 | A | 在 A 的 `frontend/` 执行其 README 命令，开发端口 5173；生产构建由 A 提供 |
 | Agent | C | C 的 ASGI 服务监听 8001，必须实现 `POST /ask` |
-| Ollama | C | `ollama serve`，11434；模型名由 C 确定 |
+| Ollama | C | 模板 Demo 不启动；未来路由使用 11434，由 C 负责 |
 
-整套演示启动顺序：Ollama → 后端 → Agent → 前端。当前已有 C0 初始化骨架；A 前端以及 C 的渲染器、检测器和 Agent 服务实现尚未就绪。其实现完成后补齐准确入口与构建命令，再进行全员彩排。
+当前模板演示启动顺序：后端 → `python -m agent.main` → 前端生产预览（5173）。A6 已在 main，C3 来自 c/model-agent 并已纳入本地集成候选；本演示不依赖 Ollama、云端密钥或训练权重。前端在 frontend/ 运行 `npm ci`、`npm run build`，然后 `npm run preview -- --host 127.0.0.1 --port 5173 --strictPort`。
 
 - A：订阅 `/ws`。`state` 是 5 Hz 完整快照，`event` 实时发送。CORS 允许 localhost 和 127.0.0.1 的 5173。重连后读取初始快照并用 `/api/events?since_seq=N` 补事件，缓存仅最近 500 条；若新快照 seq 小于旧值，表示进程重启，应重置事件游标并重新建立视图。若断线过久也需重新建立本地视图。后端主动断开过慢客户端，避免堵塞仿真。
 - C 声呐：提供 `ml/sonar/render.py:render_ping` 和 `ml/yolo/infer.py:SonarDetector`，返回任务书约定的灰度图和像素角点框，权重 `ml/yolo/weights/best.pt`。从仓库根目录启动，模块可直接导入。
 - 灾害碎片本身不发声，没有被动航迹时，其 Detection 的 `track_id` 为契约允许的空字符串；前端按 Detection ID 展示声呐图，不查询空航迹 ID。
 - 实时 Detection 的 image_url 是后端相对路径，前端按 `http://localhost:8000` 解析；离线回放里的静态图片路径按前端自身站点解析。
 - C Agent：订阅警报和方案；从 REST 获取细节，将完整 Recommendation POST 到 `/api/recommendations`。结构或引用 ID 非法返回 422。后端校验、保存最新建议并广播，不代为审批。
-- C0 的 BACKEND_BASE_URL 为后端根地址，REST 客户端需补 `/api`，WS 使用 `/ws`。C 当前本地模型超时预算为 30 秒，而本契约代理超时为 20 秒；C3 实现问答时应把响应总预算控制在 20 秒以内，或自行快速降级，避免代理先返回 504。
-- C 与 B 的依赖声明范围兼容；当前锁文件覆盖 B 运行与测试，不含 C 的 ultralytics、matplotlib、anthropic、openai。完整联调时还需安装 C 的 requirements-runtime.txt，并重新检查依赖和模型加载。B 所需 Shapely/Pillow 已在 B 的依赖中。
+- BACKEND_BASE_URL 为后端根地址，C3 客户端为 REST 补 `/api`，WS 使用 `/ws`。C3 模板问答总预算为 18 秒，低于 B 代理的 20 秒；配置中未启用的 Ollama 30 秒预算不代表当前问答会调用本地 LLM。
+- 当前锁文件覆盖 B 运行测试，以及 C1 渲染器/C3 模板所需依赖；本轮组合已按此环境运行。它不含 ultralytics、matplotlib、anthropic、openai；只有另行启用相应模型或绘图工具时才需要 C 的扩展环境，本次不安装或新增模型功能。
 - C 的环境脚本会创建 `.venv`；整合时先执行 C 的环境准备，再在同一环境安装 B 的依赖，确保 Shapely/Pillow 等后端依赖保留。
 - `/api/agent/ask` 转发到 `http://localhost:8001/ask`，Agent 不可达返回 502，20 秒超时返回 504，后端继续运行。
 - C 指标：读取 `ml/yolo/metrics.json`、`ml/lora/metrics.json`；缺失或无效时对应返回 null。
@@ -98,10 +102,10 @@ python -m backend.tools.soak --seconds 1200 --port 8000 --report artifacts/soak.
 
 `backend/app/config.py` 集中维护仿真、声学、风险、迟滞、主动 ping 和优化参数。10 Hz 墙钟循环按 speed 推进仿真，内部固定 0.1 秒子步；所有随机数来自场景 Generator 及其派生种子。测量不带目标真值 ID。跟踪采用正向方位交会、聚类、三维匀速 Kalman 和马氏距离最近邻关联；船舶 AIS 仅用于合作识别。方案按预测路径缓冲、泊位保留率、延误船时和残余风险排序。灾害覆盖按浮标扫描圆与分区交叠面积累积，通过 clear 航道图 BFS 计算可复航路线。
 
-数据是人工构造的洛杉矶港区域示意几何和虚构船期，尚未按实际海图核验水陆、码头和浮标位置；详见 [数据说明](../data/README.md)。算法、声学参数和“节省小时”都是任务书指定的演示假设。C 模型效果和 A 界面联调需在队友代码合入后验证。
+数据是人工构造的洛杉矶港区域示意几何和虚构船期，尚未按实际海图核验水陆、码头和浮标位置；详见 [数据说明](../data/README.md)。算法、声学参数和“节省小时”都是任务书指定的演示假设。A 与 C 模板服务的基础闭环已验证；训练模型效果、A 的两项缺口和现场验收仍以最终报告为准。
 
 ## Git 合入
 
-当前开发分支为 `codex/harborguard-backend-mvp`，不直接修改 main。分支现已基于 GitHub 仓库 ChrisJiang123/harborguard 的 origin/main（b8d418d）整合，C 原有源码、依赖文件、脚本及共享契约均保留。尚未执行 push 或创建 PR。
+后端实现已通过 PR #2 由仓库方合入 main；`codex/harborguard-backend-mvp` 的 PR #3 保留交接材料。最终候选分支为 `codex/harborguard-live-integration`，基于 main（5817b9c）纳入 B 交接提交和 C 分支（78d3957）的原始提交。A/C 源码及冻结契约不由本轮改写，main 不直接开发或自动合并。
 
-队友检查顺序：契约和样例 → `make test` → 启动后端接前端 → 接入 C 声呐和 Agent → 播放两份回放 → 实际地图核验 → 三人演示彩排。当前分支已与 origin/main 具有共同历史。获得你的确认后，可推送此分支并创建面向 main 的 PR；合并前再次获取远程更新，保留 A、C 的后续实现。
+队友检查顺序：契约和样例 → 全量 B/C 测试（同盘临时目录）→ 操作单启动与五分钟彩排 → A 两处缺口修复 → C/维护者审查合入路径。集成分支按授权通过 tankewudi/harborguard 的 Fork 创建面向 main 的 Draft，说明与既有 PR #3/#4 的依赖；不自动合并。
