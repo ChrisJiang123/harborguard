@@ -7,8 +7,8 @@ A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改�
 
 | 目录 | 内容 | 步骤 | 状态 |
 | --- | --- | --- | --- |
-| `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据完成；**B 的 import 联调未完成，未勾选** |
-| `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | ⏳ 待实现 |
+| `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据 + **后端真实调用联调通过** |
+| `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | 🟨 推理接口/训练说明/评估脚本就绪，数据经实际加载器验证 3400/600；**未训练，无权重无 metrics** |
 | `agent/` | Agent 服务（端口 8001）：上下文/提示词/路由/问答 | C3 | ⏳ 待实现（`config.py` 已就绪） |
 | `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | ⏳ 待实现 |
 
@@ -84,10 +84,27 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   负样本 10.9%，类别占比偏差 ≤0.1pp，生成目标 8935 / 有标注 8926
   （9 个 <16px² 被契约下限丢弃，小目标不另删除）。
   **数据全部为合成数据**，指标仅代表仿真分布，不得当作真实声呐性能
-- ⏸ **B 的实际 import 联调尚未完成（H4 检查点）**：在 B 确认后端成功调用
-  `render_ping` 之前，验收清单中该项不得勾选
+- ✅ **与真实后端联调通过（2026-10-17，三层验证）**：
+  ① B 的 `SonarClassifier` 直接调用 `render_ping`——640×640 扇形 PNG、同 seed 字节一致、
+  标注过 B 侧校验；② 合并后端代码后 73 项后端测试全过；③ 实时服务跑场景 A：
+  产生 5 条 detection 事件，`GET /api/sonar/det-5.png` 为渲染器产出的扇形图
+  （B 叠加检测框与 "uuv 0.83" 标签）。`model=stub` 为无权重时的契约预期
+- ✅ 契约对照：`shared/contract.md`（B 维护）与 `docs/shared-contract-v1.md` 逐行核对，
+  表格/类型/签名/ID 完全一致（仅标题编号与列表格式差异），接口无分歧
 - 样本预览：`ml/sonar/samples.png`（4×4，取自数据集）；数据集 321 MB 不入库，
   由 `python -m ml.sonar.gen_dataset --n 4000 --seed 0` 一键重跑
+
+## C2 准备状态（2026-10-17）
+
+- ✅ `ml/yolo/infer.py::SonarDetector` 按契约实现：构造加载一次权重、强制 CPU、
+  灰度图内部转三通道、返回像素 bbox；权重缺失抛明确 `FileNotFoundError`（B 捕获后用桩）
+- ✅ `ml/yolo/check_data.py`：用 Ultralytics **实际数据加载器**验证 `sonar.yaml`
+  （非仅文本检查）→ train 3400 / val 600，负样本 435，类别 0–3 名称正确
+- ✅ `ml/yolo/train.md`（Lenovo PowerShell / Colab 可重跑命令，含数据打包步骤）、
+  `ml/yolo/eval.py`（mAP50 / mAP50-95 / 各类召回 / CPU 20 张均耗时 → metrics.json；
+  **权重缺失直接报错退出，不写占位数据**）
+- ⏸ **未训练**：无 `best.pt`、未生成 `metrics.json`；`GET /api/metrics` 的 yolo
+  字段为 null（契约预期），模型验收不勾选
 
 ## 不入库的内容（.gitignore）
 
