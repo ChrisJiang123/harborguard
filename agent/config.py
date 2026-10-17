@@ -9,7 +9,7 @@
 
     from agent.config import get_settings
     cfg = get_settings()
-    print(cfg.anthropic_model, cfg.backend_base_url, cfg.ollama_model)
+    print(cfg.cloud_provider, cfg.backend_base_url, cfg.ollama_model)
 """
 
 from __future__ import annotations
@@ -68,7 +68,14 @@ def _get_float(key: str, default: float) -> float:
 class Settings:
     """Agent 服务与模型调用的全部可配置项。"""
 
-    # ---- 云端 LLM（Anthropic） ----
+    # ---- 云端 LLM（显式选择；不会根据凭据自动推断） ----
+    cloud_provider: str
+    openrouter_api_key: str | None
+    openrouter_base_url: str
+    openrouter_model: str
+    openrouter_timeout_s: float
+
+    # ---- 旧 Anthropic 兼容适配（保留，但仅 CLOUD_PROVIDER=anthropic 时启用） ----
     anthropic_model: str
     anthropic_api_key: str | None      # 平台 API key
     anthropic_auth_token: str | None   # 代理模式 Bearer token（与 api_key 二选一）
@@ -83,17 +90,28 @@ class Settings:
     # ---- Agent 服务自身 ----
     agent_host: str
     agent_port: int
+    agent_event_budget_s: float         # options_ready 到 POST 的整体预算
+    agent_post_reserve_s: float         # 为模板组装和 POST 预留
+    agent_cloud_budget_s: float         # 云端最多占用的整体预算切片
+    agent_ask_budget_s: float           # /ask 总预算（B 代理为 20 秒）
+    agent_failure_log: str              # 脱敏事实校验失败样例（不入库）
 
     # ---- 本地 LLM（Ollama，OpenAI 兼容接口） ----
     ollama_base_url: str
     ollama_model: str
     ollama_timeout_s: float            # 契约：本地超时 30 秒
+    ollama_keep_alive: str
 
 
 def load_settings() -> Settings:
     """每次调用重新读取环境变量（便于测试）；常规入口用 get_settings()。"""
     return Settings(
         # 云端 LLM
+        cloud_provider=_get_str("CLOUD_PROVIDER", "disabled").lower(),
+        openrouter_api_key=_get_opt("OPENROUTER_API_KEY"),
+        openrouter_base_url=_get_str("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
+        openrouter_model=_get_str("OPENROUTER_MODEL", "google/gemini-2.5-flash"),
+        openrouter_timeout_s=_get_float("OPENROUTER_TIMEOUT_S", 15.0),
         anthropic_model=_get_str("ANTHROPIC_MODEL", "claude-sonnet-5"),
         anthropic_api_key=_get_opt("ANTHROPIC_API_KEY"),
         anthropic_auth_token=_get_opt("ANTHROPIC_AUTH_TOKEN"),
@@ -106,10 +124,16 @@ def load_settings() -> Settings:
         # Agent 服务
         agent_host=_get_str("AGENT_HOST", "127.0.0.1"),
         agent_port=_get_int("AGENT_PORT", 8001),
+        agent_event_budget_s=_get_float("AGENT_EVENT_BUDGET_S", 9.5),
+        agent_post_reserve_s=_get_float("AGENT_POST_RESERVE_S", 0.5),
+        agent_cloud_budget_s=_get_float("AGENT_CLOUD_BUDGET_S", 4.0),
+        agent_ask_budget_s=_get_float("AGENT_ASK_BUDGET_S", 18.0),
+        agent_failure_log=_get_str("AGENT_FAILURE_LOG", "agent/runtime/fact_failures.jsonl"),
         # 本地 LLM
         ollama_base_url=_get_str("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
-        ollama_model=_get_str("OLLAMA_MODEL", "harborguard-lora"),
+        ollama_model=_get_str("OLLAMA_MODEL", "qwen3:1.7b"),
         ollama_timeout_s=_get_float("OLLAMA_TIMEOUT_S", 30.0),
+        ollama_keep_alive=_get_str("OLLAMA_KEEP_ALIVE", "30m"),
     )
 
 

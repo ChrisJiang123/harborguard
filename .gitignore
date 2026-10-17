@@ -10,8 +10,9 @@
 .venv/
 .venv-*/
 
-# ---- 数据集（合成声呐数据集等，体积大，可由脚本重跑生成） ----
+# ---- 数据集（合成声呐数据集、蒸馏语料等，体积大，可由脚本重跑生成） ----
 ml/datasets/
+ml/lora/datasets/
 data/cache/
 
 # ---- 训练日志 / 训练输出 ----
@@ -19,6 +20,7 @@ runs/
 wandb/
 *.log
 logs/
+agent/runtime/
 
 # ---- 大型模型文件（权重 / GGUF / checkpoint） ----
 # 例外：ml/yolo/weights/best.pt 为最终交付的 nano 权重（几 MB），允许入库

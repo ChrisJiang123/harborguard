@@ -3,12 +3,13 @@
 ```
 ml/
   __init__.py
-  sonar/    __init__.py  render.py  gen_dataset.py  preview.py     # C1 待实现
-  yolo/     __init__.py  sonar.yaml  train.md  infer.py  eval.py   # C2 待实现
-            weights/best.pt  metrics.json
-  lora/     gen_contexts.py  distill.py  train_lora.ipynb           # C4 待实现
-            Modelfile  eval.py  metrics.json
-  datasets/ (gitignored —— 合成数据集，由 gen_dataset 重跑生成)
+  sonar/    __init__.py  render.py  gen_dataset.py  preview.py     # C1 已实现
+  yolo/     __init__.py  sonar.yaml  train.md  infer.py  eval.py   # C2 已验收（Mac 演示机）
+            weights/best.pt  metrics.json  ACCEPTANCE-MAC.md
+  lora/     __init__.py  gen_contexts.py  capture_real.py           # C4 脚本已实现
+            distill.py  train_lora.ipynb  Modelfile  eval.py
+            metrics.json  datasets/ (gitignored，全部脚本可重跑)
+  datasets/ (gitignored —— 4000 张合成数据集，由 gen_dataset --n 4000 --seed 0 重跑生成)
 ```
 
 - `ml/sonar/render.py::render_ping` 与 `ml/yolo/infer.py::SonarDetector` 的签名

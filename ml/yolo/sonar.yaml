@@ -1,0 +1,10 @@
+# 由 ml/sonar/gen_dataset.py 自动生成（重跑会覆盖）
+# path 为相对仓库根路径：训练时从仓库根运行，或将 ultralytics datasets_dir 指到仓库根
+path: ml/datasets/sonar
+train: images/train
+val: images/val
+names:
+  0: uuv
+  1: fish_school
+  2: debris
+  3: marine_mammal
