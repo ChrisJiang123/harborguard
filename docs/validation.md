@@ -4,7 +4,7 @@
 
 ## 自动化验证
 
-- pytest：71 项全量测试通过，最近一次通过 dev.ps1 test 执行，耗时 56.29 秒。
+- pytest：接入远程 C0 骨架后，73 项全量测试通过，最近一次通过 dev.ps1 test 执行，耗时 55.19 秒；包含 C 与 B 契约逐 token 一致性检查，以及模型指标含 NaN 时返回 null 的回归。
 - Ruff：所有 backend Python 文件通过。
 - compileall：backend 全部 Python 源码编译通过。
 - pip check：依赖无冲突；PowerShell setup、check、record 已实际执行成功。
@@ -54,13 +54,17 @@ python -m backend.app.perception.benchmark --seconds 1200 --out docs/perception_
 | replay_a.jsonl | 722 | 601 | 120 秒墙钟 | 26,117 字节 |
 | replay_b.jsonl | 335 | 301 | 60 秒墙钟 | 2,032 字节 |
 
-相同种子分别完整录制两次，事件名及仿真时间序列完全一致，JSONL SHA256 完全一致。所有声呐静态 URL 对应实际 PNG，可离线解码。再加实时场景验收，各场景至少运行三次，关键事件时间没有变化。A 的前端回放器尚未提供，因此浏览器中的完整播放仍需 A 验收。
+相同种子分别完整录制两次，事件名及仿真时间序列完全一致，JSONL SHA256 完全一致。所有声呐静态 URL 对应实际 PNG，可离线解码；还在独立静态 HTTP 服务上验证了两个 JSONL 和全部 18 张图片。再加实时场景验收，各场景至少运行三次，关键事件时间没有变化。A 的前端回放器尚未提供，因此浏览器中的完整播放仍需 A 验收。
 
 ## 实时耐久检查
 
 运行 `python -m backend.tools.soak --seconds 1200 --port 8000 --report artifacts/soak.json`，真实 Uvicorn 进程循环切换 A/B、重置和六种故障。采样包含 Windows 虚拟环境启动器及其 Python 子进程的 RSS 与单核 CPU；端口占用时工具拒绝启动，结束清理它创建的进程树。
 
-20 分钟运行结果在本次检查结束后补入此节。
+20 分钟运行通过，实测 1,200.13 秒；6,001 个 state、1,142 个 event、平均 5.00 Hz、共 14 次场景启动，服务 ERROR 为 0。最大 state 为 26,125 字节。全部 Python 子进程合计 RSS 为 88.18–100.88 MB，暖机后在约 93–101 MB 内随场景切换回落；未观察到持续单向增长。采样单核 CPU 峰值 17.5%，低于 50% 目标。原始采样见 soak_metrics.json。
+
+在 10× 运行时，外层墙钟 tick 一次推进 1 秒仿真，包含多个 0.1 秒子步。记录了 289 条超过 20 ms 的 tick 警告，最大 145.4 ms，主要出现在声呐图片生成和初始批量碎片识别附近。因此“每个 tick < 20 ms”的性能目标仍未完全满足；平均推送频率和服务稳定性通过。
+
+这次耐久检查覆盖 B 独立服务；随后将开发分支接到 origin/main 的 C0 骨架上。再次全量测试 73 项通过，真实服务 15 秒烟测通过、状态约 5.03 Hz。通过 Git 比较确认 C 原有 agent/、ml/、scripts/、依赖文件及 docs/shared-contract-v1.md 未被修改，原 README 全文也保留，仅追加 B 入口。
 
 ## 尚需团队验收
 

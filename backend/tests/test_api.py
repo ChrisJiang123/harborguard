@@ -8,6 +8,19 @@ from backend.app.main import create_app
 from backend.app.models import EventMsg, StateMsg
 
 
+def test_incomplete_model_metrics_are_null_instead_of_a_server_error(client,tmp_path,monkeypatch):
+    from backend.app import config
+
+    for kind in ("yolo","lora"):
+        (tmp_path/"ml"/kind).mkdir(parents=True)
+    (tmp_path/"ml/yolo/metrics.json").write_text('{"precision":NaN}',encoding="utf-8")
+    (tmp_path/"ml/lora/metrics.json").write_text('{"loss":0.1}',encoding="utf-8")
+    monkeypatch.setattr(config,"ROOT",tmp_path)
+    response = client.get("/api/metrics")
+    assert response.status_code == 200
+    assert response.json() == {"yolo":None,"lora":{"loss":0.1}}
+
+
 def test_controls_faults_and_reset(client):
     assert client.post("/api/control",json={"action":"resume"}).status_code == 409
     assert client.post("/api/scenario/a/start",json={"speed":4}).json() == {"ok":True}

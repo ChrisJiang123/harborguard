@@ -83,10 +83,14 @@ python -m backend.tools.soak --seconds 1200 --port 8000 --report artifacts/soak.
 
 整套演示启动顺序：Ollama → 后端 → Agent → 前端。当前已有 C0 初始化骨架；A 前端以及 C 的渲染器、检测器和 Agent 服务实现尚未就绪。其实现完成后补齐准确入口与构建命令，再进行全员彩排。
 
-- A：订阅 `/ws`。`state` 是 5 Hz 完整快照，`event` 实时发送。CORS 允许 localhost 和 127.0.0.1 的 5173。重连后读取初始快照并用 `/api/events?since_seq=N` 补事件，缓存仅最近 500 条；若断线过久需重新建立本地视图。后端主动断开过慢客户端，避免堵塞仿真。
+- A：订阅 `/ws`。`state` 是 5 Hz 完整快照，`event` 实时发送。CORS 允许 localhost 和 127.0.0.1 的 5173。重连后读取初始快照并用 `/api/events?since_seq=N` 补事件，缓存仅最近 500 条；若新快照 seq 小于旧值，表示进程重启，应重置事件游标并重新建立视图。若断线过久也需重新建立本地视图。后端主动断开过慢客户端，避免堵塞仿真。
 - C 声呐：提供 `ml/sonar/render.py:render_ping` 和 `ml/yolo/infer.py:SonarDetector`，返回任务书约定的灰度图和像素角点框，权重 `ml/yolo/weights/best.pt`。从仓库根目录启动，模块可直接导入。
 - 灾害碎片本身不发声，没有被动航迹时，其 Detection 的 `track_id` 为契约允许的空字符串；前端按 Detection ID 展示声呐图，不查询空航迹 ID。
+- 实时 Detection 的 image_url 是后端相对路径，前端按 `http://localhost:8000` 解析；离线回放里的静态图片路径按前端自身站点解析。
 - C Agent：订阅警报和方案；从 REST 获取细节，将完整 Recommendation POST 到 `/api/recommendations`。结构或引用 ID 非法返回 422。后端校验、保存最新建议并广播，不代为审批。
+- C0 的 BACKEND_BASE_URL 为后端根地址，REST 客户端需补 `/api`，WS 使用 `/ws`。C 当前本地模型超时预算为 30 秒，而本契约代理超时为 20 秒；C3 实现问答时应把响应总预算控制在 20 秒以内，或自行快速降级，避免代理先返回 504。
+- C 与 B 的依赖声明范围兼容；当前锁文件覆盖 B 运行与测试，不含 C 的 ultralytics、matplotlib、anthropic、openai。完整联调时还需安装 C 的 requirements-runtime.txt，并重新检查依赖和模型加载。B 所需 Shapely/Pillow 已在 B 的依赖中。
+- C 的环境脚本会创建 `.venv`；整合时先执行 C 的环境准备，再在同一环境安装 B 的依赖，确保 Shapely/Pillow 等后端依赖保留。
 - `/api/agent/ask` 转发到 `http://localhost:8001/ask`，Agent 不可达返回 502，20 秒超时返回 504，后端继续运行。
 - C 指标：读取 `ml/yolo/metrics.json`、`ml/lora/metrics.json`；缺失或无效时对应返回 null。
 

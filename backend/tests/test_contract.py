@@ -1,3 +1,4 @@
+import re
 from io import BytesIO
 
 import pytest
@@ -21,6 +22,20 @@ from backend.app.models import (
     ZoneCollection,
 )
 from backend.tools.make_samples import samples
+
+
+def test_upstream_c_contract_has_the_same_frozen_types():
+    from backend.app.config import ROOT
+
+    upstream = (ROOT/"docs/shared-contract-v1.md").read_text(encoding="utf-8")
+    block = re.search(r"```(?:ts|typescript)\s*\n(.*?)```",upstream,re.DOTALL)
+    assert block is not None
+    local = (ROOT/"shared/types.ts").read_text(encoding="utf-8")
+
+    def tokens(source):
+        return re.sub(r"\s+","",re.sub(r"//[^\n]*","",source))
+
+    assert tokens(block.group(1)) == tokens(local)
 
 
 def test_all_contract_get_endpoints(seeded_client):

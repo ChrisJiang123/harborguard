@@ -33,6 +33,10 @@ from ..models import (
 router = APIRouter(prefix="/api")
 
 
+def _reject_nonfinite_json(value):
+    raise ValueError(f"Invalid JSON numeric value: {value}")
+
+
 def engine(request: Request):
     return request.app.state.engine
 
@@ -111,7 +115,8 @@ async def metrics():
     result = {}
     for kind in ("yolo", "lora"):
         try:
-            result[kind] = json.loads((config.ROOT/"ml"/kind/"metrics.json").read_text(encoding="utf-8"))
+            result[kind] = json.loads((config.ROOT/"ml"/kind/"metrics.json").read_text(encoding="utf-8"),
+                                      parse_constant=_reject_nonfinite_json)
         except (OSError, ValueError):
             result[kind] = None
     return result
