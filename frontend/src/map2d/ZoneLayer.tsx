@@ -1,3 +1,4 @@
+import { englishText } from '../data/english'
 import { memo, useMemo } from 'react'
 import { Polygon, Tooltip } from 'react-leaflet'
 import { polygonPositions } from '../data/mapGeometry'
@@ -6,8 +7,8 @@ import { useHarbor } from '../store/useHarbor'
 import { useMapData } from '../store/useMapData'
 import { zoneStyle } from './styles'
 
-const KINDS: Record<string, string> = { berth: '泊位', channel: '航道', anchorage: '锚地' }
-const STATE_NAMES = { open: '开放', restricted: '限制通航', clear: '可复航', unsurveyed: '待勘测', blocked: '封闭' }
+const KINDS: Record<string, string> = { berth: 'Berth', channel: 'Channel', anchorage: 'Anchorage' }
+const STATE_NAMES = { open: 'Open', restricted: 'Restricted', clear: 'Ready to reopen', unsurveyed: 'Unsurveyed', blocked: 'Blocked' }
 
 const Zone = memo(function Zone({ feature }: { feature: ZoneFeature }) {
   const { id, name, kind } = feature.properties
@@ -20,7 +21,7 @@ const Zone = memo(function Zone({ feature }: { feature: ZoneFeature }) {
   const style = useMemo(() => zoneStyle(state, highlighted, focused), [state, highlighted, focused])
   return <Polygon positions={positions} pathOptions={style}>
     {disaster && <Tooltip permanent direction="center" className="zone-coverage-label" interactive={false}>{id} · {coverage === undefined ? '—' : `${Math.round(coverage * 100)}%`}</Tooltip>}
-    {!disaster && <Tooltip sticky><div className="map-tooltip-content"><strong>{name} · {id}</strong><span>{KINDS[kind] ?? kind} · {STATE_NAMES[state]}</span><span>覆盖率 {coverage === undefined ? '待接收' : `${Math.round(coverage * 100)}%`}</span></div></Tooltip>}
+    {!disaster && <Tooltip sticky><div className="map-tooltip-content"><strong>{englishText(name)} · {id}</strong><span>{KINDS[kind] ?? kind} · {STATE_NAMES[state]}</span><span>Coverage {coverage === undefined ? 'Pending' : `${Math.round(coverage * 100)}%`}</span></div></Tooltip>}
   </Polygon>
 })
 

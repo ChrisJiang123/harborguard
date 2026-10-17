@@ -13,10 +13,10 @@ export function MetricsCard() {
     const abort = new AbortController()
     void api.metrics(abort.signal).then(value => {
       if (abort.signal.aborted) return
-      if (!value || !('yolo' in value) || !('lora' in value)) { setError('指标响应缺少 yolo / lora 字段。'); return }
+      if (!value || !('yolo' in value) || !('lora' in value)) { setError('Metrics response is missing yolo / lora fields.'); return }
       setResult(value); setError(null)
-    }).catch((cause: unknown) => { if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : '指标读取失败。') })
+    }).catch((cause: unknown) => { if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : 'Could not load metrics.') })
     return () => abort.abort()
   }, [conn, revision])
-  return <details className="metrics-card"><summary>合成数据指标</summary><p className="muted">仅展示数据源原值，不代表真实海域效果。{conn === 'replay' && '回放无指标侧车文件，未访问后端。'}</p>{error ? <p role="alert">指标不可用：{error}</p> : result ? (['yolo', 'lora'] as const).map(model => <div className="metric-model" key={model}><b>{model === 'yolo' ? 'YOLO · mAP50 / 各类召回 / CPU 每图延迟' : 'LoRA · JSON 合法率 / 方案一致率 / 本地延迟'}</b>{result[model] === null ? <p className="training">训练中 · 尚未提供评估结果</p> : <><p className="muted">指标名与单位沿用后端字段：</p><dl>{metricEntries(result[model]).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}</dl>{metricEntries(result[model]).length === 0 && <p>指标格式待对齐，未生成替代数值。</p>}</>}</div>) : <p>正在读取指标…</p>}<button onClick={() => setRevision(value => value + 1)}>刷新指标</button></details>
+  return <details className="metrics-card"><summary>Synthetic Data Metrics</summary><p className="muted">Source-provided values; not a measure of real-world marine performance.{conn === 'replay' && 'No metrics sidecar in replay. Backend was not queried.'}</p>{error ? <p role="alert">Metrics unavailable: {error}</p> : result ? (['yolo', 'lora'] as const).map(model => <div className="metric-model" key={model}><b>{model === 'yolo' ? 'YOLO · mAP50 / Recall by class / CPU latency per image' : 'LoRA · Valid JSON / Option agreement / Local latency'}</b>{result[model] === null ? <p className="training">Training · Evaluation results not available</p> : <><p className="muted">Metric names and units follow backend fields: </p><dl>{metricEntries(result[model]).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}</dl>{metricEntries(result[model]).length === 0 && <p>Unsupported metrics format. No substitute values were generated.</p>}</>}</div>) : <p>Loading metrics…</p>}<button onClick={() => setRevision(value => value + 1)}>Refresh metrics</button></details>
 }

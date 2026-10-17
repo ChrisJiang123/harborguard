@@ -41,14 +41,14 @@ function MapEvents() {
 
 function HomeButton() {
   const map = useMap()
-  return <div className="map-home-control"><button onClick={() => map.setView(PORT_CENTER, 14)} title="恢复洛杉矶港默认视野">⌖ 港口全景</button></div>
+  return <div className="map-home-control"><button onClick={() => map.setView(PORT_CENTER, 14)} title="Reset to the default Port of Los Angeles view">⌖ Port Overview</button></div>
 }
 
 function SelectedDetails() {
   const selected = useHarbor(s => s.selectedTrackId)
   const track = useHarbor(s => selected ? s.tracks[selected] : undefined)
-  if (!track) return <div className="map-selection-hint">点击地图目标查看 · 点击空白取消选中</div>
-  const openSonar = () => void runOperation('读取声呐记录', async () => {
+  if (!track) return <div className="map-selection-hint">Select a target on the map · Click empty space to clear</div>
+  const openSonar = () => void runOperation('Load sonar record', async () => {
     const state = useHarbor.getState(), id = track.detection_id
     if (!id) return
     const detection = state.detections[id] ?? await api.detection(id)
@@ -56,7 +56,7 @@ function SelectedDetails() {
     useHarbor.getState().cacheDetection(detection)
     useHarbor.setState({ sonarModalDetId: id })
   })
-  return <div className="map-selection-details"><b style={{ color: LEVEL_COLORS[track.level] }}>{track.id} · L{track.level}</b><span>深度 {track.depth_m.toFixed(1)} m</span><span>{track.lat.toFixed(5)}, {track.lon.toFixed(5)}</span>{track.detection_id && <button onClick={openSonar}>声呐图</button>}<button onClick={() => useHarbor.getState().selectTrack(null)} aria-label="取消选中目标">×</button></div>
+  return <div className="map-selection-details"><b style={{ color: LEVEL_COLORS[track.level] }}>{track.id} · L{track.level}</b><span>Depth {track.depth_m.toFixed(1)} m</span><span>{track.lat.toFixed(5)}, {track.lon.toFixed(5)}</span>{track.detection_id && <button onClick={openSonar}>Sonar Image</button>}<button onClick={() => useHarbor.getState().selectTrack(null)} aria-label="Clear target selection">×</button></div>
 }
 
 export function MapView() {
@@ -82,17 +82,17 @@ export function MapView() {
   }, [])
   const events = useMemo(() => ({ tileerror: () => setTileError(true) }), [])
   const demo = resources && Object.values(resources.sources).some(source => source === 'demo')
-  return <div className="map-stage" aria-label="洛杉矶港二维态势地图">
+  return <div className="map-stage" aria-label="Port of Los Angeles 2D operational map">
     <MapContainer center={PORT_CENTER} zoom={14} minZoom={10} maxZoom={19} zoomControl={false} className="harbor-map" scrollWheelZoom>
       {useOSM && <TileLayer key={tileVersion} url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' eventHandlers={events} updateWhenIdle keepBuffer={1} />}
       <LocalBaseLayer visible={!useOSM} />
       <ZoomControl position="topleft" /><ScaleControl position="bottomleft" imperial={false} />
       <MapEvents /><ZoneLayer /><AssetRings /><BuoyLayer /><BlindAreas /><TrackLayer /><HomeButton />
     </MapContainer>
-    <div className="map-layer-note">{loading ? '正在加载业务图层…' : error ?? (demo ? '含示例业务图层 · 模拟数据' : '团队业务图层已加载')}<button onClick={() => { const params = new URLSearchParams(location.search); if (params.get('mock') === '1' || params.has('replay')) location.reload(); else void ensureMapData(true) }} disabled={loading} title="重新读取业务图层（本地演示将重新开始）">↻</button></div>
-    {!useOSM && <div className="map-tile-notice" role="status">{localReady ? '本地 OSM 岸线简图 · 非完整瓦片底图' : '纯业务图层 · 本地岸线不可用'}{!offline && !replay && browserOnline && <button onClick={() => { setShowBase(true); setTileError(false); setTileVersion(v => v + 1) }}>显示在线底图</button>}</div>}
-    {useOSM && <button className="map-show-base" onClick={() => setShowBase(false)}>切换离线简图</button>}
-    {disaster ? <DisasterLegend /> : <div className="map-legend" aria-label="地图图例"><span><i style={{ background: LEVEL_COLORS[1] }} />一级</span><span><i style={{ background: LEVEL_COLORS[2] }} />二级</span><span><i style={{ background: LEVEL_COLORS[3] }} />三级</span><span className="predicted-legend">┄ 预测航迹</span></div>}
+    <div className="map-layer-note">{loading ? 'Loading operational layers…' : error ?? (demo ? 'Includes demo operational layers · Simulated data' : 'Operational layers loaded')}<button onClick={() => { const params = new URLSearchParams(location.search); if (params.get('mock') === '1' || params.has('replay')) location.reload(); else void ensureMapData(true) }} disabled={loading} title="Reload operational layers (restarts the local demo)">↻</button></div>
+    {!useOSM && <div className="map-tile-notice" role="status">{localReady ? 'Local OSM shoreline · Simplified offline map' : 'Operational layers only · Local shoreline unavailable'}{!offline && !replay && browserOnline && <button onClick={() => { setShowBase(true); setTileError(false); setTileVersion(v => v + 1) }}>Show online map</button>}</div>}
+    {useOSM && <button className="map-show-base" onClick={() => setShowBase(false)}>Use offline map</button>}
+    {disaster ? <DisasterLegend /> : <div className="map-legend" aria-label="Map legend"><span><i style={{ background: LEVEL_COLORS[1] }} />Level 1</span><span><i style={{ background: LEVEL_COLORS[2] }} />Level 2</span><span><i style={{ background: LEVEL_COLORS[3] }} />Level 3</span><span className="predicted-legend">┄ Predicted track</span></div>}
     <SelectedDetails />
   </div>
 }

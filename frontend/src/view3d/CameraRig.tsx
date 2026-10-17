@@ -8,7 +8,7 @@ import { useMapData } from '../store/useMapData'
 import { cameraPreset, createTrackMotion, FLIGHT_SECONDS, sampleTrackMotion, smoothFlight } from './coordinates'
 import type { CameraMode, SceneBounds } from './coordinates'
 
-export function CameraRig({ mode, revision, bounds }: { mode: CameraMode; revision: number; bounds: SceneBounds }) {
+export function CameraRig({ mode, revision, bounds, verticalScale }: { mode: CameraMode; revision: number; bounds: SceneBounds; verticalScale: number }) {
   const selected = useHarbor(s => s.selectedTrackId)
   const controls = useRef<OrbitControlsImpl>(null)
   const camera = useThree(s => s.camera)
@@ -19,7 +19,7 @@ export function CameraRig({ mode, revision, bounds }: { mode: CameraMode; revisi
     if (!controls.current) return
     const track = selected ? useHarbor.getState().tracks[selected] : undefined
     const asset = useMapData.getState().resources?.assets[0]
-    const preset = cameraPreset(mode, bounds, track, asset)
+    const preset = cameraPreset(mode, bounds, track, asset, verticalScale)
     const plan = flight.current
     plan.startCamera.copy(camera.position)
     plan.startTarget.copy(controls.current.target)
@@ -28,14 +28,14 @@ export function CameraRig({ mode, revision, bounds }: { mode: CameraMode; revisi
     plan.offset.copy(plan.goalCamera).sub(plan.goalTarget)
     plan.at = clock.elapsedTime
     plan.active = true
-    motion.current = createTrackMotion(track)
-  }, [selected, mode, revision, bounds, camera, clock])
+    motion.current = createTrackMotion(track, verticalScale)
+  }, [selected, mode, revision, bounds, camera, clock, verticalScale])
   useFrame((_, delta) => {
     if (!controls.current) return
     const track = selected ? useHarbor.getState().tracks[selected] : undefined
     const plan = flight.current
     if (mode === 'follow' && track) {
-      plan.goalTarget.fromArray(sampleTrackMotion(motion.current, track, clock.elapsedTime))
+      plan.goalTarget.fromArray(sampleTrackMotion(motion.current, track, clock.elapsedTime, verticalScale))
       plan.goalCamera.copy(plan.goalTarget).add(plan.offset)
     }
     if (plan.active) {

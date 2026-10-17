@@ -15,7 +15,7 @@ function recordScenario(scenario) {
     engine.advance(.2)
     if (step === 150) engine.inject({ type: 'buoy_down', target: 'B1' })
     if (step === 250) engine.inject({ type: 'network_down' })
-    if (scenario === 'a' && step === 350) engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: '模拟操作员（录制事件）' })
+    if (scenario === 'a' && step === 350) engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: 'Demo Operator (recorded event)' })
   }
   engine.stop()
   return rows
@@ -31,7 +31,7 @@ function recordFullDemo() {
   engine.startScenario('a')
   for (let step = 1; step <= 400; step++) {
     engine.advance(.2)
-    if (step === 350) engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: '模拟操作员（录制事件）' })
+    if (step === 350) engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: 'Demo Operator (recorded event)' })
   }
 
   wallOffset = 80_000

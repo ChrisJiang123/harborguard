@@ -13,7 +13,7 @@ export async function runOperation(label: string, operation: () => Promise<unkno
     await operation()
     return true
   } catch (error) {
-    notify(`${label}失败：${error instanceof Error ? error.message : '请检查后端连接。'}`, 'error')
+    notify(`${label} failed: ${error instanceof Error ? error.message : 'Check the backend connection.'}`, 'error')
     return false
   } finally { useOperations.setState({ pending: null }) }
 }

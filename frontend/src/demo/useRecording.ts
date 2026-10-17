@@ -23,13 +23,13 @@ export function useRecording() {
   }, [status])
   const start = async () => {
     if (active.current || choosing.current || blobURL.current) return
-    if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === 'undefined') { setError('当前浏览器不支持页面录屏，请使用系统录屏或 OBS。'); setStatus('error'); return }
+    if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === 'undefined') { setError('Tab recording is unavailable in this browser. Use a system recorder or OBS.'); setStatus('error'); return }
     choosing.current = true; setStatus('choosing'); setError(null); setElapsed(0)
     try {
       // Must stay directly in the button's user-activation chain. Never request audio.
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       if (!mounted.current) { stream.getTracks().forEach(track => track.stop()); return }
-      if (!stream.getVideoTracks().length) { stream.getTracks().forEach(track => track.stop()); throw new Error('未选择可录制画面。') }
+      if (!stream.getVideoTracks().length) { stream.getTracks().forEach(track => track.stop()); throw new Error('No recordable display was selected.') }
       active.current = recordStream(stream, {
         progress(ms) { if (mounted.current) setElapsed(ms) },
         complete(blob, ms) {
@@ -43,7 +43,7 @@ export function useRecording() {
       })
       setStatus('recording')
     } catch (cause) {
-      if (mounted.current) { setError(cause instanceof Error && cause.name === 'NotAllowedError' ? '未授权或已取消共享，未开始录屏。' : cause instanceof Error ? cause.message : '无法开始录屏。'); setStatus('error') }
+      if (mounted.current) { setError(cause instanceof Error && cause.name === 'NotAllowedError' ? 'Sharing was denied or cancelled. Recording did not start.' : cause instanceof Error ? cause.message : 'Could not start recording.'); setStatus('error') }
     } finally { choosing.current = false }
   }
   const discard = () => {

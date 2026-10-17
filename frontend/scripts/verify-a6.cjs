@@ -92,7 +92,7 @@ assert.equal(videoExtension('video/webm;codecs=vp8'), 'webm')
 {
   FakeRecorder.supported = false
   const h = harness()
-  assert.throws(() => recordStream(h.stream, { progress() {}, complete() {}, error() {} }, h.runtime), /不支持/)
+  assert.throws(() => recordStream(h.stream, { progress() {}, complete() {}, error() {} }, h.runtime), /does not support/)
   assert.equal(h.track.stopped, 1)
   FakeRecorder.supported = true
 }

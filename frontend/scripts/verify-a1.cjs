@@ -5,7 +5,7 @@ const path = require('node:path')
 // The compiled verification output is generated and ignored, not application source.
 writeFileSync(path.join(__dirname, '../work/verify-a1/package.json'), '{"type":"commonjs"}\n')
 const { createMockEngine } = require('../work/verify-a1/data/mock.js')
-const { receiveMessage, useHarbor } = require('../work/verify-a1/store/useHarbor.js')
+const { eventIdentity, isHarborMessage, receiveMessage, useHarbor } = require('../work/verify-a1/store/useHarbor.js')
 
 const messages = []
 const engine = createMockEngine(msg => { messages.push(msg); assert.equal(receiveMessage(msg), true) })
@@ -51,12 +51,51 @@ engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operato
 assert.deepEqual(useHarbor.getState().latest.zones.filter(zone => zone.state === 'restricted').map(zone => zone.id), ['Z4', 'Z5'])
 assert.throws(() => engine.decision({ alert_id: 'missing', option_id: 'opt-1', action: 'approve', operator: 'test' }))
 
+// A hard refresh starts with an empty store; bounded REST history must reconstruct event-derived UI state.
+const recoveredSnapshot = useHarbor.getState().latest
+const recoveredEvents = messages.filter(msg => msg.type === 'event')
+const recoveredLogsNewestFirst = [...useHarbor.getState().logs].reverse()
+useHarbor.getState().reset()
+useHarbor.getState().recoverLive(recoveredSnapshot, recoveredEvents, recoveredLogsNewestFirst, {}, {})
+assert.equal(useHarbor.getState().events.filter(event => event.event === 'decision').length, 1)
+assert.equal(useHarbor.getState().decisionsByAlert.A1.action, 'approve')
+assert.equal(useHarbor.getState().decisionsByAlert.A1.operator, 'test')
+assert.equal(useHarbor.getState().optionsByAlert.A1.length, 2)
+assert.equal(useHarbor.getState().detections['det-1'].cls, 'uuv')
+assert.equal(useHarbor.getState().latest.seq, recoveredSnapshot.seq)
+assert.deepEqual(useHarbor.getState().logs, [...recoveredLogsNewestFirst].reverse())
+assert.equal(useHarbor.getState().recovery.phase, 'complete')
+useHarbor.getState().recoverLive(recoveredSnapshot, recoveredEvents, recoveredLogsNewestFirst, {}, {})
+assert.equal(useHarbor.getState().events.filter(event => event.event === 'decision').length, 1)
+const originalRecommendation = recoveredEvents.find(msg => msg.event === 'recommendation')
+const replayedRecommendation = { ...originalRecommendation, seq: originalRecommendation.seq + 9000 }
+assert.equal(eventIdentity(originalRecommendation), eventIdentity(replayedRecommendation))
+receiveMessage(replayedRecommendation)
+assert.equal(useHarbor.getState().events.filter(event => event.event === 'recommendation').length, 1)
+useHarbor.getState().recoverLive(recoveredSnapshot, recoveredEvents.slice(-500), recoveredLogsNewestFirst, {}, {}, { eventsAvailable: true, eventsReturned: 500, eventLimitReached: true, detailFailures: 0 })
+assert.equal(useHarbor.getState().recovery.phase, 'partial')
+assert.match(useHarbor.getState().recovery.message, /Incomplete history/)
+useHarbor.getState().recoverLive(recoveredSnapshot, [], recoveredLogsNewestFirst, {}, {}, { eventsAvailable: false, eventsReturned: 0, eventLimitReached: false, detailFailures: 0 })
+assert.equal(useHarbor.getState().recovery.phase, 'failed')
+assert.match(useHarbor.getState().recovery.message, /History loading failed/)
 const before = useHarbor.getState().events.length
 receiveMessage(events.find(msg => msg.event === 'recommendation'))
 assert.equal(useHarbor.getState().events.length, before)
 assert.equal(receiveMessage(null), false)
 assert.equal(receiveMessage({ type: 'state', seq: 1, t: 1 }), false)
 assert.equal(receiveMessage({ type: 'event', seq: 1, t: 1, event: 'log', data: null }), false)
+
+const sessionBeforeServerRestart = useHarbor.getState().session
+const restartedSnapshot = { ...recoveredSnapshot, seq: 0, t: 0, tracks: [], alerts: [] }
+// The WebSocket client clears a restarted session before ingesting its snapshot.
+useHarbor.getState().reset()
+useHarbor.getState().ingest(restartedSnapshot)
+useHarbor.getState().recoverLive(restartedSnapshot, [], [], {}, {}, { eventsAvailable: true, eventsReturned: 0, eventLimitReached: false, detailFailures: 0, previousSnapshotSeq: recoveredSnapshot.seq })
+assert.equal(useHarbor.getState().events.length, 0)
+assert.deepEqual(useHarbor.getState().decisionsByAlert, {})
+assert.equal(useHarbor.getState().session, sessionBeforeServerRestart + 1)
+assert.equal(useHarbor.getState().recovery.phase, 'partial')
+assert.match(useHarbor.getState().recovery.message, /sequence reset/)
 
 for (let i = 0; i < 650; i++) receiveMessage({ type: 'event', seq: 10000 + i, t: i, event: 'log', data: { log: { t: i, level: 'info', source: 'sim', text: `${i}` } } })
 assert.equal(useHarbor.getState().events.length, 500)
@@ -84,7 +123,8 @@ const Module = require('node:module')
 const wsPath = path.join(__dirname, '../src/data/ws.ts')
 const wsCode = ts.transpileModule(readFileSync(wsPath, 'utf8').replace('import.meta.env.VITE_WS_URL', 'undefined'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2023 } }).outputText
 const wsModule = new Module(wsPath, module)
-wsModule.require = name => name === '../store/useHarbor' ? { receiveMessage, useHarbor } : require(name)
+let recoveryGeneration = 0
+wsModule.require = name => name === '../store/useHarbor' ? { isHarborMessage, receiveMessage, useHarbor } : name === './liveRecovery' ? { beginLiveRecoveryGeneration: () => ++recoveryGeneration, invalidateLiveRecoveryGeneration: generation => { if (generation === recoveryGeneration) recoveryGeneration++ }, recoverLiveFromBackend: async () => {} } : require(name)
 wsModule._compile(wsCode, wsPath)
 const original = { WebSocket: global.WebSocket, setTimeout: global.setTimeout, clearTimeout: global.clearTimeout }
 const timers = new Map()
@@ -118,7 +158,7 @@ try {
   sockets.at(-1).onmessage({ data: JSON.stringify(staticMessages[0]) })
   assert.equal(useHarbor.getState().conn, 'live')
   sockets.at(-1).onmessage({ data: 'malformed json' })
-  assert.match(useHarbor.getState().error, /无法解析/)
+  assert.match(useHarbor.getState().error, /Unreadable message/)
   stopLive()
   assert.equal(timers.size, 0)
 } finally {
@@ -127,4 +167,4 @@ try {
   global.clearTimeout = original.clearTimeout
 }
 
-console.log('PASS A0-A1: 200ms cadence; 10/35/60/66s events; pause/resume/speed; selection; mock approval; reset; event/log caps; malformed envelopes; static buoy fallback; WebSocket 1s/2s/5s/5s reconnect; LIVE on valid data; timer cleanup.')
+console.log('PASS A0-A1: 200ms cadence; 10/35/60/66s events; pause/resume/speed; selection; mock approval; refresh reconstruction with stable-ID deduplication; explicit complete/partial/failed recovery state; reset; event/log caps; malformed envelopes; WebSocket 1s/2s/5s/5s reconnect; LIVE on valid data; timer cleanup.')
