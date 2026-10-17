@@ -6,6 +6,8 @@
 
 2026-10-17 持久化更新：见 [给 A 的恢复交接](docs/history-handoff.md) 和 [B 验证记录](docs/history-verification.md)。下文保留初始 MVP 背景；关于重启、驳回和历史范围请以本次交接为准。
 
+声呐安全修复与新 C 候选验证见 [本轮验收及启动说明](docs/sonar-safety-integration.md)。新算法参数改变内部检查点指纹：保留原演示数据库，为新版设置独立的 `HARBORGUARD_DB`（例如 `backend/runtime/sonar-safety.sqlite3`）；不要删除旧库或强行加载旧配置检查点。没有引入 C 的分支仍明确使用 stub，不能按真实识别宣传。
+
 后续本地性能改进与新版耐久结果见 [性能跟进报告](docs/performance-followup.md)。严格每 tick <20ms 尚未通过，不把平均耗时改善算作全部验收通过。
 
 本次新增文件见 [文件清单](../docs/files.md)，逐项验收范围见 [任务书验收范围](../docs/acceptance.md)。
