@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "refresh:osm": "node scripts/fetch-osm.mjs",
     "refresh:buildings": "node scripts/fetch-lacounty-buildings.mjs",
+    "refresh:noaa-bathy": "node scripts/refresh-noaa-crm.mjs",
     "make:bathymetry": "node scripts/make-demo-bathymetry.mjs",
     "check:a5": "tsc --ignoreConfig src/data/replayCore.ts src/data/replay.ts src/data/presentation.ts src/data/localBase.ts src/data/mock.ts src/data/http.ts --outDir work/verify-a5 --module commonjs --target ES2023 --moduleResolution node --ignoreDeprecations 6.0 --esModuleInterop --skipLibCheck --strict && node scripts/verify-a5.cjs",
     "make:replays": "npm run check:a5 && node scripts/make-demo-replays.cjs",
