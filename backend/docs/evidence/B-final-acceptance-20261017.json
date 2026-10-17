@@ -1,0 +1,939 @@
+{
+  "report_date_client": "2026-10-17 America/Los_Angeles",
+  "scope": "37 original B acceptance checkboxes, current B regression, and version-scoped historical evidence; no full current-main browser acceptance",
+  "original_checkbox_count": 37,
+  "counts_original_strict_threshold": {
+    "PENDING": 5,
+    "PASS": 31,
+    "FAIL": 1
+  },
+  "approved_exception": {
+    "item": "B4-5",
+    "20ms_is_hard_gate": false,
+    "measurement_still_fails_original_threshold": true,
+    "authority": "project owner instruction in this thread"
+  },
+  "current_audit": {
+    "checked_at_utc": "2026-10-17T21:56:17.520094+00:00",
+    "scope": "B-only acceptance report audit; tests use independent temporary DBs; no browser retest or service mutation",
+    "taskbook_sha256": "9291ad36b4c3d38563caa681f4634c107db5723975e28f73d0e2c25cef9fe9ac",
+    "workspace_head": "6f862d78bb8458f90237252f4fc6d1629e7b6738",
+    "branch": "codex/harborguard-backend-tick-performance",
+    "remote_main": "f93af2caa6763ca41c00f05a5a9329939f0dbbe3",
+    "a_pr7_head": "b549515337e0a50889d331ae397e4f381e4694ca",
+    "previous_acceptance_report_commit": "9049a556bc35cc714b1dcd9091ea5db36aea629d",
+    "backend_production_matches_04de0fe": true,
+    "main_backend_matches_04de0fe": true,
+    "main_has_verified_template_agent_main": false,
+    "environment": {
+      "python": "3.11.17",
+      "pydantic": "2.14.1",
+      "fastapi": "0.143.3",
+      "numpy": "2.4.6"
+    },
+    "geometry": {
+      "zones": 12,
+      "kinds": {
+        "channel": 4,
+        "berth": 6,
+        "anchorage": 2
+      },
+      "unique_zone_ids": 12,
+      "valid_polygons": 12,
+      "asymmetric_neighbors": [],
+      "non_touching_neighbors": [],
+      "reachable_berths": [
+        "berth_bulk",
+        "berth_container_1",
+        "berth_container_2",
+        "berth_container_3",
+        "berth_cruise",
+        "berth_fuel"
+      ],
+      "assets": 5,
+      "vessels": 40,
+      "buoys": 10,
+      "buoys_in_schematic_water": 10,
+      "buoy_nearest_m": {
+        "B1": 452.76925744144967,
+        "B2": 452.76925744144967,
+        "B3": 460.97722278259045,
+        "B4": 492.4428899787838,
+        "B5": 457.0557948156379,
+        "B6": 279.9999976375551,
+        "B7": 403.1128824355032,
+        "B8": 279.9999976375551,
+        "B9": 403.1128866631463,
+        "B10": 390.51248364530585
+      },
+      "not_real_land_water_validation": true
+    },
+    "roundtrip_max_m": 4.6440895747286854e-10,
+    "three_buoy": {
+      "samples_after_30s": 61,
+      "position_rmse_m": 5.885071769075228,
+      "velocity_rmse_mps": 0.17103650920539507,
+      "ids": [
+        "T1"
+      ],
+      "ellipse_final": {
+        "a_m": 7.213987409237528,
+        "b_m": 3.4852715964027707,
+        "angle_deg": 96.06706111955006
+      }
+    },
+    "rest_operations": [
+      "GET /api/health",
+      "GET /api/state",
+      "GET /api/events",
+      "GET /api/zones",
+      "GET /api/assets",
+      "GET /api/buoys",
+      "GET /api/tracks/{track_id}",
+      "GET /api/alerts/{alert_id}",
+      "GET /api/detections/{det_id}",
+      "GET /api/options/{alert_id}",
+      "GET /api/sonar/{det_id}.png",
+      "GET /api/log",
+      "POST /api/log",
+      "GET /api/metrics",
+      "POST /api/scenario/{scenario_id}/start",
+      "POST /api/control",
+      "POST /api/mode",
+      "POST /api/inject",
+      "POST /api/decision",
+      "POST /api/recommendations",
+      "POST /api/agent/ask"
+    ],
+    "rest_count": 21,
+    "event_types": [
+      "alert_raised",
+      "alert_changed",
+      "alert_cleared",
+      "detection",
+      "options_ready",
+      "recommendation",
+      "decision",
+      "zone_changed",
+      "reopen_plan",
+      "buoy_changed",
+      "network_changed",
+      "mode_changed",
+      "scenario_changed",
+      "log"
+    ],
+    "in_memory_health": {
+      "ok": true
+    },
+    "rest_speeds": [
+      {
+        "request": 1,
+        "returned_speed": 1.0
+      },
+      {
+        "request": 4,
+        "returned_speed": 4.0
+      },
+      {
+        "request": 10,
+        "returned_speed": 10.0
+      }
+    ],
+    "checks": {
+      "sample_typescript": {
+        "exit_code": 0,
+        "output": ""
+      },
+      "compileall": {
+        "exit_code": 0,
+        "output": ""
+      },
+      "gnu_make_available": false
+    },
+    "live_services": {
+      "frontend_5173": {
+        "url": "http://127.0.0.1:5173/",
+        "unavailable": "ConnectTimeout"
+      },
+      "proxy_8000": {
+        "url": "http://127.0.0.1:8000/api/health",
+        "unavailable": "ConnectTimeout"
+      },
+      "backend_8003": {
+        "url": "http://127.0.0.1:8003/api/health",
+        "unavailable": "ConnectTimeout"
+      },
+      "template_agent_8001": {
+        "url": "http://127.0.0.1:8001/health",
+        "unavailable": "ConnectTimeout"
+      }
+    },
+    "production_changes": false,
+    "remote_writes": false
+  },
+  "current_b_pytest": {
+    "passed": 95,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 1,
+    "reported_seconds": 63.17,
+    "command": ".venv/Scripts/python.exe -m pytest backend/tests -q --basetemp artifacts/B-acceptance-20261017/pytest-temp --junitxml artifacts/B-acceptance-20261017/pytest.xml",
+    "junit_sha256": "ea66d8ef56a221641553ce83828cd6cdb6adb51fdcb71e15c55996ce7a5804eb"
+  },
+  "ruff": "PASS",
+  "pip_check": "PASS",
+  "historical_sources": {
+    "H1": {
+      "report_commit": "9049a556bc35cc714b1dcd9091ea5db36aea629d",
+      "tested_merge": "9ed9a4d92c46c0ffa2419ed8145ce4c9de53a26d",
+      "baselines": {
+        "PR6": "5af2ae08d9baf6aa53fe58cacd6552986eed76a2",
+        "PR7": "faa7ac16265b4a976c71361d7ee378a6abc27784",
+        "C_template": "78d39574266b01a582b0626c17021181749271c8",
+        "observed_remote_C_not_integrated": "d290a3fa48308d679c49e37ac6f804aa1bd1659c"
+      },
+      "original_evidence_blob_sha256": "35c0fdf86da9dbf563ee644f06cf29f4fe6e5f16f6e62f6431a38f1aaadbaba8",
+      "rehearsals": [
+        {
+          "round": 1,
+          "elapsed_s": 260.235,
+          "first_levels_wall_s": {
+            "1": 0.063,
+            "2": 15.094,
+            "3": 49.016
+          },
+          "first_levels_sim_s": {
+            "1": 1.0,
+            "2": 150.7,
+            "3": 483.1
+          },
+          "options_wall_s": 49.016,
+          "options_sim_s": 483.1,
+          "recommendation_wall_s": 49.11,
+          "approved_wall_s": 91.75,
+          "B_wall_s": 60.031,
+          "B_first_zone_wall_s": {
+            "blocked": 0.141,
+            "clear": 1.844
+          },
+          "B_final_zones": {
+            "clear": 6,
+            "blocked": 4,
+            "unsurveyed": 2
+          },
+          "reopen_plan": {
+            "route_zone_ids": [
+              "channel_entrance",
+              "channel_main_s"
+            ],
+            "reopen_berth_zone_ids": [
+              "berth_container_1"
+            ],
+            "unsurveyed_zone_ids": [
+              "berth_container_3",
+              "berth_cruise"
+            ],
+            "blocked_zone_ids": [
+              "anchorage_north",
+              "berth_fuel",
+              "channel_main_n",
+              "channel_turning"
+            ],
+            "est_hours_saved": 9.0
+          },
+          "manual_retries": 0,
+          "real_UI_2d_3d_approval_and_replay_verified": true,
+          "replay_method": "full B playback from zero at 1x",
+          "restricted_zones_after_approve": [
+            "channel_entrance",
+            "channel_main_s",
+            "berth_container_1",
+            "anchorage_outer",
+            "anchorage_north"
+          ]
+        },
+        {
+          "round": 2,
+          "elapsed_s": 135.594,
+          "first_levels_wall_s": {
+            "1": 0.11,
+            "2": 15.125,
+            "3": 48.407
+          },
+          "first_levels_sim_s": {
+            "1": 1.0,
+            "2": 150.7,
+            "3": 483.1
+          },
+          "options_wall_s": 48.407,
+          "options_sim_s": 483.1,
+          "recommendation_wall_s": 48.453,
+          "approved_wall_s": 54.875,
+          "B_wall_s": 60.031,
+          "B_first_zone_wall_s": {
+            "blocked": 0.156,
+            "clear": 1.828
+          },
+          "B_final_zones": {
+            "clear": 6,
+            "blocked": 4,
+            "unsurveyed": 2
+          },
+          "reopen_plan": {
+            "route_zone_ids": [
+              "channel_entrance",
+              "channel_main_s"
+            ],
+            "reopen_berth_zone_ids": [
+              "berth_container_1"
+            ],
+            "unsurveyed_zone_ids": [
+              "berth_container_3",
+              "berth_cruise"
+            ],
+            "blocked_zone_ids": [
+              "anchorage_north",
+              "berth_fuel",
+              "channel_main_n",
+              "channel_turning"
+            ],
+            "est_hours_saved": 9.0
+          },
+          "manual_retries": 0,
+          "real_UI_2d_3d_approval_and_replay_verified": true,
+          "replay_method": "seek to last frame; full playback independently tested",
+          "restricted_zones_after_approve": [
+            "channel_entrance",
+            "channel_main_s",
+            "berth_container_1",
+            "anchorage_outer",
+            "anchorage_north"
+          ]
+        },
+        {
+          "round": 3,
+          "elapsed_s": 201.187,
+          "first_levels_wall_s": {
+            "1": 0.109,
+            "2": 15.14,
+            "3": 48.406
+          },
+          "first_levels_sim_s": {
+            "1": 1.0,
+            "2": 150.7,
+            "3": 483.1
+          },
+          "options_wall_s": 48.406,
+          "options_sim_s": 483.1,
+          "recommendation_wall_s": 48.468,
+          "approved_wall_s": 53.625,
+          "B_wall_s": 59.938,
+          "B_first_zone_wall_s": {
+            "blocked": 0.172,
+            "clear": 1.86
+          },
+          "B_final_zones": {
+            "clear": 6,
+            "blocked": 4,
+            "unsurveyed": 2
+          },
+          "reopen_plan": {
+            "route_zone_ids": [
+              "channel_entrance",
+              "channel_main_s"
+            ],
+            "reopen_berth_zone_ids": [
+              "berth_container_1"
+            ],
+            "unsurveyed_zone_ids": [
+              "berth_container_3",
+              "berth_cruise"
+            ],
+            "blocked_zone_ids": [
+              "anchorage_north",
+              "berth_fuel",
+              "channel_main_n",
+              "channel_turning"
+            ],
+            "est_hours_saved": 9.0
+          },
+          "manual_retries": 0,
+          "real_UI_2d_3d_approval_and_replay_verified": true,
+          "replay_method": "seek to last frame; full playback independently tested",
+          "restricted_zones_after_approve": [
+            "channel_entrance",
+            "channel_main_s",
+            "berth_container_1",
+            "anchorage_outer",
+            "anchorage_north"
+          ]
+        }
+      ],
+      "harness_retry": {
+        "round": 2,
+        "reason": "observer stopped consuming WS while waiting for replay UI; client queue backpressure caused keepalive timeout",
+        "application_failure": false,
+        "retry_required": true,
+        "fix": "continuous WS reader in test harness; no product change"
+      },
+      "debug_truth_browser": {
+        "debug_label_visible": true,
+        "target_T1_visible": true,
+        "source": "real browser screenshots plus actual REST motion coordinates; separate DEBUG truth test"
+      },
+      "prepared_startup": [
+        {
+          "service": "backend",
+          "ready_after_s": 1.219
+        },
+        {
+          "service": "agent",
+          "ready_after_s": 2.328
+        },
+        {
+          "service": "frontend",
+          "ready_after_s": 3.063
+        }
+      ],
+      "isolated_install": {
+        "kind": "fresh_local_clone_install_using_existing_machine_package_caches",
+        "not_cold_machine": true,
+        "steps": [
+          {
+            "name": "clone",
+            "elapsed_s": 0.547,
+            "exit": 0
+          },
+          {
+            "name": "venv",
+            "elapsed_s": 1.031,
+            "exit": 0
+          },
+          {
+            "name": "pip",
+            "elapsed_s": 14.313,
+            "exit": 0
+          },
+          {
+            "name": "editable",
+            "elapsed_s": 4.812,
+            "exit": 0
+          },
+          {
+            "name": "npm",
+            "elapsed_s": 6.625,
+            "exit": 0
+          },
+          {
+            "name": "build",
+            "elapsed_s": 5.594,
+            "exit": 0
+          }
+        ]
+      },
+      "fresh_clone_real_startup": {
+        "startup": [
+          {
+            "service": "backend",
+            "ready_after_s": 1.734
+          },
+          {
+            "service": "agent",
+            "ready_after_s": 2.875
+          },
+          {
+            "service": "frontend",
+            "ready_after_s": 3.719
+          }
+        ],
+        "backend": {
+          "ok": true
+        },
+        "agent": {
+          "ok": true,
+          "service": "agent",
+          "model": "template",
+          "phase": "c3-stage1",
+          "pending_tasks": 0,
+          "stats": {
+            "processed": 0,
+            "submitted": 0,
+            "errors": 0,
+            "dropped": 0
+          },
+          "backend": "http://127.0.0.1:8000"
+        },
+        "frontend_status": 200
+      }
+    },
+    "H2": {
+      "production_B": "04de0fe7abb9eb52ba7ae806beb30131d4b04a8e",
+      "soak": "soak-history.json",
+      "performance": "ticks-after.json",
+      "browser": "ab-integration-9850558.json"
+    },
+    "H3": {
+      "a": "dc69ad28ac37e8d0592d9271f9d61e28c79ff27c",
+      "b": "04de0fe7abb9eb52ba7ae806beb30131d4b04a8e",
+      "c": "78d39574266b01a582b0626c17021181749271c8",
+      "merge": "b48cac76e301a047afa330bced2eae6e388d534c",
+      "evidence": "pr7-recovery-dc69ad2.json"
+    }
+  },
+  "items": [
+    {
+      "id": "B0–B1-1",
+      "group": "B0–B1",
+      "number": 1,
+      "status": "PENDING",
+      "requirement": "队友 clone 后执行 make backend，GET /api/health 返回 {\"ok\": true}",
+      "source": "Makefile:backend；dev.ps1；backend/app/main.py；backend/tests/test_contract.py",
+      "executed": "本轮独立内存 TestClient GET health；历史 H1 全新本地 clone 和三服务启动。未由队友执行 GNU make。",
+      "measured": "本轮隔离 health={\"ok\":true}；历史预装依赖三服务累计 3.063s，新 clone 累计 3.719s。",
+      "reason": "接口正常已有证据；队友本人 clone 后 make backend 的指定验收动作缺少记录，保留 PENDING。",
+      "evidence_scope": "H1：历史已验证模板组合，非本轮重跑"
+    },
+    {
+      "id": "B0–B1-2",
+      "group": "B0–B1",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "用一个小 Python 脚本连 /ws：每秒约 5 条 state，seq 连续递增",
+      "source": "backend/app/api/ws.py；bus.py；main.py；test_api.py::test_websocket_rate_sequence_and_disconnect_cleanup。",
+      "executed": "test_api.py::test_websocket_rate_sequence_and_disconnect_cleanup；引用 H2 真实网络 20 分钟结果。",
+      "measured": "H2：1200.08s、6001 条 state、5.000Hz；最新 H3 空闲短样本 4.991Hz。seq 严格递增。",
+      "reason": "state/event 共用 seq，state 之间可有跳号；严格递增不等于无间隙连续。5Hz 是实测平均，不是每帧硬实时保证。",
+      "evidence_scope": "R：本轮 WS 单测；H2：稳定 B 真实 20 分钟耐久"
+    },
+    {
+      "id": "B0–B1-3",
+      "group": "B0–B1",
+      "number": 3,
+      "status": "PASS",
+      "requirement": "tests/test_contract.py 遍历附录全部 GET 接口，返回体都能被对应 pydantic 模型校验通过",
+      "source": "backend/app/models.py；api/rest.py；test_contract.py::test_all_contract_get_endpoints。",
+      "executed": "本轮 95 项 B 全量回归，含 test_contract.py::test_all_contract_get_endpoints 与冻结路径检查。",
+      "measured": "21 个 REST 操作＝13 GET＋8 POST；12 JSON GET 按 Pydantic v2 校验，PNG GET 实际解码；14 类事件。",
+      "reason": "所有测试通过；PNG 是二进制校验，不把 PNG 当成 JSON Pydantic 模型。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B0–B1-4",
+      "group": "B0–B1",
+      "number": 4,
+      "status": "PENDING",
+      "requirement": "样例 JSON 能被 A 的 TypeScript 类型直接使用（A 确认）",
+      "source": "shared/sample_state.json；sample_events.json；types.ts；frontend/src/types/contract.ts。",
+      "executed": "将 shared 样例直接赋给 StateMsg/EventMsg[]，tsc --noEmit --strict --skipLibCheck --target ES2022。",
+      "measured": "tsc exit=0；2 条航迹、1 个三级警报、3 个样例方案、14 类样例事件。",
+      "reason": "技术兼容已验证；没有把编译通过代替原始要求的 A 明确确认。",
+      "evidence_scope": "R：本轮严格 TypeScript 编译；A 的指定确认仍待提供"
+    },
+    {
+      "id": "B0–B1-5",
+      "group": "B0–B1",
+      "number": 5,
+      "status": "PASS",
+      "requirement": "A 的前端连上后浏览器控制台无 CORS 报错",
+      "source": "backend/app/main.py；config.ALLOWED_ORIGINS；test_contract.py::test_cors_and_static_data。",
+      "executed": "本轮 CORS preflight 单测；历史 localhost:5173 跨域实际操作和浏览器错误检查。",
+      "measured": "localhost:5173 OPTIONS 200 且 allow-origin 正确；历史浏览器未出现 CORS 阻断。H3 候选使用同源代理。",
+      "reason": "仅证明已测构型；H3 同源代理不等于允许 5174 跨域，更不等于当前 main 整体验收。",
+      "evidence_scope": "R：本轮 CORS 单测；H1/H3：固定 A 的历史浏览器"
+    },
+    {
+      "id": "B2-1",
+      "group": "B2",
+      "number": 1,
+      "status": "PASS",
+      "requirement": "tests/test_data.py：shapely 能加载全部多边形且 is_valid；分区 ID 唯一；neighbors 双向对称",
+      "source": "data/zones.geojson；backend/tests/test_data.py::test_polygons_metadata_and_symmetric_navigation_graph。",
+      "executed": "本轮 test_data.py 五项数据测试及独立 Shapely/邻接审计。",
+      "measured": "12 个唯一且有效多边形；6 berth、4 channel、2 anchorage；非对称邻接 0，几何不接触的邻接对 0。",
+      "reason": "示意数据的几何合法性通过；真实海图准确性不由此证明。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B2-2",
+      "group": "B2",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "从入口分区出发沿航道 BFS，能到达所有泊位区",
+      "source": "decision/disaster.py::reopen；test_data.py::test_entrance_reaches_every_berth_through_channels。",
+      "executed": "本轮从 entrance 只沿 channel 扩展的 BFS 审计；test_data 与 test_disaster。",
+      "measured": "全部 6 个泊位区可达；灾害模式仅通行 clear 航道。",
+      "reason": "灾害 BFS 只穿过 clear 航道，blocked/unsurveyed 不会越过。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B2-3",
+      "group": "B2",
+      "number": 3,
+      "status": "PENDING",
+      "requirement": "10 个浮标都在水域多边形内或紧邻水域（在 geojson.io 上目视确认，不在陆地上）",
+      "source": "data/buoys.json；test_data.py::test_buoys_are_in_schematic_water_and_assets_in_berths。",
+      "executed": "Shapely 检查浮标在示意水域内；计算每个浮标最近邻米制距离。未执行权威水陆底图目视验收。",
+      "measured": "10/10 在示意水域；最近邻约 280.000–492.443m，与建议约 500–800m 有偏差。",
+      "reason": "多边形合法不证明真实不在陆地上。B/A 应对照可靠底图共同核验；未经确认不移动共享坐标。",
+      "evidence_scope": "R：本轮示意几何检查；真实海图验收 PENDING"
+    },
+    {
+      "id": "B2-4",
+      "group": "B2",
+      "number": 4,
+      "status": "PASS",
+      "requirement": "A 的地图上能看到真实分区、资产三圈和浮标",
+      "source": "frontend/src/map2d/*（A 原样）；data/*；test_data.py。",
+      "executed": "真实 2D 浏览器和前端 A2 检查。",
+      "measured": "业务图层已加载；12 分区、5 资产三圈、10 浮标；40 船期静态副本一致。",
+      "reason": "业务数据确实来自后端，图层可见；此 PASS 仅指实际业务图层显示，不能解释为真实港区海图/测深已验收。",
+      "evidence_scope": "H1/H3：固定 A 的真实浏览器及图层检查"
+    },
+    {
+      "id": "B3-1",
+      "group": "B3",
+      "number": 1,
+      "status": "PASS",
+      "requirement": "geo 往返换算误差 < 0.1 米（测试）",
+      "source": "backend/app/geo.py；test_simulation.py::test_geo_round_trip_has_sub_decimeter_error。",
+      "executed": "本轮 4 组坐标往返实测＋test_simulation.py 参数化测试。",
+      "measured": "最大误差 4.64408957473e-10m，远小于 0.1m。",
+      "reason": "通过。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B3-2",
+      "group": "B3",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "UUV 两个航点相距 300 米、速度 1.5 m/s，在 t = 200 ± 1 秒到达（测试）",
+      "source": "sim/targets.py::UUV；test_simulation.py::test_uuv_reaches_300m_waypoint_at_200_seconds。",
+      "executed": "1999+1 个 0.1s 步长。",
+      "measured": "t199.9s 到299.85m；t200s 到300m、速度归零。",
+      "reason": "通过。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B3-3",
+      "group": "B3",
+      "number": 3,
+      "status": "PASS",
+      "requirement": "同一种子运行两次，t = 120 秒时所有目标位置完全相同（测试）",
+      "source": "sim/scenario.py；world.py；test_simulation.py::test_scene_seed_is_repeatable_and_large_steps_match_fixed_steps。",
+      "executed": "两次固定子步 + 一次120s大步。",
+      "measured": "t120s 全部目标位置和速度完全相同；A seed42/B seed7。",
+      "reason": "仅用场景派生 numpy Generator，不以墙钟随机化。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B3-4",
+      "group": "B3",
+      "number": 4,
+      "status": "PASS",
+      "requirement": "DEBUG_TRUTH_TRACKS=1 跑场景 A，A 的地图上能看到目标按剧本移动",
+      "source": "engine.py::_truth_tracks；sim/targets.py；test_simulation.py。",
+      "executed": "引用 H1 独立 DEBUG=1 后端与真实 A 浏览器运动检查。",
+      "measured": "7 条真值航迹；T1 从 t1 到 t301 坐标改变，地图/目标卡可见；10m 误差圈及显式 DEBUG 标签。",
+      "reason": "该条是历史兜底显示测试；算法、耐久和普通 Demo 使用 DEBUG=0。本轮没有重启现有服务跑 DEBUG。",
+      "evidence_scope": "H1：历史已验证模板组合，非本轮重跑"
+    },
+    {
+      "id": "B3-5",
+      "group": "B3",
+      "number": 5,
+      "status": "PASS",
+      "requirement": "暂停、继续、1×/4×/10× 倍速、重置都能通过 REST 生效",
+      "source": "backend/app/api/rest.py；engine.py；backend/tests/test_api.py::test_controls_faults_and_reset",
+      "executed": "本轮隔离 REST 依次设置 1/4/10，读取 state 核对；全量测试覆盖 pause/resume/reset 和时钟。",
+      "measured": "三个请求均 200，返回 speed 分别为 1/4/10；pause 时位置/仿真 t 不变，reset 回 t0/scenario=null。",
+      "reason": "主循环10Hz；10× 每外层tick推进1仿真秒，由10个0.1s子步组成。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B4-1",
+      "group": "B4",
+      "number": 1,
+      "status": "PASS",
+      "requirement": "单元测试：3 个浮标观测一个直线目标，30 秒后位置 RMSE < 30 米、速度误差 < 0.3 m/s",
+      "source": "perception/localize.py；kalman.py；test_perception.py::test_noisy_three_buoy_track_accuracy_velocity_and_id。",
+      "executed": "本轮按现有三浮标测试独立重算 t30–90 的 61 个样本，并跑完整感知单测。",
+      "measured": "位置 RMSE 5.88507m；速度 RMSE 0.171037m/s；单一 ID T1；末椭圆 a=7.21399m/b=3.48527m。",
+      "reason": "均低于 30m/0.3m/s；这里是 30 秒后直线窗口，不能混作完整转弯场景速度指标。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B4-2",
+      "group": "B4",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "场景 A：UUV 从首次被检测到到抵达泊位，≥ 90% 时间对应同一个航迹 ID（不换号）",
+      "source": "perception/tracker.py；perception/benchmark.py。",
+      "executed": "完整A 1200仿真秒真值只用于评分。",
+      "measured": "首次检测t1；抵达t1066；T3占965/1066=90.5253%；T60占99。",
+      "reason": "抵达前 965/1066=90.5253%，仅窄幅通过；完整 1200s 主 ID 占比 80.4167%。保留换号限制，不换分母美化。",
+      "evidence_scope": "H1：完整 A 感知指标；H2：后续优化输出一致性证据"
+    },
+    {
+      "id": "B4-3",
+      "group": "B4",
+      "number": 3,
+      "status": "PASS",
+      "requirement": "场景 A 中每 5 分钟仿真时间内，confirmed 的假航迹 ≤ 1 条",
+      "source": "sim/acoustics.py；perception/localize.py；benchmark.py；test_perception.py。",
+      "executed": "A全程+300s纯虚警单测。",
+      "measured": "A四个300s窗口 confirmed假航迹均0（距最近真值>100m口径）。",
+      "reason": "100m评分门限明确披露；纯虚警观测确实产生后仍满足≤1。",
+      "evidence_scope": "R：纯虚警单测；H1：完整 A 四窗口评分"
+    },
+    {
+      "id": "B4-4",
+      "group": "B4",
+      "number": 4,
+      "status": "PASS",
+      "requirement": "水面船舶航迹 cls 都为 vessel，且不产生警报",
+      "source": "perception/tracker.py::update；decision/alerts.py；test_perception.py::test_ais_only_uses_nearby_vessels。",
+      "executed": "全A每秒 confirmed broadband 航迹最近船舶评分 + AIS单测。",
+      "measured": "100m评分门内3793个船舶航迹样本全为vessel且L0；违规0。",
+      "reason": "AIS生产门限50m未改；不得用AIS覆盖narrowband UUV。",
+      "evidence_scope": "R：AIS/警报排除单测；H1：3793 个船舶样本评分"
+    },
+    {
+      "id": "B4-5",
+      "group": "B4",
+      "number": 5,
+      "status": "FAIL",
+      "requirement": "10 Hz 下每 tick 处理耗时 < 20 ms",
+      "source": "backend/app/engine.py::step；perception/classifier.py；backend/tools/benchmark_ticks.py；backend/docs/performance-followup.md",
+      "executed": "引用真实同步持久化、真实数值链路的完整 A/B 10× 基准和 20 分钟记录。本轮未改变算法或重跑性能。",
+      "measured": "A 外层 tick 平均 19.6448ms/P95 27.0585ms/最大 61.0667ms，446/1200 超 20ms；B 最大 113.8246ms；耐久日志最大 120.8ms。",
+      "reason": "按原始严格阈值仍 FAIL；负责人已明确将 20ms 调整为尽力优化目标，所以这项不再阻塞 Demo。保留原始统计，不改写为达标；单子步、外层 tick、PNG、持久化不能混用。",
+      "evidence_scope": "H2：优化后独占离线基准/20分钟；另有固定B/C的独立峰值细分诊断"
+    },
+    {
+      "id": "B5-1",
+      "group": "B5",
+      "number": 1,
+      "status": "PASS",
+      "requirement": "风险分项测试：5 个手算用例全部通过",
+      "source": "decision/risk.py；config.W；test_decision.py::test_risk_five_hand_computed_cases。",
+      "executed": "5个手算case + 行为/ETA单测。",
+      "measured": "C=0.6/0.2/0.05/0.92/0.2；R=0.47/0.35/0.305/0.566/0.35。",
+      "reason": "C/P/B/Z/D权重0.30/0.25/0.25/0.15/0.05未改。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B5-2",
+      "group": "B5",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "迟滞测试：R 在 0.4 上下来回波动时等级不来回跳",
+      "source": "decision/alerts.py；test_decision.py::test_alert_hysteresis_and_deleted_track。",
+      "executed": "0.39/0.41往返及连续低阈值测试。",
+      "measured": "t1低、t10恢复、t20再低，t49仍L2，t50才L1；删除发cleared。",
+      "reason": "升级立即，降级连续30仿真秒。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B5-3",
+      "group": "B5",
+      "number": 3,
+      "status": "PASS",
+      "requirement": "场景 A 以 10× 运行：一级 ≤ 5 秒、二级 15–25 秒、三级 40–50 秒（墙钟时间，通过调场景起点和速度达到）",
+      "source": "decision/alerts.py；data/scenarios/scenario_a.yaml；test_integration.py。",
+      "executed": "本轮真实数值场景回归；引用 H2 独立 B HTTP/WS 墙钟测试与 H1 三次模板组合记录。",
+      "measured": "稳定 B：L1 3.720s、L2 15.069s、L3 48.339s；H1 三轮 L3 为49.016/48.407/48.406s。",
+      "reason": "均在原窗口；墙钟来自实际服务，未用仿真 t/10 代替。不同基线的最早 L1 时刻分别保留。",
+      "evidence_scope": "H2：稳定 B 真实 Uvicorn 时序；H1：三次真实彩排；R：场景回归"
+    },
+    {
+      "id": "B5-4",
+      "group": "B5",
+      "number": 4,
+      "status": "PASS",
+      "requirement": "二级后发生 ping，detection 事件带 image_url，打开图片能看到框",
+      "source": "decision/pinger.py；perception/classifier.py；test_decision.py::test_active_sonar_fallback_png_and_all_outbound_event_models。",
+      "executed": "本轮 C 导入失败/坏输出降级、PNG/事件模型回归；引用 H3 真实浏览器检测图与框检查。",
+      "measured": "二级 t150.7 触发 ping；640×640 PNG 可解码；Recovery 四张空 track_id 入口也可打开。",
+      "reason": "允许的演示降级已通过；当前 Detection.model=\"stub\"，不构成 YOLO 或真实声呐识别精度验收。",
+      "evidence_scope": "R：classifier/PNG 单测；H3：真实浏览器逐张打开"
+    },
+    {
+      "id": "B5-5",
+      "group": "B5",
+      "number": 5,
+      "status": "PASS",
+      "requirement": "三级后 1 秒仿真时间内发 options_ready：≥ 2 个局部方案 + 全港关闭；全港关闭的 berths_open_pct = 0 且延误船时最大",
+      "source": "decision/optimizer.py；test_integration.py::test_security_scene_timing_options_and_manual_approval。",
+      "executed": "全A首次三级与options事件比较+优化器单测。",
+      "measured": "t483.1 同子步 options_ready，3 局部＋1 全港；全港开放比例0、延误162船时，最小局部6船时。",
+      "reason": "仅生成建议；restricted 必须由人工 approve 写入。",
+      "evidence_scope": "R：全场景/优化器回归；H2/H3：真实三级和方案"
+    },
+    {
+      "id": "B5-6",
+      "group": "B5",
+      "number": 6,
+      "status": "PASS",
+      "requirement": "approve 后 state.zones 中对应分区变为 restricted",
+      "source": "decision/__init__.py::approve；api/rest.py::decision；test_api.py::test_decision_endpoint_requires_valid_human_approval。",
+      "executed": "本轮 API、决策、SQLite 失败回滚与重启回归；引用 H3 UI 批准/驳回后刷新和同库重启。",
+      "measured": "A11/opt-1 实际 UI approve seq3064，5 个 restricted 分区；reject seq887；写入失败503且没有成功 decision。",
+      "reason": "按负责人后续要求，reject 也发布已有 decision 事件并持久化，未增加共享字段；reject 不撤销早先 approve。A 多操作员去重问题另列 I-02。",
+      "evidence_scope": "R：持久化/审批单测；H3：真实 UI 批准/驳回/失败注入"
+    },
+    {
+      "id": "B5-7",
+      "group": "B5",
+      "number": 7,
+      "status": "PASS",
+      "requirement": "哺乳动物禁 ping 规则有单元测试",
+      "source": "decision/pinger.py::safe；test_decision.py::test_mammal_ping_prohibition_limit_and_duration。",
+      "executed": "500m保护、cue call、在线浮标、20s/5次/1.5s测试。",
+      "measured": "保护区内不ping；超出保护区才允许；计时及次数断言全过。",
+      "reason": "未新增硬件发射，所有为仿真。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B6-1",
+      "group": "B6",
+      "number": 1,
+      "status": "PASS",
+      "requirement": "场景 B：墙钟 60 秒内分区陆续变为 clear、unsurveyed、blocked；t = 60 秒浮标失效后至少 1 个分区停在 unsurveyed",
+      "source": "decision/disaster.py；scenario_b.yaml；test_integration.py::test_disaster_scene_faults_detection_and_connected_reopening。",
+      "executed": "三次真实B10×完整600s仿真。",
+      "measured": "H1 首 blocked 0.141/0.156/0.172s，首 clear 1.844/1.828/1.860s；仿真 t60 B4/B7失效；最终6 clear/4 blocked/2 unsurveyed。",
+      "reason": "3 种状态在墙钟 60s 内可见；完整600仿真秒耗时约59.938–60.031s。碎片不走安防警报。",
+      "evidence_scope": "R：完整 B 数值回归；H1：真实 10× 三轮；H3：Recovery 浏览器 smoke"
+    },
+    {
+      "id": "B6-2",
+      "group": "B6",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "reopen_plan 至少给出 1 条航路和 1 个可复航泊位",
+      "source": "decision/disaster.py::reopen；test_disaster.py::test_bfs_requires_continuous_clear_channels_and_adjacent_clear_berths。",
+      "executed": "真实B plan与独立BFS断言。",
+      "measured": "route 为 channel_entrance、channel_main_s；可复航 berth_container_1；按 SURVEY_H=1.5h 得 9h。",
+      "reason": "9h 为任务书演示公式，不代表真实调查工时或经济收益。",
+      "evidence_scope": "R：BFS 与完整 B 回归；H3：真实浏览器"
+    },
+    {
+      "id": "B6-3",
+      "group": "B6",
+      "number": 3,
+      "status": "PASS",
+      "requirement": "同一种子跑两次，事件序列（事件名 + t）完全一致",
+      "source": "backend/tools/record.py；test_integration.py::test_full_replay_deterministic_and_self_contained。",
+      "executed": "本轮 test_full_replay_deterministic_and_self_contained 对 A/B 各录两次到独立 pytest 临时目录；另含同库 checkpoint 可复现性回归。",
+      "measured": "A/B 两次事件名+t 一致，JSONL 字节 SHA256 一致，PNG 实际解码；没有覆盖 frontend/public 的文件。",
+      "reason": "不使用外部Agent随机延时作为离线事件时钟。",
+      "evidence_scope": "R：本轮 B@6f862d7 复核；生产源码与 B@04de0fe 一致"
+    },
+    {
+      "id": "B6-4",
+      "group": "B6",
+      "number": 4,
+      "status": "PASS",
+      "requirement": "每种注入在 A 的界面上 3 秒内可见",
+      "source": "engine.py::inject；sim/world.py::inject；frontend/src/panels/BuoyGrid.tsx/TopBar.tsx。",
+      "executed": "引用 ab-integration-9850558.json 的六类真实浏览器反馈计时。本轮仅跑 B 注入单测。",
+      "measured": "buoy_down 383ms、buoy_up 382ms；network_down 383ms、network_up 378ms；noise_up ≤191.521ms、noise_down ≤214.135ms。",
+      "reason": "均低于3s，含观察开销；noise 由 REST 触发、前端日志确认。仅模拟业务网络状态；不证明真实 Wi-Fi、LoRa、ESP32 离线。最新 main 未重复本项浏览器计时。",
+      "evidence_scope": "H2：A@9850558+B@04de0fe+C@78d3957 实际浏览器；非本轮重测"
+    },
+    {
+      "id": "B6-5",
+      "group": "B6",
+      "number": 5,
+      "status": "PASS",
+      "requirement": "replay_a.jsonl、replay_b.jsonl 在 A 的回放模式中能完整播放",
+      "source": "backend/tools/record.py；frontend/src/data/replay*.ts（A原样）；test_integration.py。",
+      "executed": "引用 H1 浏览器从0以1×完整播放两文件；H3 仅 seek 末帧与图片；本轮对 A/B 重录两次、校验所有消息及图片。",
+      "measured": "历史完整播放 A120000ms/B60000ms；A20:00三级、B10:00复航9h；H3 replay批准禁用、碎片本地PNG640×640。",
+      "reason": "PASS 限已有完整播放证据的版本；最新 main 的全程浏览器播放仍 PENDING，不把 seek 写成完整播放。",
+      "evidence_scope": "H1：A@faa7ac1 全程播放；H3：A@dc69ad2 末帧/只读/PNG smoke；R：完整 JSONL 校验"
+    },
+    {
+      "id": "B6-6",
+      "group": "B6",
+      "number": 6,
+      "status": "PASS",
+      "requirement": "向 /api/recommendations POST 非法数据返回 422，合法数据被广播",
+      "source": "models.py::Recommendation；engine.py::recommend；test_contract.py::test_recommendation_validates_references_and_broadcasts。",
+      "executed": "本轮非法结构/证据/方案ID 422，合法载荷广播及写入失败回滚；引用 H3 C 产生的两条真实建议。",
+      "measured": "实际建议 rec-d89ea3415187 与 rec-e3714ebee774；对应警报/方案可查询，延迟恢复期间没有丢失。",
+      "reason": "C 仅给建议、不审批。C 模板未实现灾害/浮标建议触发；新 C 路由未验收。",
+      "evidence_scope": "R：契约/引用/事务单测；H3：真正 C 模板推荐"
+    },
+    {
+      "id": "B6-7",
+      "group": "B6",
+      "number": 7,
+      "status": "PASS",
+      "requirement": "Agent 未启动时 /api/agent/ask 返回清楚的错误，后端不崩",
+      "source": "api/rest.py::ask；test_api.py::test_agent_proxy_success_failure_timeout。",
+      "executed": "本轮 MockTransport 回归；历史实际停止自有 C 后调用 B 问答。",
+      "measured": "H1 实际2.375s返回清楚502且B health正常；20s超时分支通过MockTransport返回504。",
+      "reason": "真实缺席与模拟超时分开说明；本轮不停止他人服务。",
+      "evidence_scope": "R：代理成功/502/504回归；H1：真实 Agent 缺席"
+    },
+    {
+      "id": "B7-1",
+      "group": "B7",
+      "number": 1,
+      "status": "PASS",
+      "requirement": "场景 A、B 各连跑 3 次，关键事件时间偏差 < 3 秒",
+      "source": "data/scenarios/*；历史 H1 验收观察器与机器可读 rehearsals 记录",
+      "executed": "引用三次实际浏览器参与的单机集成彩排。未冒充 A/C 队友在场，也未声称当前 main 已重跑三遍。",
+      "measured": "总耗时260.235/135.594/201.187s；L3极差0.610s，B结束极差0.093s；关键事件误差均<3s。",
+      "reason": "历史三轮通过；一次观察器背压超时尝试重跑已披露。三人现场彩排、最新候选三轮验收仍待安排。",
+      "evidence_scope": "H1：旧固定 A/B/C 三次单机彩排；非当前 main 三次复验"
+    },
+    {
+      "id": "B7-2",
+      "group": "B7",
+      "number": 2,
+      "status": "PASS",
+      "requirement": "连续运行 20 分钟无报错、内存平稳",
+      "source": "backend/tools/soak.py；backend/app/main.py；backend/docs/evidence/soak-history.json",
+      "executed": "引用1200秒真实Uvicorn/HTTP/WS/CPU/RSS和数据库重启验证；本轮未重新运行20分钟。",
+      "measured": "1200.08s；6001state/1139event；5.000Hz；最大包26618bytes；CPU平均15.751%/30s窗口最大24.0%；RSS94.89–104.14MB；错误0。",
+      "reason": "内存随场景回落，未见持续增长；只覆盖该时长/机器。磁盘历史增长另有保留策略风险，不能把RSS稳定写成数据库不增长。",
+      "evidence_scope": "H2：持久化及性能改进后稳定 B 的真实20分钟；不扩展为最新ABC耐久"
+    },
+    {
+      "id": "B7-3",
+      "group": "B7",
+      "number": 3,
+      "status": "PENDING",
+      "requirement": "队友按 README 从零启动整套系统 < 5 分钟",
+      "source": "README.md；backend/README.md；dev.ps1；历史 H1 docs/demo-runbook.md",
+      "executed": "引用本机新clone、独立venv/node_modules、依赖安装/构建及真实三服务启动；队友新电脑从零未执行。",
+      "measured": "有缓存本机安装+构建32.922s，再启动3.719s，合计36.641s；预装环境3.063s。",
+      "reason": "不是空缓存/无运行时的新电脑；缺队友本人验收。当前 main 也缺模板 Agent，不得直接把旧用时移植到 main。",
+      "evidence_scope": "H1：历史已验证模板组合，非本轮重跑"
+    },
+    {
+      "id": "B7-4",
+      "group": "B7",
+      "number": 4,
+      "status": "PENDING",
+      "requirement": "make test 全绿",
+      "source": "Makefile:test；dev.ps1:test；pyproject.toml。",
+      "executed": "本轮 python -m pytest backend/tests -q（pyproject 默认 testpaths 同为backend/tests）；Ruff、compileall、pip check、样例TS编译。",
+      "measured": "95 passed、0 failed、0 skipped，63.17s；上游TestClient弃用警告1条。历史B+C为120passed/2skipped、68.57s。",
+      "reason": "本机无GNU make，严格字面 make test 保留 PENDING；Windows等价测试负载全部通过。历史两项无权重跳过不得计PASS，也不与95简单相加。",
+      "evidence_scope": "R：本轮 B 等价 pytest；H3：联合 B+C 回归；GNU make 字面验收未执行"
+    }
+  ],
+  "remaining_integration_failures": [
+    "R1 repeated legitimate logs collapse after refresh",
+    "R2 distinct-operator same-time decision ignored live"
+  ],
+  "current_main_full_demo_pending": [
+    "verified C template absent from main",
+    "main full-stack browser acceptance not performed"
+  ],
+  "production_changes": false,
+  "github_writes": false
+}
