@@ -48,3 +48,9 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
+
+# B backend development and local verification
+node_modules/
+.coverage
+artifacts/
+.tools/

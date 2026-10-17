@@ -1,0 +1,282 @@
+[
+  {
+    "id": "V01",
+    "name": "MV HARBOR 01",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 1.07
+  },
+  {
+    "id": "V02",
+    "name": "MV HARBOR 02",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 3.84
+  },
+  {
+    "id": "V03",
+    "name": "MV HARBOR 03",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 2.8
+  },
+  {
+    "id": "V04",
+    "name": "MV HARBOR 04",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 2.22
+  },
+  {
+    "id": "V05",
+    "name": "MV HARBOR 05",
+    "zone_id": "berth_cruise",
+    "movement": "depart",
+    "t_h": 2.13
+  },
+  {
+    "id": "V06",
+    "name": "MV HARBOR 06",
+    "zone_id": "berth_bulk",
+    "movement": "at_berth",
+    "t_h": 4.74
+  },
+  {
+    "id": "V07",
+    "name": "MV HARBOR 07",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 5.43
+  },
+  {
+    "id": "V08",
+    "name": "MV HARBOR 08",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 1.06
+  },
+  {
+    "id": "V09",
+    "name": "MV HARBOR 09",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 3.92
+  },
+  {
+    "id": "V10",
+    "name": "MV HARBOR 10",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 1.79
+  },
+  {
+    "id": "V11",
+    "name": "MV HARBOR 11",
+    "zone_id": "berth_cruise",
+    "movement": "depart",
+    "t_h": 5.8
+  },
+  {
+    "id": "V12",
+    "name": "MV HARBOR 12",
+    "zone_id": "berth_bulk",
+    "movement": "at_berth",
+    "t_h": 5.52
+  },
+  {
+    "id": "V13",
+    "name": "MV HARBOR 13",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 3.82
+  },
+  {
+    "id": "V14",
+    "name": "MV HARBOR 14",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 4.52
+  },
+  {
+    "id": "V15",
+    "name": "MV HARBOR 15",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 3.09
+  },
+  {
+    "id": "V16",
+    "name": "MV HARBOR 16",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 4.96
+  },
+  {
+    "id": "V17",
+    "name": "MV HARBOR 17",
+    "zone_id": "berth_cruise",
+    "movement": "depart",
+    "t_h": 2.69
+  },
+  {
+    "id": "V18",
+    "name": "MV HARBOR 18",
+    "zone_id": "berth_bulk",
+    "movement": "at_berth",
+    "t_h": 2.03
+  },
+  {
+    "id": "V19",
+    "name": "MV HARBOR 19",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 1.67
+  },
+  {
+    "id": "V20",
+    "name": "MV HARBOR 20",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 1.36
+  },
+  {
+    "id": "V21",
+    "name": "MV HARBOR 21",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 3.15
+  },
+  {
+    "id": "V22",
+    "name": "MV HARBOR 22",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 2.59
+  },
+  {
+    "id": "V23",
+    "name": "MV HARBOR 23",
+    "zone_id": "berth_cruise",
+    "movement": "depart",
+    "t_h": 3.98
+  },
+  {
+    "id": "V24",
+    "name": "MV HARBOR 24",
+    "zone_id": "berth_bulk",
+    "movement": "at_berth",
+    "t_h": 0.08
+  },
+  {
+    "id": "V25",
+    "name": "MV HARBOR 25",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 2.69
+  },
+  {
+    "id": "V26",
+    "name": "MV HARBOR 26",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 2.19
+  },
+  {
+    "id": "V27",
+    "name": "MV HARBOR 27",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 1.17
+  },
+  {
+    "id": "V28",
+    "name": "MV HARBOR 28",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 3.57
+  },
+  {
+    "id": "V29",
+    "name": "MV HARBOR 29",
+    "zone_id": "berth_cruise",
+    "movement": "depart",
+    "t_h": 2.61
+  },
+  {
+    "id": "V30",
+    "name": "MV HARBOR 30",
+    "zone_id": "berth_bulk",
+    "movement": "at_berth",
+    "t_h": 1.8
+  },
+  {
+    "id": "V31",
+    "name": "MV HARBOR 31",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 1.26
+  },
+  {
+    "id": "V32",
+    "name": "MV HARBOR 32",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 5.25
+  },
+  {
+    "id": "V33",
+    "name": "MV HARBOR 33",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 4.78
+  },
+  {
+    "id": "V34",
+    "name": "MV HARBOR 34",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 3.64
+  },
+  {
+    "id": "V35",
+    "name": "MV HARBOR 35",
+    "zone_id": "berth_cruise",
+    "movement": "depart",
+    "t_h": 2.07
+  },
+  {
+    "id": "V36",
+    "name": "MV HARBOR 36",
+    "zone_id": "berth_bulk",
+    "movement": "at_berth",
+    "t_h": 5.68
+  },
+  {
+    "id": "V37",
+    "name": "MV HARBOR 37",
+    "zone_id": "berth_container_1",
+    "movement": "arrive",
+    "t_h": 3.38
+  },
+  {
+    "id": "V38",
+    "name": "MV HARBOR 38",
+    "zone_id": "berth_container_2",
+    "movement": "depart",
+    "t_h": 2.6
+  },
+  {
+    "id": "V39",
+    "name": "MV HARBOR 39",
+    "zone_id": "berth_container_3",
+    "movement": "at_berth",
+    "t_h": 5.4
+  },
+  {
+    "id": "V40",
+    "name": "MV HARBOR 40",
+    "zone_id": "berth_fuel",
+    "movement": "arrive",
+    "t_h": 1.92
+  }
+]

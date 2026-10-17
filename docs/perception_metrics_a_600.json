@@ -1,0 +1,71 @@
+{
+  "scenario": "a",
+  "seed": 42,
+  "seconds": 600.0,
+  "debug_truth": false,
+  "first_detected_t": 1.0,
+  "reached_asset_t": null,
+  "confirmed_track_ids": {
+    "T3": 598
+  },
+  "samples": 600,
+  "matched_samples": 598,
+  "dominant_id_fraction_all_samples": 0.9966666666666667,
+  "track_ids_first_detection_to_arrival": {
+    "T3": 598
+  },
+  "first_detection_to_arrival_samples": 600,
+  "dominant_id_fraction_first_detection_to_arrival": 0.9966666666666667,
+  "position_rmse_m": 10.052691942047804,
+  "velocity_rmse_after_30s_mps": 0.3022255508681516,
+  "classifications": {
+    "unknown": 341,
+    "uuv": 257
+  },
+  "anonymous_false_confirmed_ids_per_300s": [
+    [],
+    []
+  ],
+  "ais_vessel_alert_violations": 0,
+  "first_level_t": {
+    "1": 1.0,
+    "2": 150.7,
+    "3": 483.1
+  },
+  "options_ready_t": [
+    483.1,
+    543.1,
+    573.1
+  ],
+  "detections": [
+    {
+      "t": 150.7,
+      "cls": "unknown",
+      "model": "stub"
+    },
+    {
+      "t": 170.7,
+      "cls": "unknown",
+      "model": "stub"
+    },
+    {
+      "t": 190.7,
+      "cls": "unknown",
+      "model": "stub"
+    },
+    {
+      "t": 343.9,
+      "cls": "uuv",
+      "model": "stub"
+    },
+    {
+      "t": 363.9,
+      "cls": "uuv",
+      "model": "stub"
+    }
+  ],
+  "max_state_bytes": 25762,
+  "tick_p99_ms": 5.6590280003729285,
+  "tick_max_ms": 32.028900000113936,
+  "elapsed_wall_s": 8.361779700000625
+}
