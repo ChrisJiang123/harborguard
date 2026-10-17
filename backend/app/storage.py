@@ -107,6 +107,23 @@ class HistoryStore:
         except (sqlite3.Error, ValueError) as exc:
             raise StorageError("Cannot read archived detail") from exc
 
+    def commit_sequence(self, *, previous, seq):
+        """A state publication changes only the sequence, not the committed world.
+
+        Keep FULL durability and a transaction. Rewriting the same complete
+        checkpoint five times per second is unnecessary; never reserve ahead.
+        """
+        if seq <= previous:
+            raise StorageError("State sequence must increase")
+        try:
+            with self.connection:
+                self.connection.execute("BEGIN IMMEDIATE")
+                cursor = self.connection.execute("UPDATE runtime SET seq=? WHERE id=1 AND seq=?", (seq, previous))
+                if cursor.rowcount != 1:
+                    raise StorageError("State sequence differs from committed checkpoint")
+        except sqlite3.Error as exc:
+            raise StorageError("Durable state sequence write failed; state was not published") from exc
+
     def get_image(self, identifier):
         try:
             row = self.connection.execute("SELECT png FROM images WHERE id=?", (identifier,)).fetchone()

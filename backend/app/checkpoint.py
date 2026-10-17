@@ -37,6 +37,14 @@ def fingerprint():
 
 
 def encode(value):
+    # The great majority of values are ordinary history coordinates/timestamps.
+    # Handle them before NumPy/object dispatch without changing the JSON format.
+    if value is None or type(value) in (str, bool, int, float):
+        return value
+    if isinstance(value, dict):
+        return {k: encode(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [encode(v) for v in value]
     if isinstance(value, np.ndarray):
         return {"__hg__": "array", "value": value.tolist()}
     if isinstance(value, np.random.Generator):
@@ -48,10 +56,6 @@ def encode(value):
     if isinstance(value, (set, tuple, deque)):
         return {"__hg__": type(value).__name__, "value": [encode(v) for v in value],
                 "maxlen": value.maxlen if isinstance(value, deque) else None}
-    if isinstance(value, dict):
-        return {k: encode(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [encode(v) for v in value]
     if value is None or isinstance(value, (str, bool, int, float)):
         return value
     raise TypeError(f"Unsupported checkpoint type: {type(value).__name__}")
@@ -89,13 +93,15 @@ def fields(obj, names):
     return {name: getattr(obj, name) for name in names}
 
 
-def capture(game):
+def capture(game, *, copy_values=True):
+    """Copy for rollback, or borrow synchronously while encoding before commit."""
     decision = game.decision
-    return copy.deepcopy({"version": VERSION, "engine": fields(game, ENGINE),
+    snapshot = {"version": VERSION, "engine": fields(game, ENGINE),
         "world": fields(game.world, WORLD), "tracker": vars(game.tracker),
         "decision": fields(decision, DECISION), "risk": {"first_seen": decision.risk.first_seen},
         "alerts": vars(decision.alert_manager), "pinger": fields(decision.pinger, PINGER),
-        "disaster": fields(decision.disaster, ["detected_debris", "blocked_zones", "coverage_weights"])})
+        "disaster": fields(decision.disaster, ["detected_debris", "blocked_zones", "coverage_weights"])}
+    return copy.deepcopy(snapshot) if copy_values else snapshot
 
 
 def restore(game, snapshot, images):

@@ -35,7 +35,7 @@ def durable(method):
         try:
             result = method(self, *args, **kwargs)
             self.store.commit(seq=self.bus.seq, fingerprint=self._fingerprint,
-                checkpoint=checkpoint.encode(checkpoint.capture(self)), messages=self.bus.pending,
+                checkpoint=checkpoint.encode(checkpoint.capture(self, copy_values=False)), messages=self.bus.pending,
                 objects=self._history_objects(), images=self.decision.images)
         except Exception as exc:
             checkpoint.restore(self, previous, images)
@@ -271,7 +271,7 @@ class GameEngine:
                     self._scan_elapsed -= config.SCAN_EVERY_S
                     observations = self.acoustics.observe(self.world, config.SCAN_EVERY_S)
                     measurements = localize(observations, self.world.buoys)
-                    self.tracker.update(measurements, self.world.t, targets=self.world.targets)
+                    self.tracker.update(measurements, self.world.t, targets=self.world.targets, return_tracks=False)
                 tracks = self.tracker.tracks(self.world.t)
             self.emit_all(self.decision.step(tracks, self.world, sub))
             if not self.debug_truth:
@@ -290,9 +290,10 @@ class GameEngine:
         self.emit("scenario_changed", {"scenario":self.world.scenario_id, "status":"ended"})
 
     def state(self):
-        tracks = copy.deepcopy(self._tracks)
-        for track in tracks:
-            track["history"] = track["history"][-config.HISTORY_MAX:]
+        # Bound the copy itself, not only the result after copying full histories.
+        # Complete history remains available through the existing track detail.
+        tracks = [copy.deepcopy({**track, "history": track["history"][-config.HISTORY_MAX:]})
+                  for track in self._tracks]
         payload = dict(type="state",seq=self.bus.seq,t=round(self.world.t,6),mode=self.world.mode,
                        network=self.world.network,scenario=self.world.scenario_id,paused=self.world.paused,
                        speed=self.world.speed,buoys=list(self.world.buoys.values()), tracks=tracks,
@@ -304,9 +305,26 @@ class GameEngine:
                 track.history = track.history[len(track.history)//2 + 1:]
         return state
 
-    @durable
     def publish_state(self):
-        return self.bus.publish_state(self.state())
+        if self.store is None or self.bus.pending is not None:
+            return self.bus.publish_state(self.state())
+        # Every world mutation has already committed its checkpoint. Publishing
+        # an unchanged snapshot must durably increment seq before broadcasting,
+        # but need not copy/serialize/rewrite the entire checkpoint once again.
+        previous = self.bus.seq
+        self.bus.begin()
+        try:
+            message = self.bus.publish_state(self.state())
+            self.store.commit_sequence(previous=previous, seq=self.bus.seq)
+        except Exception as exc:
+            self.bus.seq = previous
+            self.bus.pending = None
+            if isinstance(exc, StorageError):
+                self.persistence_error = str(exc)
+            raise
+        self.persistence_error = None
+        self.bus.commit()
+        return message
 
     def get_track(self, track_id):
         return next((track for track in self._tracks if track["id"] == track_id), None)
