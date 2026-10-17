@@ -6,6 +6,8 @@
 
 本次新增文件见 [文件清单](../docs/files.md)，逐项验收范围见 [任务书验收范围](../docs/acceptance.md)。
 
+前端和 AI 队友从 [联调交接](../docs/frontend-integration.md) 开始：含全部 21 个 REST 接口、WebSocket、审批与事件恢复、数据单位、可直接加载的 Mock 和完整 OpenAPI。运行 `python -m backend.tools.integration_bundle` 可重新生成，不修改冻结契约。
+
 ## 安装与启动
 
 要求 Python 3.11 或更新版本，命令均在仓库根目录运行。
@@ -102,6 +104,6 @@ python -m backend.tools.soak --seconds 1200 --port 8000 --report artifacts/soak.
 
 ## Git 合入
 
-当前开发分支为 `codex/harborguard-backend-mvp`，不直接修改 main。分支现已基于 GitHub 仓库 ChrisJiang123/harborguard 的 origin/main（b8d418d）整合，C 原有源码、依赖文件、脚本及共享契约均保留。尚未执行 push 或创建 PR。
+当前开发分支为 `codex/harborguard-backend-mvp`，不直接修改 main。后端实现已通过 PR #2 由仓库方合入 main；本轮基于包含该 PR 的 origin/main（fdf4baf）补充联调交付物，C 原有源码、依赖文件、脚本及冻结契约均保持不变。
 
-队友检查顺序：契约和样例 → `make test` → 启动后端接前端 → 接入 C 声呐和 Agent → 播放两份回放 → 实际地图核验 → 三人演示彩排。当前分支已与 origin/main 具有共同历史。获得你的确认后，可推送此分支并创建面向 main 的 PR；合并前再次获取远程更新，保留 A、C 的后续实现。
+队友检查顺序：契约和样例 → `make test` → 启动后端接前端 → 接入 C 声呐和 Agent → 播放两份回放 → 实际地图核验 → 三人演示彩排。本轮按用户授权推送独立分支并创建面向 main 的 Draft PR，供队友审查，不自动合并。当前账号没有原仓库写权限，使用 tankewudi/harborguard 的 Fork 提交。

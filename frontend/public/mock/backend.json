@@ -1,0 +1,2303 @@
+{
+  "description": "联调静态合成样例。所有 REST 示例经真实路由验证；Agent 回答为 Mock。state/events 是同一快照；event_catalogue 是独立事件目录，不按序播放。这些固定 ID 不可直接用于新的实时场景审批。",
+  "state": {
+    "type": "state",
+    "seq": 7,
+    "t": 120.0,
+    "mode": "security",
+    "network": "online",
+    "scenario": "a",
+    "paused": false,
+    "speed": 10.0,
+    "buoys": [
+      {
+        "id": "B1",
+        "lat": 33.7173349014,
+        "lon": -118.2832229627,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B2",
+        "lat": 33.7168825764,
+        "lon": -118.2783623426,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B3",
+        "lat": 33.7177872263,
+        "lon": -118.2735017225,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B4",
+        "lat": 33.7200488511,
+        "lon": -118.2686411024,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B5",
+        "lat": 33.7218581509,
+        "lon": -118.2637804823,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B6",
+        "lat": 33.7236674507,
+        "lon": -118.2589198622,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B7",
+        "lat": 33.7268337253,
+        "lon": -118.2610801378,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B8",
+        "lat": 33.721134431,
+        "lon": -118.2589198622,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B9",
+        "lat": 33.7263814004,
+        "lon": -118.265400689,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      },
+      {
+        "id": "B10",
+        "lat": 33.7263814004,
+        "lon": -118.2562195177,
+        "status": "ok",
+        "range_m": 600.0,
+        "pinging": false
+      }
+    ],
+    "tracks": [
+      {
+        "id": "T1",
+        "status": "confirmed",
+        "cls": "uuv",
+        "conf": 0.85,
+        "cue": "narrowband",
+        "lat": 33.71914420119902,
+        "lon": -118.2605400689,
+        "depth_m": 12.0,
+        "vel_e": 0.0,
+        "vel_n": 2.0,
+        "vel_d": 0.0,
+        "speed_mps": 2.0,
+        "heading_deg": 0.0,
+        "err": {
+          "a_m": 25.0,
+          "b_m": 15.0,
+          "angle_deg": 0.0
+        },
+        "history": [
+          [
+            33.718058621318434,
+            -118.2605400689,
+            12.0,
+            60.0
+          ],
+          [
+            33.71914420119902,
+            -118.2605400689,
+            12.0,
+            120.0
+          ]
+        ],
+        "predicted": [
+          [
+            33.71968699113931,
+            -118.2605400689,
+            12.0,
+            150.0
+          ]
+        ],
+        "level": 3,
+        "risk": 0.867,
+        "detection_id": "det-1"
+      },
+      {
+        "id": "T2",
+        "status": "confirmed",
+        "cls": "vessel",
+        "conf": 0.85,
+        "cue": "broadband",
+        "lat": 33.71914420119902,
+        "lon": -118.2605400689,
+        "depth_m": 0.0,
+        "vel_e": 0.0,
+        "vel_n": 2.0,
+        "vel_d": 0.0,
+        "speed_mps": 2.0,
+        "heading_deg": 0.0,
+        "err": {
+          "a_m": 25.0,
+          "b_m": 15.0,
+          "angle_deg": 0.0
+        },
+        "history": [
+          [
+            33.718058621318434,
+            -118.2605400689,
+            0.0,
+            60.0
+          ],
+          [
+            33.71914420119902,
+            -118.2605400689,
+            0.0,
+            120.0
+          ]
+        ],
+        "predicted": [
+          [
+            33.71968699113931,
+            -118.2605400689,
+            0.0,
+            150.0
+          ]
+        ],
+        "level": 0,
+        "risk": 0.0,
+        "detection_id": null
+      }
+    ],
+    "alerts": [
+      {
+        "id": "A1",
+        "track_id": "T1",
+        "level": 3,
+        "risk": 0.867,
+        "breakdown": {
+          "C": 0.94,
+          "P": 0.9,
+          "B": 1.0,
+          "Z": 0.6,
+          "D": 0.4
+        },
+        "zone_id": "channel_main_s",
+        "asset_id": "asset_container_1",
+        "distance_m": 200.0,
+        "eta_s": 100.0,
+        "raised_t": 60.0,
+        "updated_t": 120.0,
+        "options_ready": true
+      }
+    ],
+    "zones": [
+      {
+        "id": "channel_entrance",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "channel_main_s",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "channel_main_n",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "channel_turning",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "berth_container_1",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "berth_container_2",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "berth_container_3",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "berth_fuel",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "berth_cruise",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "berth_bulk",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "anchorage_outer",
+        "state": "open",
+        "coverage": 0.0
+      },
+      {
+        "id": "anchorage_north",
+        "state": "open",
+        "coverage": 0.0
+      }
+    ]
+  },
+  "events": [
+    {
+      "type": "event",
+      "seq": 1,
+      "t": 0.0,
+      "event": "scenario_changed",
+      "data": {
+        "scenario": "a",
+        "status": "started"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 2,
+      "t": 0.0,
+      "event": "mode_changed",
+      "data": {
+        "mode": "security"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 3,
+      "t": 0.0,
+      "event": "log",
+      "data": {
+        "log": {
+          "t": 0.0,
+          "level": "info",
+          "source": "sim",
+          "text": "场景 A 开始，speed=10"
+        }
+      }
+    },
+    {
+      "type": "event",
+      "seq": 4,
+      "t": 120.0,
+      "event": "alert_raised",
+      "data": {
+        "alert": {
+          "id": "A1",
+          "track_id": "T1",
+          "level": 3,
+          "risk": 0.867,
+          "breakdown": {
+            "C": 0.94,
+            "P": 0.9,
+            "B": 1.0,
+            "Z": 0.6,
+            "D": 0.4
+          },
+          "zone_id": "channel_main_s",
+          "asset_id": "asset_container_1",
+          "distance_m": 200.0,
+          "eta_s": 100.0,
+          "raised_t": 60.0,
+          "updated_t": 120.0,
+          "options_ready": true
+        }
+      }
+    },
+    {
+      "type": "event",
+      "seq": 5,
+      "t": 120.0,
+      "event": "detection",
+      "data": {
+        "detection": {
+          "id": "det-1",
+          "track_id": "T1",
+          "buoy_id": "B1",
+          "t": 120.0,
+          "cls": "uuv",
+          "conf": 0.85,
+          "bbox": [
+            200.0,
+            250.0,
+            300.0,
+            300.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "stub"
+        }
+      }
+    },
+    {
+      "type": "event",
+      "seq": 6,
+      "t": 120.0,
+      "event": "options_ready",
+      "data": {
+        "alert_id": "A1",
+        "options": [
+          {
+            "id": "opt-1",
+            "label": "最小封闭",
+            "is_baseline": false,
+            "zones_closed": [
+              "berth_container_1"
+            ],
+            "speed_limit_zones": [],
+            "berths_open_pct": 0.75,
+            "vessels_affected": 3,
+            "delay_vessel_hours": 6.0,
+            "residual_risk": 0.1
+          },
+          {
+            "id": "opt-2",
+            "label": "扩大缓冲 + 限速",
+            "is_baseline": false,
+            "zones_closed": [
+              "berth_container_1",
+              "channel_main_s"
+            ],
+            "speed_limit_zones": [
+              "channel_entrance"
+            ],
+            "berths_open_pct": 0.75,
+            "vessels_affected": 3,
+            "delay_vessel_hours": 6.0,
+            "residual_risk": 0.0
+          },
+          {
+            "id": "port-closure",
+            "label": "全港关闭",
+            "is_baseline": true,
+            "zones_closed": [
+              "channel_entrance",
+              "channel_main_s",
+              "channel_main_n",
+              "channel_turning",
+              "berth_container_1",
+              "berth_container_2",
+              "berth_container_3",
+              "berth_fuel",
+              "berth_cruise",
+              "berth_bulk",
+              "anchorage_outer",
+              "anchorage_north"
+            ],
+            "speed_limit_zones": [],
+            "berths_open_pct": 0.0,
+            "vessels_affected": 27,
+            "delay_vessel_hours": 162.0,
+            "residual_risk": 0.0
+          }
+        ],
+        "ranked": [
+          "opt-1",
+          "opt-2",
+          "port-closure"
+        ]
+      }
+    },
+    {
+      "type": "event",
+      "seq": 7,
+      "t": 120.0,
+      "event": "recommendation",
+      "data": {
+        "recommendation": {
+          "id": "rec-sample-1",
+          "kind": "security",
+          "alert_id": "A1",
+          "model": "template",
+          "summary": "建议审核最小封闭方案",
+          "explanation": "此为契约样例。请结合航迹和风险指标由操作员确认方案。",
+          "recommended_option_id": "opt-1",
+          "evidence_ids": [
+            "T1",
+            "A1",
+            "det-1"
+          ],
+          "uncertainties": [
+            "演示数据"
+          ],
+          "confidence": "medium",
+          "created_t": 120.0,
+          "latency_ms": 0.0
+        }
+      }
+    }
+  ],
+  "event_catalogue": [
+    {
+      "type": "event",
+      "seq": 2,
+      "t": 120.0,
+      "event": "alert_raised",
+      "data": {
+        "alert": {
+          "id": "A1",
+          "track_id": "T1",
+          "level": 3,
+          "risk": 0.867,
+          "breakdown": {
+            "C": 0.94,
+            "P": 0.9,
+            "B": 1.0,
+            "Z": 0.6,
+            "D": 0.4
+          },
+          "zone_id": "channel_main_s",
+          "asset_id": "asset_container_1",
+          "distance_m": 200.0,
+          "eta_s": 100.0,
+          "raised_t": 60.0,
+          "updated_t": 120.0,
+          "options_ready": true
+        }
+      }
+    },
+    {
+      "type": "event",
+      "seq": 3,
+      "t": 120.0,
+      "event": "alert_changed",
+      "data": {
+        "alert": {
+          "id": "A1",
+          "track_id": "T1",
+          "level": 3,
+          "risk": 0.867,
+          "breakdown": {
+            "C": 0.94,
+            "P": 0.9,
+            "B": 1.0,
+            "Z": 0.6,
+            "D": 0.4
+          },
+          "zone_id": "channel_main_s",
+          "asset_id": "asset_container_1",
+          "distance_m": 200.0,
+          "eta_s": 100.0,
+          "raised_t": 60.0,
+          "updated_t": 120.0,
+          "options_ready": true
+        },
+        "from_level": 2,
+        "to_level": 3
+      }
+    },
+    {
+      "type": "event",
+      "seq": 4,
+      "t": 120.0,
+      "event": "alert_cleared",
+      "data": {
+        "alert_id": "A1"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 5,
+      "t": 120.0,
+      "event": "detection",
+      "data": {
+        "detection": {
+          "id": "det-1",
+          "track_id": "T1",
+          "buoy_id": "B1",
+          "t": 120.0,
+          "cls": "uuv",
+          "conf": 0.85,
+          "bbox": [
+            200.0,
+            250.0,
+            300.0,
+            300.0
+          ],
+          "image_url": "/api/sonar/det-1.png",
+          "model": "stub"
+        }
+      }
+    },
+    {
+      "type": "event",
+      "seq": 6,
+      "t": 120.0,
+      "event": "options_ready",
+      "data": {
+        "alert_id": "A1",
+        "options": [
+          {
+            "id": "opt-1",
+            "label": "最小封闭",
+            "is_baseline": false,
+            "zones_closed": [
+              "berth_container_1"
+            ],
+            "speed_limit_zones": [],
+            "berths_open_pct": 0.75,
+            "vessels_affected": 3,
+            "delay_vessel_hours": 6.0,
+            "residual_risk": 0.1
+          },
+          {
+            "id": "opt-2",
+            "label": "扩大缓冲 + 限速",
+            "is_baseline": false,
+            "zones_closed": [
+              "berth_container_1",
+              "channel_main_s"
+            ],
+            "speed_limit_zones": [
+              "channel_entrance"
+            ],
+            "berths_open_pct": 0.75,
+            "vessels_affected": 3,
+            "delay_vessel_hours": 6.0,
+            "residual_risk": 0.0
+          },
+          {
+            "id": "port-closure",
+            "label": "全港关闭",
+            "is_baseline": true,
+            "zones_closed": [
+              "channel_entrance",
+              "channel_main_s",
+              "channel_main_n",
+              "channel_turning",
+              "berth_container_1",
+              "berth_container_2",
+              "berth_container_3",
+              "berth_fuel",
+              "berth_cruise",
+              "berth_bulk",
+              "anchorage_outer",
+              "anchorage_north"
+            ],
+            "speed_limit_zones": [],
+            "berths_open_pct": 0.0,
+            "vessels_affected": 27,
+            "delay_vessel_hours": 162.0,
+            "residual_risk": 0.0
+          }
+        ],
+        "ranked": [
+          "opt-1",
+          "opt-2",
+          "port-closure"
+        ]
+      }
+    },
+    {
+      "type": "event",
+      "seq": 7,
+      "t": 120.0,
+      "event": "recommendation",
+      "data": {
+        "recommendation": {
+          "id": "rec-sample-1",
+          "kind": "security",
+          "alert_id": "A1",
+          "model": "template",
+          "summary": "建议审核最小封闭方案",
+          "explanation": "此为契约样例。请结合航迹和风险指标由操作员确认方案。",
+          "recommended_option_id": "opt-1",
+          "evidence_ids": [
+            "T1",
+            "A1",
+            "det-1"
+          ],
+          "uncertainties": [
+            "演示数据"
+          ],
+          "confidence": "medium",
+          "created_t": 120.0,
+          "latency_ms": 0.0
+        }
+      }
+    },
+    {
+      "type": "event",
+      "seq": 8,
+      "t": 120.0,
+      "event": "decision",
+      "data": {
+        "alert_id": "A1",
+        "option_id": "opt-1",
+        "action": "approve",
+        "operator": "demo"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 9,
+      "t": 120.0,
+      "event": "zone_changed",
+      "data": {
+        "zone_id": "channel_main_s",
+        "state": "restricted"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 10,
+      "t": 120.0,
+      "event": "reopen_plan",
+      "data": {
+        "route_zone_ids": [
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [],
+        "blocked_zone_ids": [],
+        "est_hours_saved": 3.0
+      }
+    },
+    {
+      "type": "event",
+      "seq": 11,
+      "t": 120.0,
+      "event": "buoy_changed",
+      "data": {
+        "buoy_id": "B1",
+        "status": "down"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 12,
+      "t": 120.0,
+      "event": "network_changed",
+      "data": {
+        "network": "offline"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 13,
+      "t": 120.0,
+      "event": "mode_changed",
+      "data": {
+        "mode": "disaster"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 14,
+      "t": 120.0,
+      "event": "scenario_changed",
+      "data": {
+        "scenario": "a",
+        "status": "started"
+      }
+    },
+    {
+      "type": "event",
+      "seq": 15,
+      "t": 120.0,
+      "event": "log",
+      "data": {
+        "log": {
+          "t": 120.0,
+          "level": "info",
+          "source": "sim",
+          "text": "契约样例"
+        }
+      }
+    }
+  ],
+  "rest": [
+    {
+      "method": "GET",
+      "route": "/api/health",
+      "path": "/api/health",
+      "status": 200,
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/state",
+      "path": "/api/state",
+      "status": 200,
+      "response": {
+        "type": "state",
+        "seq": 7,
+        "t": 120.0,
+        "mode": "security",
+        "network": "online",
+        "scenario": "a",
+        "paused": false,
+        "speed": 10.0,
+        "buoys": [
+          {
+            "id": "B1",
+            "lat": 33.7173349014,
+            "lon": -118.2832229627,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B2",
+            "lat": 33.7168825764,
+            "lon": -118.2783623426,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B3",
+            "lat": 33.7177872263,
+            "lon": -118.2735017225,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B4",
+            "lat": 33.7200488511,
+            "lon": -118.2686411024,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B5",
+            "lat": 33.7218581509,
+            "lon": -118.2637804823,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B6",
+            "lat": 33.7236674507,
+            "lon": -118.2589198622,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B7",
+            "lat": 33.7268337253,
+            "lon": -118.2610801378,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B8",
+            "lat": 33.721134431,
+            "lon": -118.2589198622,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B9",
+            "lat": 33.7263814004,
+            "lon": -118.265400689,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          },
+          {
+            "id": "B10",
+            "lat": 33.7263814004,
+            "lon": -118.2562195177,
+            "status": "ok",
+            "range_m": 600.0,
+            "pinging": false
+          }
+        ],
+        "tracks": [
+          {
+            "id": "T1",
+            "status": "confirmed",
+            "cls": "uuv",
+            "conf": 0.85,
+            "cue": "narrowband",
+            "lat": 33.71914420119902,
+            "lon": -118.2605400689,
+            "depth_m": 12.0,
+            "vel_e": 0.0,
+            "vel_n": 2.0,
+            "vel_d": 0.0,
+            "speed_mps": 2.0,
+            "heading_deg": 0.0,
+            "err": {
+              "a_m": 25.0,
+              "b_m": 15.0,
+              "angle_deg": 0.0
+            },
+            "history": [
+              [
+                33.718058621318434,
+                -118.2605400689,
+                12.0,
+                60.0
+              ],
+              [
+                33.71914420119902,
+                -118.2605400689,
+                12.0,
+                120.0
+              ]
+            ],
+            "predicted": [
+              [
+                33.71968699113931,
+                -118.2605400689,
+                12.0,
+                150.0
+              ]
+            ],
+            "level": 3,
+            "risk": 0.867,
+            "detection_id": "det-1"
+          },
+          {
+            "id": "T2",
+            "status": "confirmed",
+            "cls": "vessel",
+            "conf": 0.85,
+            "cue": "broadband",
+            "lat": 33.71914420119902,
+            "lon": -118.2605400689,
+            "depth_m": 0.0,
+            "vel_e": 0.0,
+            "vel_n": 2.0,
+            "vel_d": 0.0,
+            "speed_mps": 2.0,
+            "heading_deg": 0.0,
+            "err": {
+              "a_m": 25.0,
+              "b_m": 15.0,
+              "angle_deg": 0.0
+            },
+            "history": [
+              [
+                33.718058621318434,
+                -118.2605400689,
+                0.0,
+                60.0
+              ],
+              [
+                33.71914420119902,
+                -118.2605400689,
+                0.0,
+                120.0
+              ]
+            ],
+            "predicted": [
+              [
+                33.71968699113931,
+                -118.2605400689,
+                0.0,
+                150.0
+              ]
+            ],
+            "level": 0,
+            "risk": 0.0,
+            "detection_id": null
+          }
+        ],
+        "alerts": [
+          {
+            "id": "A1",
+            "track_id": "T1",
+            "level": 3,
+            "risk": 0.867,
+            "breakdown": {
+              "C": 0.94,
+              "P": 0.9,
+              "B": 1.0,
+              "Z": 0.6,
+              "D": 0.4
+            },
+            "zone_id": "channel_main_s",
+            "asset_id": "asset_container_1",
+            "distance_m": 200.0,
+            "eta_s": 100.0,
+            "raised_t": 60.0,
+            "updated_t": 120.0,
+            "options_ready": true
+          }
+        ],
+        "zones": [
+          {
+            "id": "channel_entrance",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "channel_main_s",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "channel_main_n",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "channel_turning",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "berth_container_1",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "berth_container_2",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "berth_container_3",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "berth_fuel",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "berth_cruise",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "berth_bulk",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "anchorage_outer",
+            "state": "open",
+            "coverage": 0.0
+          },
+          {
+            "id": "anchorage_north",
+            "state": "open",
+            "coverage": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/events",
+      "path": "/api/events?since_seq=0",
+      "status": 200,
+      "response": [
+        {
+          "type": "event",
+          "seq": 1,
+          "t": 0.0,
+          "event": "scenario_changed",
+          "data": {
+            "scenario": "a",
+            "status": "started"
+          }
+        },
+        {
+          "type": "event",
+          "seq": 2,
+          "t": 0.0,
+          "event": "mode_changed",
+          "data": {
+            "mode": "security"
+          }
+        },
+        {
+          "type": "event",
+          "seq": 3,
+          "t": 0.0,
+          "event": "log",
+          "data": {
+            "log": {
+              "t": 0.0,
+              "level": "info",
+              "source": "sim",
+              "text": "场景 A 开始，speed=10"
+            }
+          }
+        },
+        {
+          "type": "event",
+          "seq": 4,
+          "t": 120.0,
+          "event": "alert_raised",
+          "data": {
+            "alert": {
+              "id": "A1",
+              "track_id": "T1",
+              "level": 3,
+              "risk": 0.867,
+              "breakdown": {
+                "C": 0.94,
+                "P": 0.9,
+                "B": 1.0,
+                "Z": 0.6,
+                "D": 0.4
+              },
+              "zone_id": "channel_main_s",
+              "asset_id": "asset_container_1",
+              "distance_m": 200.0,
+              "eta_s": 100.0,
+              "raised_t": 60.0,
+              "updated_t": 120.0,
+              "options_ready": true
+            }
+          }
+        },
+        {
+          "type": "event",
+          "seq": 5,
+          "t": 120.0,
+          "event": "detection",
+          "data": {
+            "detection": {
+              "id": "det-1",
+              "track_id": "T1",
+              "buoy_id": "B1",
+              "t": 120.0,
+              "cls": "uuv",
+              "conf": 0.85,
+              "bbox": [
+                200.0,
+                250.0,
+                300.0,
+                300.0
+              ],
+              "image_url": "/api/sonar/det-1.png",
+              "model": "stub"
+            }
+          }
+        },
+        {
+          "type": "event",
+          "seq": 6,
+          "t": 120.0,
+          "event": "options_ready",
+          "data": {
+            "alert_id": "A1",
+            "options": [
+              {
+                "id": "opt-1",
+                "label": "最小封闭",
+                "is_baseline": false,
+                "zones_closed": [
+                  "berth_container_1"
+                ],
+                "speed_limit_zones": [],
+                "berths_open_pct": 0.75,
+                "vessels_affected": 3,
+                "delay_vessel_hours": 6.0,
+                "residual_risk": 0.1
+              },
+              {
+                "id": "opt-2",
+                "label": "扩大缓冲 + 限速",
+                "is_baseline": false,
+                "zones_closed": [
+                  "berth_container_1",
+                  "channel_main_s"
+                ],
+                "speed_limit_zones": [
+                  "channel_entrance"
+                ],
+                "berths_open_pct": 0.75,
+                "vessels_affected": 3,
+                "delay_vessel_hours": 6.0,
+                "residual_risk": 0.0
+              },
+              {
+                "id": "port-closure",
+                "label": "全港关闭",
+                "is_baseline": true,
+                "zones_closed": [
+                  "channel_entrance",
+                  "channel_main_s",
+                  "channel_main_n",
+                  "channel_turning",
+                  "berth_container_1",
+                  "berth_container_2",
+                  "berth_container_3",
+                  "berth_fuel",
+                  "berth_cruise",
+                  "berth_bulk",
+                  "anchorage_outer",
+                  "anchorage_north"
+                ],
+                "speed_limit_zones": [],
+                "berths_open_pct": 0.0,
+                "vessels_affected": 27,
+                "delay_vessel_hours": 162.0,
+                "residual_risk": 0.0
+              }
+            ],
+            "ranked": [
+              "opt-1",
+              "opt-2",
+              "port-closure"
+            ]
+          }
+        },
+        {
+          "type": "event",
+          "seq": 7,
+          "t": 120.0,
+          "event": "recommendation",
+          "data": {
+            "recommendation": {
+              "id": "rec-sample-1",
+              "kind": "security",
+              "alert_id": "A1",
+              "model": "template",
+              "summary": "建议审核最小封闭方案",
+              "explanation": "此为契约样例。请结合航迹和风险指标由操作员确认方案。",
+              "recommended_option_id": "opt-1",
+              "evidence_ids": [
+                "T1",
+                "A1",
+                "det-1"
+              ],
+              "uncertainties": [
+                "演示数据"
+              ],
+              "confidence": "medium",
+              "created_t": 120.0,
+              "latency_ms": 0.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/zones",
+      "path": "/api/zones",
+      "status": 200,
+      "response": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "channel_entrance",
+              "name": "演示入口航道",
+              "kind": "channel",
+              "sensitivity": 0.6,
+              "berths": 0,
+              "neighbors": [
+                "channel_main_s",
+                "anchorage_outer",
+                "anchorage_north"
+              ],
+              "entrance": true,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2729616536,
+                    33.7141686267
+                  ],
+                  [
+                    -118.2675609646,
+                    33.7141686267
+                  ],
+                  [
+                    -118.2675609646,
+                    33.720501176
+                  ],
+                  [
+                    -118.2729616536,
+                    33.720501176
+                  ],
+                  [
+                    -118.2729616536,
+                    33.7141686267
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "channel_main_s",
+              "name": "演示主航道南段",
+              "kind": "channel",
+              "sensitivity": 0.6,
+              "berths": 0,
+              "neighbors": [
+                "channel_entrance",
+                "channel_main_n",
+                "berth_container_1"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2675609646,
+                    33.7168825764
+                  ],
+                  [
+                    -118.2616202067,
+                    33.7168825764
+                  ],
+                  [
+                    -118.2616202067,
+                    33.720953501
+                  ],
+                  [
+                    -118.2675609646,
+                    33.720953501
+                  ],
+                  [
+                    -118.2675609646,
+                    33.7168825764
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "channel_main_n",
+              "name": "演示主航道北段",
+              "kind": "channel",
+              "sensitivity": 0.6,
+              "berths": 0,
+              "neighbors": [
+                "channel_main_s",
+                "channel_turning",
+                "berth_container_1"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2637804823,
+                    33.720953501
+                  ],
+                  [
+                    -118.2616202067,
+                    33.720953501
+                  ],
+                  [
+                    -118.2616202067,
+                    33.7218581509
+                  ],
+                  [
+                    -118.2583797933,
+                    33.7218581509
+                  ],
+                  [
+                    -118.2583797933,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2637804823,
+                    33.720953501
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "channel_turning",
+              "name": "演示掉头水域",
+              "kind": "channel",
+              "sensitivity": 0.6,
+              "berths": 0,
+              "neighbors": [
+                "channel_main_n",
+                "berth_container_2",
+                "berth_container_3",
+                "berth_fuel",
+                "berth_cruise",
+                "berth_bulk"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2637804823,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2572996555,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2572996555,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7250244255
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "berth_container_1",
+              "name": "演示集装箱泊位一",
+              "kind": "berth",
+              "sensitivity": 0.7,
+              "berths": 3,
+              "neighbors": [
+                "channel_main_s",
+                "channel_main_n"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2616202067,
+                    33.7198226886
+                  ],
+                  [
+                    -118.2583797933,
+                    33.7198226886
+                  ],
+                  [
+                    -118.2583797933,
+                    33.7218581509
+                  ],
+                  [
+                    -118.2616202067,
+                    33.7218581509
+                  ],
+                  [
+                    -118.2616202067,
+                    33.7198226886
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "berth_container_2",
+              "name": "演示集装箱泊位二",
+              "kind": "berth",
+              "sensitivity": 0.7,
+              "berths": 2,
+              "neighbors": [
+                "channel_turning"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2670208957,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7272860503
+                  ],
+                  [
+                    -118.2670208957,
+                    33.7272860503
+                  ],
+                  [
+                    -118.2670208957,
+                    33.7250244255
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "berth_container_3",
+              "name": "演示集装箱泊位三",
+              "kind": "berth",
+              "sensitivity": 0.7,
+              "berths": 2,
+              "neighbors": [
+                "channel_turning"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2637804823,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2605400689,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2605400689,
+                    33.7340709246
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7340709246
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7313569749
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "berth_fuel",
+              "name": "演示液体散货泊位",
+              "kind": "berth",
+              "sensitivity": 1.0,
+              "berths": 2,
+              "neighbors": [
+                "channel_turning"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2572996555,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2540592421,
+                    33.7250244255
+                  ],
+                  [
+                    -118.2540592421,
+                    33.7277383752
+                  ],
+                  [
+                    -118.2572996555,
+                    33.7277383752
+                  ],
+                  [
+                    -118.2572996555,
+                    33.7250244255
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "berth_cruise",
+              "name": "演示邮轮泊位",
+              "kind": "berth",
+              "sensitivity": 0.9,
+              "berths": 2,
+              "neighbors": [
+                "channel_turning"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2605400689,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2572996555,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2572996555,
+                    33.7340709246
+                  ],
+                  [
+                    -118.2605400689,
+                    33.7340709246
+                  ],
+                  [
+                    -118.2605400689,
+                    33.7313569749
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "berth_bulk",
+              "name": "演示杂货泊位",
+              "kind": "berth",
+              "sensitivity": 0.7,
+              "berths": 1,
+              "neighbors": [
+                "channel_turning"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2670208957,
+                    33.7272860503
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7272860503
+                  ],
+                  [
+                    -118.2637804823,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2670208957,
+                    33.7313569749
+                  ],
+                  [
+                    -118.2670208957,
+                    33.7272860503
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "anchorage_outer",
+              "name": "演示外侧锚地",
+              "kind": "anchorage",
+              "sensitivity": 0.3,
+              "berths": 0,
+              "neighbors": [
+                "channel_entrance",
+                "anchorage_north"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2837630316,
+                    33.711454677
+                  ],
+                  [
+                    -118.270801378,
+                    33.711454677
+                  ],
+                  [
+                    -118.270801378,
+                    33.7168825764
+                  ],
+                  [
+                    -118.2805226182,
+                    33.7168825764
+                  ],
+                  [
+                    -118.2805226182,
+                    33.7182395513
+                  ],
+                  [
+                    -118.2837630316,
+                    33.7182395513
+                  ],
+                  [
+                    -118.2837630316,
+                    33.711454677
+                  ]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "id": "anchorage_north",
+              "name": "演示北侧锚地",
+              "kind": "anchorage",
+              "sensitivity": 0.3,
+              "berths": 0,
+              "neighbors": [
+                "channel_entrance",
+                "anchorage_outer"
+              ],
+              "entrance": false,
+              "state": "open",
+              "coverage": 0.0
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.2805226182,
+                    33.7168825764
+                  ],
+                  [
+                    -118.2729616536,
+                    33.7168825764
+                  ],
+                  [
+                    -118.2729616536,
+                    33.7218581509
+                  ],
+                  [
+                    -118.2805226182,
+                    33.7218581509
+                  ],
+                  [
+                    -118.2805226182,
+                    33.7168825764
+                  ]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/assets",
+      "path": "/api/assets",
+      "status": 200,
+      "response": [
+        {
+          "id": "asset_container_1",
+          "name": "演示集装箱码头一",
+          "kind": "container_terminal",
+          "lat": 33.720953501,
+          "lon": -118.2605400689,
+          "sensitivity": 0.7,
+          "rings_m": [
+            1500.0,
+            800.0,
+            400.0
+          ]
+        },
+        {
+          "id": "asset_container_2",
+          "name": "演示集装箱码头二",
+          "kind": "container_terminal",
+          "lat": 33.7263814004,
+          "lon": -118.265400689,
+          "sensitivity": 0.7,
+          "rings_m": [
+            1500.0,
+            800.0,
+            400.0
+          ]
+        },
+        {
+          "id": "asset_container_3",
+          "name": "演示集装箱码头三",
+          "kind": "container_terminal",
+          "lat": 33.7327139497,
+          "lon": -118.2621602756,
+          "sensitivity": 0.7,
+          "rings_m": [
+            1500.0,
+            800.0,
+            400.0
+          ]
+        },
+        {
+          "id": "asset_fuel",
+          "name": "演示燃料码头",
+          "kind": "fuel_terminal",
+          "lat": 33.7263814004,
+          "lon": -118.2556794488,
+          "sensitivity": 1.0,
+          "rings_m": [
+            1500.0,
+            800.0,
+            400.0
+          ]
+        },
+        {
+          "id": "asset_cruise",
+          "name": "演示邮轮码头",
+          "kind": "cruise_terminal",
+          "lat": 33.7327139497,
+          "lon": -118.2589198622,
+          "sensitivity": 0.9,
+          "rings_m": [
+            1500.0,
+            800.0,
+            400.0
+          ]
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/buoys",
+      "path": "/api/buoys",
+      "status": 200,
+      "response": [
+        {
+          "id": "B1",
+          "lat": 33.7173349014,
+          "lon": -118.2832229627,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B2",
+          "lat": 33.7168825764,
+          "lon": -118.2783623426,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B3",
+          "lat": 33.7177872263,
+          "lon": -118.2735017225,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B4",
+          "lat": 33.7200488511,
+          "lon": -118.2686411024,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B5",
+          "lat": 33.7218581509,
+          "lon": -118.2637804823,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B6",
+          "lat": 33.7236674507,
+          "lon": -118.2589198622,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B7",
+          "lat": 33.7268337253,
+          "lon": -118.2610801378,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B8",
+          "lat": 33.721134431,
+          "lon": -118.2589198622,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B9",
+          "lat": 33.7263814004,
+          "lon": -118.265400689,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        },
+        {
+          "id": "B10",
+          "lat": 33.7263814004,
+          "lon": -118.2562195177,
+          "status": "ok",
+          "range_m": 600.0,
+          "pinging": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/metrics",
+      "path": "/api/metrics",
+      "status": 200,
+      "response": {
+        "yolo": null,
+        "lora": null
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/tracks/{track_id}",
+      "path": "/api/tracks/T1",
+      "status": 200,
+      "response": {
+        "id": "T1",
+        "status": "confirmed",
+        "cls": "uuv",
+        "conf": 0.85,
+        "cue": "narrowband",
+        "lat": 33.71914420119902,
+        "lon": -118.2605400689,
+        "depth_m": 12.0,
+        "vel_e": 0.0,
+        "vel_n": 2.0,
+        "vel_d": 0.0,
+        "speed_mps": 2.0,
+        "heading_deg": 0.0,
+        "err": {
+          "a_m": 25.0,
+          "b_m": 15.0,
+          "angle_deg": 0.0
+        },
+        "history": [
+          [
+            33.718058621318434,
+            -118.2605400689,
+            12.0,
+            60.0
+          ],
+          [
+            33.71914420119902,
+            -118.2605400689,
+            12.0,
+            120.0
+          ]
+        ],
+        "predicted": [
+          [
+            33.71968699113931,
+            -118.2605400689,
+            12.0,
+            150.0
+          ]
+        ],
+        "level": 3,
+        "risk": 0.867,
+        "detection_id": "det-1"
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/alerts/{alert_id}",
+      "path": "/api/alerts/A1",
+      "status": 200,
+      "response": {
+        "id": "A1",
+        "track_id": "T1",
+        "level": 3,
+        "risk": 0.867,
+        "breakdown": {
+          "C": 0.94,
+          "P": 0.9,
+          "B": 1.0,
+          "Z": 0.6,
+          "D": 0.4
+        },
+        "zone_id": "channel_main_s",
+        "asset_id": "asset_container_1",
+        "distance_m": 200.0,
+        "eta_s": 100.0,
+        "raised_t": 60.0,
+        "updated_t": 120.0,
+        "options_ready": true
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/detections/{det_id}",
+      "path": "/api/detections/det-1",
+      "status": 200,
+      "response": {
+        "id": "det-1",
+        "track_id": "T1",
+        "buoy_id": "B1",
+        "t": 120.0,
+        "cls": "uuv",
+        "conf": 0.85,
+        "bbox": [
+          200.0,
+          250.0,
+          300.0,
+          300.0
+        ],
+        "image_url": "/api/sonar/det-1.png",
+        "model": "stub"
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/options/{alert_id}",
+      "path": "/api/options/A1",
+      "status": 200,
+      "response": {
+        "alert_id": "A1",
+        "options": [
+          {
+            "id": "opt-1",
+            "label": "最小封闭",
+            "is_baseline": false,
+            "zones_closed": [
+              "berth_container_1"
+            ],
+            "speed_limit_zones": [],
+            "berths_open_pct": 0.75,
+            "vessels_affected": 3,
+            "delay_vessel_hours": 6.0,
+            "residual_risk": 0.1
+          },
+          {
+            "id": "opt-2",
+            "label": "扩大缓冲 + 限速",
+            "is_baseline": false,
+            "zones_closed": [
+              "berth_container_1",
+              "channel_main_s"
+            ],
+            "speed_limit_zones": [
+              "channel_entrance"
+            ],
+            "berths_open_pct": 0.75,
+            "vessels_affected": 3,
+            "delay_vessel_hours": 6.0,
+            "residual_risk": 0.0
+          },
+          {
+            "id": "port-closure",
+            "label": "全港关闭",
+            "is_baseline": true,
+            "zones_closed": [
+              "channel_entrance",
+              "channel_main_s",
+              "channel_main_n",
+              "channel_turning",
+              "berth_container_1",
+              "berth_container_2",
+              "berth_container_3",
+              "berth_fuel",
+              "berth_cruise",
+              "berth_bulk",
+              "anchorage_outer",
+              "anchorage_north"
+            ],
+            "speed_limit_zones": [],
+            "berths_open_pct": 0.0,
+            "vessels_affected": 27,
+            "delay_vessel_hours": 162.0,
+            "residual_risk": 0.0
+          }
+        ],
+        "ranked": [
+          "opt-1",
+          "opt-2",
+          "port-closure"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/api/sonar/{det_id}.png",
+      "path": "/api/sonar/det-1.png",
+      "status": 200,
+      "content_type": "image/png",
+      "asset_url": "/replay_assets/a/det-1.png"
+    },
+    {
+      "method": "GET",
+      "route": "/api/log",
+      "path": "/api/log?limit=100",
+      "status": 200,
+      "response": [
+        {
+          "t": 0.0,
+          "level": "info",
+          "source": "sim",
+          "text": "场景 A 开始，speed=10"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/recommendations",
+      "path": "/api/recommendations",
+      "status": 200,
+      "request": {
+        "id": "rec-sample-1",
+        "kind": "security",
+        "alert_id": "A1",
+        "model": "template",
+        "summary": "建议审核最小封闭方案",
+        "explanation": "此为契约样例。请结合航迹和风险指标由操作员确认方案。",
+        "recommended_option_id": "opt-1",
+        "evidence_ids": [
+          "T1",
+          "A1",
+          "det-1"
+        ],
+        "uncertainties": [
+          "演示数据"
+        ],
+        "confidence": "medium",
+        "created_t": 120.0,
+        "latency_ms": 0.0
+      },
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/agent/ask",
+      "path": "/api/agent/ask",
+      "status": 200,
+      "request": {
+        "question": "当前风险如何？",
+        "track_id": "T1"
+      },
+      "response": {
+        "answer": "这是联调 Mock 回答；请由操作员审核当前方案。",
+        "model": "template"
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/decision",
+      "path": "/api/decision",
+      "status": 200,
+      "request": {
+        "alert_id": "A1",
+        "option_id": "opt-1",
+        "action": "approve",
+        "operator": "demo"
+      },
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/log",
+      "path": "/api/log",
+      "status": 200,
+      "request": {
+        "level": "info",
+        "source": "agent",
+        "text": "联调 Mock 日志"
+      },
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/mode",
+      "path": "/api/mode",
+      "status": 200,
+      "request": {
+        "mode": "disaster"
+      },
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/inject",
+      "path": "/api/inject",
+      "status": 200,
+      "request": {
+        "type": "buoy_down",
+        "target": "B4"
+      },
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/control",
+      "path": "/api/control",
+      "status": 200,
+      "request": {
+        "action": "pause"
+      },
+      "response": {
+        "ok": true
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/api/scenario/{scenario_id}/start",
+      "path": "/api/scenario/b/start",
+      "status": 200,
+      "request": {
+        "speed": 10
+      },
+      "response": {
+        "ok": true
+      }
+    }
+  ],
+  "errors": [
+    {
+      "method": "GET",
+      "path": "/api/tracks/missing",
+      "status": 404,
+      "request": null,
+      "response": {
+        "detail": "Unknown track: missing"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/decision",
+      "status": 409,
+      "request": {
+        "alert_id": "stale",
+        "option_id": "stale",
+        "action": "approve",
+        "operator": "demo"
+      },
+      "response": {
+        "detail": "alert or options no longer available"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/control",
+      "status": 422,
+      "request": {
+        "action": "speed"
+      },
+      "response": {
+        "detail": [
+          {
+            "type": "value_error",
+            "loc": [
+              "body"
+            ],
+            "msg": "Value error, speed requires a positive value",
+            "input": {
+              "action": "speed"
+            },
+            "ctx": {
+              "error": {}
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "mock_images": {
+    "/api/sonar/det-1.png": "/replay_assets/a/det-1.png"
+  }
+}

@@ -2,6 +2,18 @@
 
 在 Windows、CPython 3.11.17、requirements-lock.txt 所列依赖上验证。正常模式关闭 DEBUG_TRUTH_TRACKS；C 的渲染器、YOLO 权重与 Agent 尚未提供，因此识别使用明确标注的 stub。
 
+## 本轮联调交付验证
+
+后端主体已由仓库方通过 PR #2 合入 main。本轮基于 fdf4baf，仅增加交接文档、现有 OpenAPI 导出、静态 Mock 和两项交接验证；生产 API 和冻结契约不变。
+
+- 全量 pytest 75 项通过，用时 111.51 秒；仍有下述上游 TestClient 弃用警告。Ruff、compileall、pip check 通过。
+- 21 个 REST 操作的请求/响应经真实 FastAPI 路由验证；Agent 成功回答使用 MockTransport。state/event Schema、Mock 图片解码、导出一致性、文档路由覆盖和相对链接检查通过。
+- 真实 Uvicorn 15.19 秒烟测通过：76 个 state、18 个 event、5.003 Hz、最大 state 21,534 字节、无错误。短测不代替下方原 20 分钟性能报告。
+- 发布前扫描索引 119 个文件，未发现所检查的常见密钥模式、真实 .env、缓存或日志。已有 replay_a.jsonl 为 10,901,770 字节，与 main 的 blob 相同；本轮最大文件为 58,324 字节。
+- 生产后端、shared/、C 的 agent/ml/scripts/依赖、C 契约副本和 A 前端源码相对 main 均无变更。原任务书保持未跟踪，不提交。
+
+使用方法和完整接口见 [联调交接](frontend-integration.md)。以下保留后端主体原有验收结果。
+
 ## 自动化验证
 
 - pytest：接入远程 C0 骨架后，73 项全量测试通过，最近一次通过 dev.ps1 test 执行，耗时 55.19 秒；包含 C 与 B 契约逐 token 一致性检查，以及模型指标含 NaN 时返回 null 的回归。
