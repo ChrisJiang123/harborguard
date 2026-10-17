@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-17",
+  "timezone": "America/Los_Angeles",
+  "main": "782d04d61858cca4849f7ff39942394e5b56d1f3",
+  "branch": "codex/harborguard-handoff-refresh",
+  "pr_inventory": {
+    "3": {
+      "head": "368df2ede67f2c8e353a628afb1559a95d70cb68",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "conflicts": [
+        "backend/README.md"
+      ]
+    },
+    "6": {
+      "head": "5af2ae08d9baf6aa53fe58cacd6552986eed76a2",
+      "state": "open",
+      "draft": false,
+      "merged": false,
+      "conflicts": [
+        "backend/README.md"
+      ]
+    },
+    "10": {
+      "head": "4fb8941ff6f706721766f64160989a90d2c90372",
+      "merged": true,
+      "merge": "700eb93dccbdbf3eac1c60697f82e6175960c2a0"
+    },
+    "4": {
+      "head": "6389b705bec35b8fc44018d1c14d770f2a82b364",
+      "merged": true,
+      "merge": "782d04d61858cca4849f7ff39942394e5b56d1f3"
+    },
+    "11": {
+      "merged": true,
+      "merge_prefix": "8ca2eb3"
+    }
+  },
+  "tests": {
+    "initial": {
+      "tests": "197",
+      "failures": "1",
+      "errors": "0",
+      "skipped": "2",
+      "time": "92.534"
+    },
+    "final": {
+      "tests": "198",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "2",
+      "time": "89.010"
+    },
+    "initial_failure": "Old B assertion equated frontend proposed buoy coordinates with canonical LIVE data.",
+    "change": "Retain zones/assets/vessels equality and schematic geometry tests; add LIVE REST/state canonical position check. No coordinates changed.",
+    "optional_skips": "Missing .cache/yolo26n.pt COCO smoke weights; actual delivered sonar weights are exercised."
+  },
+  "frontend": {
+    "npm_ci": "PASS (7s)",
+    "build": "PASS",
+    "lint": "PASS",
+    "check:recovery": "PASS",
+    "check:sonar": "PASS",
+    "a1_a6": "PASS; automated checks only",
+    "scene_chunk_kB": 1003.1,
+    "chunk_warning": true,
+    "node": "24.19.0",
+    "npm": "11.17.0",
+    "browser": "PENDING for latest main"
+  },
+  "static_checks": {
+    "ruff_backend": "PASS",
+    "compileall_backend": "PASS",
+    "pip_check": "PASS",
+    "diff_check": "PASS"
+  },
+  "protected_source_unchanged": {
+    "backend/app": true,
+    "backend/migrations": true,
+    "shared": true,
+    "frontend": true,
+    "agent": true,
+    "ml": true,
+    "tests": true,
+    "data": true
+  },
+  "archives": {
+    "docs/archive/pr6-final-integration-report.md": {
+      "source": "5af2ae08d9baf6aa53fe58cacd6552986eed76a2:docs/final-integration-report.md",
+      "sha256": "11791933664dff9f9f8ebb06cbd06ebee2e4bb485af30572c4703fe593b114c4",
+      "exact_copy": true
+    },
+    "docs/archive/pr6-final-integration-results.json": {
+      "source": "5af2ae08d9baf6aa53fe58cacd6552986eed76a2:docs/final-integration-results.json",
+      "sha256": "75b08cbb0c75e9842c2c37a2af0471620634572e4b1420a7ae8112c2e41a1d2c",
+      "exact_copy": true
+    }
+  },
+  "artifacts": {
+    "docs/integration/openapi.json": "69b210e6816bb1b41588e7749fe8837b893f0ba4ec353f36d5f771ade5bf9ef2",
+    "backend/fixtures/integration/backend.json": "75a8f866be01cade3fbf60d77935717ae0a16192570cafb9c758981ac4bd98f5",
+    "backend/fixtures/integration/sonar/det-1.png": "2e8a6d54fca89034ae008b0bc939b06ef9ba9a3c25fa4c84e537ed971daf2443",
+    "artifacts/handoff-refresh/tests.xml": "a987cb6845757958256110d0174ae1c9d61950fe081c0cb183f2862626b4860a",
+    "artifacts/handoff-refresh/tests-final.xml": "2a5af7a4e159c7ac5d9393d3662c1df2a8fadefa5405a0d43385a7231f2e81d0"
+  },
+  "contracts": {
+    "rest_operations": 21,
+    "event_kinds": 14,
+    "new_public_interfaces": false,
+    "event_window": 500,
+    "log_cache_max": 1000,
+    "full_history_pagination": "NOT APPROVED/NOT IMPLEMENTED"
+  },
+  "validation_scope": "Current route/export fixtures + full B/C regression + frontend automated checks, not browser/full rehearsal.",
+  "historical_API_evidence": "backend/docs/evidence/sonar-safety-20261017.json (same B/C production, different A)",
+  "pending_or_failed": {
+    "security_L3_500s": "FAIL: prior fixed real model reached 505 simulation seconds",
+    "fuel_berth_real_detection": "Unconfirmed near field; keep unsurveyed",
+    "browser_recovery_latest_main": "PENDING",
+    "20_min_soak_latest_model": "PENDING",
+    "field_rehearsal_three_people": "PENDING",
+    "real_wifi_hardware": "PENDING"
+  },
+  "github_operations": {
+    "main_merged_by_this_run": false,
+    "old_PRs_closed_or_modified": false,
+    "force_push": false
+  },
+  "artifact_hash_scope": "Tracked text: LF-normalized Git content; local JUnit: raw bytes."
+}

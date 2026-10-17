@@ -1,5 +1,9 @@
 # 本次开发文件清单
 
+2026-10-17 后续交付：旧 #3/#6 缺失资料已按 main `782d04d` 更新迁移；当前范围见 [集成报告](final-integration-report.md)。新增 `backend/tools/integration_bundle.py`、对应4项测试、B的 `fixtures/integration/`、`docs/frontend-integration.md`、`docs/integration/openapi.json`、最终报告/JSON和五分钟操作单。旧#6原始JSON保存在docs/archive，未改A/C生产源码或冻结契约。
+
+以下95文件统计为初始MVP历史清单，不是当前仓库或本次变更总数。
+
 本次新增或修改 95 个文件，覆盖 B 端实现、共享契约、演示数据、回放与验证记录。上游 C 源码保持原样；根 README 与 .gitignore 追加 B 的内容。原始任务书未修改。
 
 ## 启动与依赖 共 7 个

@@ -68,8 +68,30 @@ def test_fictional_schedules_and_frontend_data_are_consistent():
     assert all(vessel["name"].startswith("MV HARBOR") and vessel["zone_id"] in berth_ids
                and 0 <= vessel["t_h"] <= 6
                and vessel["movement"] in {"arrive", "depart", "at_berth"} for vessel in vessels)
-    for name in ["zones.geojson", "assets.json", "buoys.json", "vessels.json"]:
+    # A #11 intentionally uses proposed stations for offline demos. Those are
+    # not B observations; do not relocate LIVE buoys to match the proposal.
+    # A's check:sonar verifies its proposal/fallback/replays and no relocation.
+    for name in ["zones.geojson", "assets.json", "vessels.json"]:
         assert (config.DATA_DIR / name).read_bytes() == (config.ROOT / "frontend/public/data" / name).read_bytes()
+
+
+def test_live_buoys_keep_canonical_B_coordinates_when_frontend_has_a_proposal(client):
+    from backend.app.models import Buoy
+
+    expected = read("buoys.json")
+    proposed = json.loads((config.ROOT / "frontend/public/data/buoys.json").read_text(encoding="utf-8"))
+    assert {b["id"] for b in proposed} == {b["id"] for b in expected}
+    for buoy in proposed:
+        Buoy.model_validate({**buoy, "status": "ok", "pinging": False})
+
+    def check_live():
+        actual = client.get("/api/buoys").json()
+        assert [{key: buoy[key] for key in ("id", "lat", "lon", "range_m")} for buoy in actual] == expected
+        assert client.get("/api/state").json()["buoys"] == actual
+
+    check_live()
+    assert client.post("/api/scenario/a/start", json={"speed": 10}).status_code == 200
+    check_live()
 
 
 def test_scripted_uuv_and_vessel_routes_stay_in_schematic_water():
