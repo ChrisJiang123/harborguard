@@ -14,6 +14,12 @@ export const FLIGHT_SECONDS = 1.5
 export const DEFAULT_VERTICAL_SCALE = 3
 export const VERTICAL_SCALES = [1, 2, 3, 4, 8] as const
 
+/** Shortest angular path across north; presentation only, no heading inference. */
+export function blendHeading(current: number, target: number, delta: number): number {
+  const difference = ((target - current + 540) % 360 + 360) % 360 - 180
+  return (current + difference * (1 - Math.exp(-10 * Math.max(0, Math.min(delta, .1)))) + 360) % 360
+}
+
 export function worldPosition(lat: number, lon: number, depth = 0, verticalScale = VZ): Point3 {
   const [east, north] = toLocal(lat, lon)
   return [east, -depth * verticalScale, -north]

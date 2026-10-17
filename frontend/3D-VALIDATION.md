@@ -2,13 +2,13 @@
 
 ## Changes
 
-- Default 3× vertical enhancement, always identified as non-true-scale; restore 1× remains available. No business coordinate, depth value, 2D, backend, or shared-contract changes.
+- Default 3× vertical enhancement, always identified as non-true-scale; restore 1× remains available. Real-backend coordinates/depths, the 2D renderer, backend, and shared contract are unchanged. The subsequent vessel-motion revision intentionally changes synthetic T3/T4 positions in the shared 2D/3D mock/replay source.
 - Native keyboard-accessible disclosure panels for Layers, Display Settings, Data sources, selected-target information, and scale/data legend. Closing a panel hides its content without resetting its controls. Narrow canvases expose Layers/Display Settings through Scene Settings.
 - Supersampled rendering (DPR 1.5–2, adaptive floor 85%), no pixelated upscale, improved side lighting and lower overview angle. Camera framing now accounts for canvas aspect ratio.
 - USGS/USDA NAIP orthophoto export upgraded from 1536×834 to 3072×1668 (9,154,383 bytes); four times as many display pixels. The underlying land DEM values/bounds are unchanged. The 4096-pixel request returned HTTP 504; the bounded 3072-pixel export succeeded and was validated before replacing the asset.
 - Seabed display refinement: bilinear subdivision and smooth normals, no wireframe overlay, 2 m contour interval. Original source samples and land/NoData holes are preserved. This does not add new measurements or increase source accuracy.
 
-## Browser observations
+## Historical browser observations (clarity revision `734e271`)
 
 Local production preview: `http://127.0.0.1:4173/?replay=demo_full.jsonl&stats=1`.
 
@@ -27,11 +27,13 @@ The following are instantaneous approximately one-second UI readings captured in
 
 Actual screenshots are saved locally under `D:\HarborGuard\frontend\artifacts\vertical-relief\`: `clear-overview-3x.png`, `clear-surface-3x.png`, `clear-underwater-3x.png`, and `compact-panels.png`. Screenshots are not committed.
 
-Verified interactions: surface/underwater/overview/reset, 1× restore, scale changes, target selection/follow and real target readout, water hiding, Layers expansion/collapse with buoy checkbox preserved, Display Settings expansion/collapse with the selected 2× value preserved, source/target/legend disclosure, Enter-key disclosure, and narrow-canvas Scene Settings. Playback/pause, A/B seek, and 2D/3D transitions were also exercised during this iteration. No console errors were returned by the browser log checks. Screenshot-control timeout occurred once; reconnecting showed the page remained running and the underwater screenshot had been saved successfully.
+Verified interactions at that revision: surface/underwater/overview/reset, 1× restore, scale changes, target selection/follow and source-backed synthetic target readout, water hiding, Layers expansion/collapse with buoy checkbox preserved, Display Settings expansion/collapse with the selected 2× value preserved, source/target/legend disclosure, Enter-key disclosure, and narrow-canvas Scene Settings. Playback/pause, A/B seek, and 2D/3D transitions were also exercised. No console errors were returned by the browser log checks. Screenshot-control timeout occurred once; reconnecting showed the page remained running and the underwater screenshot had been saved successfully. These FPS readings and screenshots are not a new sustained benchmark of later commits.
 
 ## Automated checks
 
 Passed: `npm.cmd run build`, `lint`, `check:a1` through `check:a6`, `check:recovery`, and `check:english`.
+
+The vessel-motion revision reran all of these and added passing `check:vessels`: full reference corridor including the pre-demo path checked against the bundled mask (minimum neighboring source-cell depth 9 m), maximum sampled acceleration/deceleration 0.0450 m/s², sampled turn rate 1.658°/s, and minimum simultaneous center separation 78.9 m. These are deterministic synthetic-model checks, not AIS observations, under-keel clearance, or collision-avoidance certification. See `ACCEPTANCE-A.md` for the current acceptance review and stale backend-report corrections.
 
 A4 includes original-point preservation, bilinear center/extrema, no bridging of NoData cells, refined triangle count, unchanged source grid, vertical transform/restore, geometry reuse, and narrow-canvas framing. Build retains the existing approximately 998 kB uncompressed 3D chunk warning.
 

@@ -2,6 +2,8 @@
 
 记录日期：2026-10-17。本文只描述 A 前端在当前冻结契约下无法补齐的状态；A 未修改后端、数据库或共享契约。
 
+> 2026-10-18 复核：以下“当前”均是历史记录，不代表今天运行态。现有 `backend/app/decision/__init__.py` 已对 approve/reject 都生成结构化 decision，`storage.py`/`engine.py` 已有持久化与检查点恢复，不能继续说“拒绝只写日志”或“后端完全未持久化”。但冻结的 `/api/events` 仍读取 500 条缓存，没有分页历史列表；持久化存在不等于前端能查询全部旧审批。本轮 `127.0.0.1:8000/api/health` 连接被拒绝，未实测当前后端重启/审批往返，也未运行或修改 B 测试。最新 B 验收报告已在远端 main `8613834` 的 `backend/docs/B-final-acceptance.md`，其历史证据不是 A 本轮重跑结果。前端复核结论以 `ACCEPTANCE-A.md` 为准。
+
 ## 1. `/api/events` 只能覆盖最近 500 条
 
 涉及接口：`GET /api/events?since_seq={seq}`、`GET /api/log?limit={n}`。
@@ -21,7 +23,7 @@ GET /api/log?limit=3             -> HTTP 200，返回 3 条
 
 前端影响：当前 A 只能在响应恰好达到 500 条时提示“历史不完整”，不能恢复更早的建议、批准或驳回；也无法区分“刚好总计 500 条”和“已被截断”。实时事件仍正常衔接，前端使用已有 recommendation/detection/alert ID 及事件字段去重。
 
-## 2. 驳回没有结构化 `decision` 事件
+## 2. 历史缺口：驳回没有结构化 `decision` 事件（源码已修复，运行态待复验）
 
 涉及接口：`POST /api/decision`、`GET /api/events`、WebSocket `/ws`。
 

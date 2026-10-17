@@ -4,6 +4,7 @@ import { DEMO_ASSETS, DEMO_BUOYS, DEMO_ZONES } from './demoGeometry'
 import type { StaticBuoy } from './mapGeometry'
 import { loadLocalData } from './staticData'
 import type { DecisionInput, InjectInput } from './commands'
+import { demoVesselTrack } from './vesselMotion'
 
 export const MOCK_ASSETS: Asset[] = DEMO_ASSETS
 function mockOptions(zoneIds: string[]): Option[] {
@@ -30,7 +31,6 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
   let restricted = new Set<string>()
   const delivered = new Set<string>()
   let history: Track['history'] = []
-  let vesselHistories: Record<'T3' | 'T4', Track['history']> = { T3: [], T4: [] }
   const asset = inputAsset ?? MOCK_ASSETS[0]!
   const zoneIds = inputZoneIds?.length ? inputZoneIds : DEMO_ZONES.features.map(zone => zone.properties.id)
   const options = mockOptions(zoneIds)
@@ -41,32 +41,6 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
   }
   function once(key: string, at: number, fn: () => void) {
     if (t >= at && !delivered.has(key)) { delivered.add(key); fn() }
-  }
-  function vesselTrack(id: 'T3' | 'T4', start: [number, number], end: [number, number], duration: number, bend: number, speed_mps: number): Track {
-    const position = (time: number) => {
-      const p = Math.max(0, Math.min(1, time / duration))
-      const lat = start[0] + (end[0] - start[0]) * p + Math.sin(Math.PI * p) * bend
-      const lon = start[1] + (end[1] - start[1]) * p
-      const q = Math.min(1, p + .001)
-      const nextLat = start[0] + (end[0] - start[0]) * q + Math.sin(Math.PI * q) * bend
-      const nextLon = start[1] + (end[1] - start[1]) * q
-      const east = (nextLon - lon) * 111320 * Math.cos(lat * Math.PI / 180)
-      const north = (nextLat - lat) * 110540
-      const heading = (Math.atan2(east, north) * 180 / Math.PI + 360) % 360
-      return { lat, lon, heading }
-    }
-    const current = position(t)
-    const point: Track['history'][number] = [current.lat, current.lon, 0, t]
-    if (vesselHistories[id].at(-1)?.[3] !== t) vesselHistories[id] = [...vesselHistories[id], point].slice(-60)
-    const distanceE = (end[1] - start[1]) * 111320 * Math.cos(current.lat * Math.PI / 180)
-    const distanceN = (end[0] - start[0]) * 110540
-    return {
-      id, status: 'confirmed', cls: 'vessel', conf: 0.99, cue: 'none', lat: current.lat, lon: current.lon, depth_m: 0,
-      vel_e: distanceE / duration, vel_n: distanceN / duration, vel_d: 0, speed_mps, heading_deg: current.heading,
-      err: { a_m: 18, b_m: 8, angle_deg: current.heading }, history: vesselHistories[id],
-      predicted: Array.from({ length: 10 }, (_, index) => { const future = t + (index + 1) * 30; const next = position(future); return [next.lat, next.lon, 0, future] }),
-      level: 0, risk: 0.01, detection_id: null,
-    }
   }
   function snapshot(): StateMsg {
     const progress = Math.min(t / 90, 1)
@@ -94,8 +68,8 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
       depth_m: 7, vel_e: 0.5, vel_n: 0.3, speed_mps: 0.58, heading_deg: 59,
       history: [], predicted: [], level: 0, risk: 0.03, detection_id: null,
     }
-    const eastbound = vesselTrack('T3', [asset.lat - .012, asset.lon - .028], [asset.lat - .006, asset.lon + .020], 120, .0018, 7.2)
-    const westbound = vesselTrack('T4', [asset.lat + .010, asset.lon + .022], [asset.lat + .006, asset.lon - .026], 150, -.0015, 5.8)
+    const inbound = demoVesselTrack('T3', t)
+    const outbound = demoVesselTrack('T4', t)
     const alert: Alert = {
       id: 'A1', track_id: 'T1', level: level === 0 ? 1 : level, risk,
       breakdown: { C: risk, P: risk, B: risk, Z: risk, D: risk },
@@ -105,7 +79,7 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
     return {
       type: 'state', seq: ++seq, t, mode, network, scenario, paused, speed,
       buoys: buoys.map((buoy, i) => ({ ...buoy, pinging: buoy.status === 'ok' && Math.floor(t * 5) % 25 === i * 2 })),
-      tracks: [target, fish, eastbound, westbound], alerts: level > 0 ? [alert] : [],
+      tracks: [target, fish, inbound, outbound], alerts: level > 0 ? [alert] : [],
       zones: zoneIds.map((id, i) => mode === 'disaster' ? disasterZone(id, i) : { id, state: restricted.has(id) ? 'restricted' : 'open', coverage: 1 }),
     }
   }
@@ -161,7 +135,7 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
     })
   }
   function resetScenario(next: StateMsg['scenario'], nextSpeed = 1) {
-    t = 0; paused = next === null; speed = nextSpeed; restricted = new Set(); delivered.clear(); history = []; vesselHistories = { T3: [], T4: [] }
+    t = 0; paused = next === null; speed = nextSpeed; restricted = new Set(); delivered.clear(); history = []
     decided = false; scenario = next; mode = next === 'b' ? 'disaster' : 'security'; network = 'online'
     buoys.forEach(buoy => { buoy.status = 'ok' })
     event('scenario_changed', { scenario: next, status: next ? 'started' : 'reset' })
