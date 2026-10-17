@@ -87,6 +87,7 @@ class Settings:
     agent_post_reserve_s: float         # 为模板组装和 POST 预留
     agent_cloud_budget_s: float         # 云端最多占用的整体预算切片
     agent_ask_budget_s: float           # /ask 总预算（B 代理为 20 秒）
+    agent_failure_log: str              # 脱敏事实校验失败样例（不入库）
 
     # ---- 本地 LLM（Ollama，OpenAI 兼容接口） ----
     ollama_base_url: str
@@ -115,6 +116,7 @@ def load_settings() -> Settings:
         agent_post_reserve_s=_get_float("AGENT_POST_RESERVE_S", 0.5),
         agent_cloud_budget_s=_get_float("AGENT_CLOUD_BUDGET_S", 4.0),
         agent_ask_budget_s=_get_float("AGENT_ASK_BUDGET_S", 18.0),
+        agent_failure_log=_get_str("AGENT_FAILURE_LOG", "agent/runtime/fact_failures.jsonl"),
         # 本地 LLM
         ollama_base_url=_get_str("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
         ollama_model=_get_str("OLLAMA_MODEL", "qwen3:1.7b"),

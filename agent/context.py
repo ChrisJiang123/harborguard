@@ -52,7 +52,7 @@ def _slim_track(track: dict | None, t_now: float) -> dict | None:
     if not track:
         return None
     keep = ("id", "status", "cls", "conf", "cue", "lat", "lon",
-            "depth_m", "speed_mps", "heading_deg", "level", "risk")
+            "depth_m", "speed_mps", "heading_deg", "level", "risk", "detection_id")
     slim = {k: track.get(k) for k in keep if track.get(k) is not None}
     slim["history_summary"] = history_summary(track.get("history", []), t_now)
     return slim
@@ -92,8 +92,9 @@ def _trim(context: dict, limit: int = MAX_CONTEXT_BYTES) -> dict:
     ]
     if size(context) <= limit:
         return context
-    # 极端情况下先去掉不参与模板证据的分区清单；ID、方案和数值事实仍保留。
-    context["zones"] = []
+    # security 的分区详情可由方案里的 zones_closed ID 代替；灾害/浮标必须保留状态。
+    if context.get("kind") == "security":
+        context["zones"] = []
     for option in context.get("options", []):
         if "zones_closed" in option:
             option["zones_closed_count"] = len(option["zones_closed"] or [])
@@ -172,6 +173,129 @@ async def collect_security(
     return _trim(context)
 
 
+def _buoy_facts(buoys: list[dict]) -> dict:
+    ok_ids = [b["id"] for b in buoys if b.get("status") == "ok" and b.get("id")]
+    down = [b["id"] for b in buoys if b.get("status") == "down" and b.get("id")]
+    return {"ok": len(ok_ids), "ok_ids": ok_ids, "down": down}
+
+
+async def collect_disaster(client: BackendClient, plan: dict) -> dict:
+    """reopen_plan 的真实计划、分区状态和浮标状态上下文。"""
+    state = await client.get_state()
+    buoys = await client.get_buoys()
+    context = {
+        "kind": "disaster",
+        "t": float(state.get("t", 0.0)),
+        "mode": state.get("mode"),
+        "network": state.get("network"),
+        "reopen_plan": dict(plan),
+        "buoys": _buoy_facts(buoys),
+        "zones": [
+            {key: zone.get(key) for key in ("id", "state", "coverage") if key in zone}
+            for zone in state.get("zones", [])
+        ],
+        "options": [],
+        "ranked": [],
+        "recent_logs": [],
+    }
+    return _trim(context)
+
+
+def _rings(geometry: dict) -> list[list[list[float]]]:
+    coordinates = geometry.get("coordinates") or []
+    if geometry.get("type") == "Polygon":
+        return coordinates[:1]
+    if geometry.get("type") == "MultiPolygon":
+        return [polygon[0] for polygon in coordinates if polygon]
+    return []
+
+
+def _point_in_ring(x: float, y: float, ring: list[list[float]]) -> bool:
+    inside = False
+    if len(ring) < 3:
+        return False
+    points = [((lon - LON0) * M_PER_LON, (lat - LAT0) * M_PER_LAT) for lon, lat in ring]
+    j = len(points) - 1
+    for i, (xi, yi) in enumerate(points):
+        xj, yj = points[j]
+        if (yi > y) != (yj > y):
+            crossing = (xj - xi) * (y - yi) / (yj - yi) + xi
+            if x < crossing:
+                inside = not inside
+        j = i
+    return inside
+
+
+def _segment_distance(px: float, py: float, ax: float, ay: float, bx: float, by: float) -> float:
+    dx, dy = bx - ax, by - ay
+    if dx == 0 and dy == 0:
+        return math.hypot(px - ax, py - ay)
+    u = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+    return math.hypot(px - (ax + u * dx), py - (ay + u * dy))
+
+
+def _zone_in_range(buoy: dict, feature: dict) -> bool:
+    bx = (float(buoy["lon"]) - LON0) * M_PER_LON
+    by = (float(buoy["lat"]) - LAT0) * M_PER_LAT
+    limit = float(buoy["range_m"])
+    for ring in _rings(feature.get("geometry") or {}):
+        if _point_in_ring(bx, by, ring):
+            return True
+        points = [((lon - LON0) * M_PER_LON, (lat - LAT0) * M_PER_LAT) for lon, lat in ring]
+        for first, second in zip(points, points[1:] + points[:1]):
+            if _segment_distance(bx, by, *first, *second) <= limit:
+                return True
+    return False
+
+
+async def collect_buoy(client: BackendClient, buoy_id: str) -> dict:
+    """浮标失效上下文；覆盖影响只声明量程圆与分区几何相交这一可复算事实。"""
+    state = await client.get_state()
+    buoys = await client.get_buoys()
+    target = next((b for b in buoys if b.get("id") == buoy_id), None)
+    if target is None:
+        raise ValueError(f"浮标 {buoy_id} 已不存在")
+    zones_geojson = await client.get_zones()
+    features = zones_geojson.get("features", [])
+    affected = sorted(
+        feature.get("properties", {}).get("id")
+        for feature in features
+        if feature.get("properties", {}).get("id") and _zone_in_range(target, feature)
+    )
+    remaining_by_zone = {}
+    for zone_id in affected:
+        remaining_by_zone[zone_id] = sorted(
+            buoy["id"]
+            for buoy in buoys
+            if buoy.get("status") == "ok"
+            and any(
+                feature.get("properties", {}).get("id") == zone_id and _zone_in_range(buoy, feature)
+                for feature in features
+            )
+        )
+    context = {
+        "kind": "buoy",
+        "t": float(state.get("t", 0.0)),
+        "mode": state.get("mode"),
+        "network": state.get("network"),
+        "buoy": {key: target.get(key) for key in ("id", "status", "range_m")},
+        "buoys": _buoy_facts(buoys),
+        "coverage_impact": {
+            "method": "buoy_range_intersects_zone_geometry",
+            "affected_zone_ids": affected,
+            "remaining_ok_buoy_ids_by_zone": remaining_by_zone,
+        },
+        "zones": [
+            {key: zone.get(key) for key in ("id", "state", "coverage") if key in zone}
+            for zone in state.get("zones", []) if zone.get("id") in affected
+        ],
+        "options": [],
+        "ranked": [],
+        "recent_logs": [],
+    }
+    return _trim(context)
+
+
 def context_ids(context: dict) -> set[str]:
     """上下文中真实存在的全部 ID（双重校验的第一重依据）。"""
     ids: set[str] = set()
@@ -185,9 +309,20 @@ def context_ids(context: dict) -> set[str]:
         ids.add(d.get("id"))
     for o in context.get("options", []):
         ids.add(o.get("id"))
+        ids |= set(o.get("zones_closed", [])) | set(o.get("speed_limit_zones", []))
     ids |= {r for r in context.get("ranked", [])}
     buoys = context.get("buoys", {})
     ids |= set(buoys.get("covering_track", [])) | set(buoys.get("down", []))
     for z in context.get("zones", []):
         ids.add(z.get("id"))
+    if b := context.get("buoy"):
+        ids.add(b.get("id"))
+    plan = context.get("reopen_plan") or {}
+    for key in ("route_zone_ids", "reopen_berth_zone_ids", "unsurveyed_zone_ids", "blocked_zone_ids"):
+        ids |= set(plan.get(key, []))
+    impact = context.get("coverage_impact") or {}
+    ids |= set(impact.get("affected_zone_ids", []))
+    for buoy_ids in (impact.get("remaining_ok_buoy_ids_by_zone") or {}).values():
+        ids |= set(buoy_ids)
+    ids |= set(buoys.get("ok_ids", []))
     return {i for i in ids if i}

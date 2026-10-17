@@ -8,9 +8,12 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import hashlib
 import json
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Literal, Protocol
 from urllib.parse import urlsplit, urlunsplit
 
@@ -19,9 +22,10 @@ from anthropic import AsyncAnthropic
 
 from .config import Settings, get_settings
 from .context import context_ids
+from .factcheck import FACT_CHECK_SCOPE, check_draft_facts, fact_snapshot
 from .prompts import ASK_SYSTEM_PROMPT, SYSTEM_PROMPT
 from .schemas import DraftOutputError, RecommendationDraft, normalize_draft, parse_model_draft, validate_draft
-from .template import generate_security
+from .template import generate_recommendation
 
 Route = Literal["cloud", "local", "template"]
 
@@ -190,7 +194,10 @@ def _provider_stats() -> dict:
         "draft_raw_outputs": 0,
         "draft_raw_valid": 0,
         "draft_invalid": 0,
+        "draft_fact_valid": 0,
+        "draft_fact_invalid": 0,
         "draft_retries": 0,
+        "draft_retry_success": 0,
         "success": 0,
         "errors": 0,
         "timeouts": 0,
@@ -222,6 +229,7 @@ class Router:
             "providers": {"cloud": _provider_stats(), "local": _provider_stats()},
             "generated_routes": {"cloud": 0, "local": 0, "template": 0},
             "ask_routes": {"cloud": 0, "local": 0, "template": 0},
+            "template_fallbacks": 0,
             "cloud_skipped_offline": 0,
             "cloud_skipped_unhealthy": 0,
         }
@@ -258,7 +266,70 @@ class Router:
             "retry_in_s": round(max(0.0, self.cloud_retry_after - time.perf_counter()), 1),
             "reason": self.cloud_circuit_reason,
         }
+        result["fact_check_scope"] = FACT_CHECK_SCOPE
         return result
+
+    @staticmethod
+    def _redact_text(value: str, ids: set[str]) -> str:
+        for identifier in sorted(ids, key=len, reverse=True):
+            alias = hashlib.sha256(identifier.encode("utf-8")).hexdigest()[:8]
+            value = value.replace(identifier, f"<id:{alias}>")
+        return value
+
+    @classmethod
+    def _redact_value(cls, value, ids: set[str]):
+        if isinstance(value, str):
+            return cls._redact_text(value, ids)
+        if isinstance(value, list):
+            return [cls._redact_value(item, ids) for item in value]
+        if isinstance(value, dict):
+            return {
+                cls._redact_text(key, ids) if isinstance(key, str) else key: cls._redact_value(item, ids)
+                for key, item in value.items()
+            }
+        return value
+
+    def _record_fact_failure(
+        self,
+        route: str,
+        provider: CompletionProvider,
+        response: RawResponse,
+        draft: RecommendationDraft,
+        context: dict,
+        errors: list[str],
+    ) -> None:
+        """追加脱敏 JSONL；只含校验事实，不含日志、坐标、凭证或完整原始响应。"""
+        configured = self.settings.agent_failure_log.strip()
+        if not configured:
+            return
+        try:
+            path = Path(configured)
+            ids = context_ids(context)
+            sanitized = {
+                key: self._redact_text(value, ids) if isinstance(value, str) else value
+                for key, value in draft.model_dump().items()
+            }
+            sanitized["evidence_ids"] = [
+                self._redact_text(value, ids) for value in draft.evidence_ids
+            ]
+            sanitized["uncertainties"] = [
+                self._redact_text(value, ids) for value in draft.uncertainties
+            ]
+            record = {
+                "recorded_at": datetime.now(timezone.utc).isoformat(),
+                "route": route,
+                "provider": provider.provider,
+                "request_model": provider.request_model,
+                "response_model": response.response_model,
+                "errors": [self._redact_text(error, ids) for error in errors],
+                "facts": self._redact_value(fact_snapshot(context), ids),
+                "draft": sanitized,
+            }
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
+        except OSError:
+            pass  # 评估样例写入失败不得拖垮在线建议链路
 
     def reset_cloud_circuit(self) -> None:
         self.cloud_retry_after = 0.0
@@ -289,6 +360,7 @@ class Router:
         route: Literal["cloud", "local"],
         provider: CompletionProvider,
         context_json: str,
+        context: dict,
         known_ids: set[str],
         option_ids: set[str],
         deadline: float,
@@ -331,7 +403,17 @@ class Router:
                 stat["last_error"] = error[:240]
                 continue
             stat["draft_raw_valid"] += 1
+            fact_result = check_draft_facts(draft, context)
+            if not fact_result.ok:
+                stat["draft_fact_invalid"] += 1
+                error = "事实校验失败: " + "; ".join(fact_result.errors)
+                stat["last_error"] = error[:240]
+                self._record_fact_failure(route, provider, response, draft, context, fact_result.errors)
+                continue
+            stat["draft_fact_valid"] += 1
             stat["success"] += 1
+            if attempt:
+                stat["draft_retry_success"] += 1
             stat["last_error"] = None
             return draft, response, attempt + 1
         return None
@@ -376,6 +458,7 @@ class Router:
                 "cloud",
                 self.cloud,
                 context_json,
+                context,
                 known_ids,
                 option_ids,
                 cloud_deadline,
@@ -400,6 +483,7 @@ class Router:
                 "local",
                 self.local,
                 context_json,
+                context,
                 known_ids,
                 option_ids,
                 generation_end,
@@ -418,10 +502,14 @@ class Router:
                     attempts=attempts,
                 )
 
-        draft = normalize_draft(generate_security(context))
+        draft = normalize_draft(generate_recommendation(context))
         errors = validate_draft(draft, known_ids, option_ids)
         if errors:
             raise ValueError("模板建议未通过双重校验: " + "; ".join(errors))
+        fact_result = check_draft_facts(draft, context)
+        if not fact_result.ok:
+            raise ValueError("模板建议未通过事实校验: " + "; ".join(fact_result.errors))
+        self.stats["template_fallbacks"] += 1
         self._record_route("template", "deterministic-template", None, None)
         return GenerationResult(
             draft=draft,

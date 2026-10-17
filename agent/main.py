@@ -4,8 +4,8 @@
 
     .venv/bin/python -m agent.main     # 读取 .env，监听 AGENT_HOST:AGENT_PORT（默认 8001）
 
-链路：WS 订阅 /ws → options_ready → REST 拉齐上下文 → 云端/本地/模板 →
-pydantic + 真实 ID 双重校验 → POST /api/recommendations。
+链路：WS 订阅 /ws → 四类任务触发 → REST 拉齐上下文 → 云端/本地/模板 →
+pydantic + 真实 ID + 确定性事实校验 → POST /api/recommendations。
 恒不改警报等级、绝不调用 /api/decision。
 """
 
@@ -26,7 +26,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .backend_client import BackendClient
 from .config import get_settings
-from .context import collect_security
+from .context import collect_buoy, collect_disaster, collect_security
 from .router import AnswerResult, GenerationResult, Router
 from .schemas import Recommendation
 from .template import generate_answer
@@ -35,12 +35,12 @@ MAX_SEEN_SEQS = 2000  # 事件去重窗口（seq 有界集合）
 
 
 class TaskQueue:
-    """事件去重 + 每警报仅保留最新任务 + 场景重置清空。
+    """事件去重 + 同一对象仅保留最新任务 + 场景重置清空。
 
     - seq 去重：重连补事件与实时推送重叠时不会重复入队；
-    - 同一警报：新 options_ready（方案集签名不同）覆盖旧任务 → 可触发新建议，
-      相同方案集签名则跳过；
-    - alert_cleared / scenario_changed(reset|started)：丢弃相关/全部待处理任务。
+    - security 以 alert 为键，buoy 以 buoy 为键，disaster 为单例；
+    - reopen_plan 同计划不重复，且仿真时间最多每 20 秒接受一次；
+    - alert_cleared / buoy_up / scenario_changed(reset|started) 会使旧任务失效。
     """
 
     def __init__(self) -> None:
@@ -50,6 +50,24 @@ class TaskQueue:
         self._generation = 0
         self._versions: dict[str, int] = {}
         self._signatures: dict[str, str] = {}
+        self._last_reopen_t: float | None = None
+
+    def _offer(self, key: str, signature: str, **payload) -> dict | None:
+        if self._signatures.get(key) == signature:
+            return None
+        version = self._versions.get(key, 0) + 1
+        self._versions[key] = version
+        self._signatures[key] = signature
+        task = {
+            "key": key,
+            "signature": signature,
+            "generation": self._generation,
+            "version": version,
+            "queued_at": time.perf_counter(),
+            **payload,
+        }
+        self._tasks[key] = task
+        return task
 
     def offer_event(self, msg: dict) -> dict | None:
         seq = msg.get("seq")
@@ -67,8 +85,63 @@ class TaskQueue:
             self.clear()
             return None
         if name == "alert_cleared":
-            self.drop(data.get("alert_id"))
+            self.drop(f"security:{data.get('alert_id')}")
             return None
+        if name == "alert_changed":
+            alert = data.get("alert") or {}
+            alert_id = alert.get("id")
+            key = f"security:{alert_id}"
+            if data.get("to_level") != 2 or not isinstance(data.get("from_level"), int) or data["from_level"] >= 2:
+                self.drop(key)
+                return None
+            signature = json.dumps(
+                {"trigger": name, "alert": alert}, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            )
+            return self._offer(
+                key,
+                signature,
+                kind="security",
+                trigger=name,
+                alert_id=alert_id,
+                options=[],
+                ranked=[],
+                t=msg.get("t"),
+            )
+        if name == "reopen_plan":
+            event_t = float(msg.get("t", 0.0))
+            if self._last_reopen_t is not None and event_t - self._last_reopen_t < 20.0:
+                return None
+            signature = json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+            task = self._offer(
+                "disaster",
+                signature,
+                kind="disaster",
+                trigger=name,
+                alert_id=None,
+                plan=dict(data),
+                t=event_t,
+            )
+            if task is not None:
+                self._last_reopen_t = event_t
+            return task
+        if name == "buoy_changed":
+            buoy_id = data.get("buoy_id")
+            key = f"buoy:{buoy_id}"
+            if data.get("status") != "down":
+                self.drop(key)
+                return None
+            signature = json.dumps(
+                {"buoy_id": buoy_id, "status": "down"}, sort_keys=True, separators=(",", ":")
+            )
+            return self._offer(
+                key,
+                signature,
+                kind="buoy",
+                trigger=name,
+                alert_id=None,
+                buoy_id=buoy_id,
+                t=msg.get("t"),
+            )
         if name != "options_ready":
             return None
 
@@ -81,49 +154,44 @@ class TaskQueue:
             sort_keys=True,
             separators=(",", ":"),
         )
-        if self._signatures.get(alert_id) == signature:
-            return None  # 排队中、处理中或已提交的相同载荷均只处理一次
-        version = self._versions.get(alert_id, 0) + 1
-        self._versions[alert_id] = version
-        self._signatures[alert_id] = signature
-        task = {
-            "kind": "options_ready",
-            "alert_id": alert_id,
-            "options": options,
-            "ranked": ranked,
-            "signature": signature,
-            "generation": self._generation,
-            "version": version,
-            "t": msg.get("t"),
-            "queued_at": time.perf_counter(),
-        }
-        self._tasks[alert_id] = task  # 覆盖旧任务：同警报只处理最新
-        return task
+        return self._offer(
+            f"security:{alert_id}",
+            signature,
+            kind="security",
+            trigger=name,
+            alert_id=alert_id,
+            options=options,
+            ranked=ranked,
+            t=msg.get("t"),
+        )
 
     def take(self) -> dict | None:
         """取最早入队的任务（串行处理）。"""
-        for alert_id in list(self._tasks):
-            return self._tasks.pop(alert_id)
+        for key in list(self._tasks):
+            return self._tasks.pop(key)
         return None
 
     def clear(self) -> None:
         self._generation += 1
+        self._seen.clear()
+        self._seen_order.clear()
         self._tasks.clear()
         self._versions.clear()
         self._signatures.clear()
+        self._last_reopen_t = None
 
-    def drop(self, alert_id: str | None) -> None:
-        if not alert_id:
+    def drop(self, key: str | None) -> None:
+        if not key:
             return
-        self._tasks.pop(alert_id, None)
-        self._signatures.pop(alert_id, None)
-        self._versions[alert_id] = self._versions.get(alert_id, 0) + 1
+        self._tasks.pop(key, None)
+        self._signatures.pop(key, None)
+        self._versions[key] = self._versions.get(key, 0) + 1
 
     def is_current(self, task: dict) -> bool:
-        """处理中任务只有在场景代际和警报版本均未变化时才可提交。"""
+        """处理中任务只有在场景代际和对象版本均未变化时才可提交。"""
         return (
             task.get("generation") == self._generation
-            and task.get("version") == self._versions.get(task.get("alert_id"))
+            and task.get("version") == self._versions.get(task.get("key"))
         )
 
     def __len__(self) -> int:
@@ -142,6 +210,7 @@ stats = {
     "errors": 0,
     "dropped": 0,
     "routes": {"cloud": 0, "local": 0, "template": 0},
+    "kinds": {"security": 0, "disaster": 0, "buoy": 0},
 }
 last_announced_model: str | None = None
 model_log_lock = asyncio.Lock()
@@ -154,9 +223,9 @@ def handle_event(msg: dict) -> None:
         wake.set()
 
 
-async def process_options_ready(task: dict) -> tuple[Recommendation, GenerationResult] | None:
+async def process_task(task: dict) -> tuple[Recommendation, GenerationResult] | None:
     """沿用既有链路加入模型路由；返回 None 表示任务被安全丢弃。"""
-    alert_id = task["alert_id"]
+    alert_id = task.get("alert_id")
     started = float(task.get("queued_at", time.perf_counter()))
     deadline = started + settings.agent_event_budget_s
     try:
@@ -165,7 +234,12 @@ async def process_options_ready(task: dict) -> tuple[Recommendation, GenerationR
             stats["dropped"] += 1
             return None
         async with asyncio.timeout(context_remaining):
-            context = await collect_security(client, alert_id, task["options"], task["ranked"])
+            if task["kind"] == "security":
+                context = await collect_security(client, alert_id, task["options"], task["ranked"])
+            elif task["kind"] == "disaster":
+                context = await collect_disaster(client, task["plan"])
+            else:
+                context = await collect_buoy(client, task["buoy_id"])
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 404:
             stats["dropped"] += 1  # 场景已重置/警报已清除：不得提交旧任务的建议
@@ -184,7 +258,7 @@ async def process_options_ready(task: dict) -> tuple[Recommendation, GenerationR
 
     rec = Recommendation(
         id=f"rec-{uuid.uuid4().hex[:12]}",
-        kind="security",
+        kind=context["kind"],
         alert_id=alert_id,
         model=result.model,
         summary=result.draft.summary,
@@ -206,6 +280,7 @@ async def process_options_ready(task: dict) -> tuple[Recommendation, GenerationR
         await client.post_recommendation(rec.model_dump())
     stats["submitted"] += 1
     stats["routes"][rec.model] += 1
+    stats["kinds"][rec.kind] += 1
     return rec, result
 
 
@@ -240,14 +315,14 @@ async def worker_loop() -> None:
             continue
         stats["processed"] += 1
         try:
-            processed = await process_options_ready(task)
+            processed = await process_task(task)
             if processed is not None:
                 rec, result = processed
                 await announce_model_switch(result)
                 try:
                     await client.post_log(
                         "info",
-                        f"已提交 {rec.model} 建议 {rec.id}（{rec.alert_id} → "
+                        f"已提交 {rec.model}/{rec.kind} 建议 {rec.id}（{rec.alert_id} → "
                         f"{rec.recommended_option_id}，{rec.latency_ms:.0f} ms）",
                     )
                 except Exception:  # noqa: BLE001 - 日志失败不影响建议链路
@@ -259,13 +334,13 @@ async def worker_loop() -> None:
                 detail += "（后端校验拒绝——场景可能已重置，建议已丢弃）"
                 stats["dropped"] += 1
             try:
-                await client.post_log("warn", f"Agent 建议提交失败 {task['alert_id']}: {detail}")
+                await client.post_log("warn", f"Agent 建议提交失败 {task['key']}: {detail}")
             except Exception:  # noqa: BLE001
                 pass
         except Exception as exc:  # noqa: BLE001 - 单任务失败不拖垮服务
             stats["errors"] += 1
             try:
-                await client.post_log("warn", f"Agent 处理异常 {task['alert_id']}: {exc}")
+                await client.post_log("warn", f"Agent 处理异常 {task['key']}: {exc}")
             except Exception:  # noqa: BLE001
                 pass
 
@@ -311,7 +386,7 @@ async def health() -> dict:
         "ok": True,
         "service": "agent",
         "model": current_model,
-        "phase": "c3-stage2",
+        "phase": "c3-stage3",
         "pending_tasks": len(queue),
         "stats": dict(stats),
         "router": route_health,

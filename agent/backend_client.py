@@ -75,6 +75,9 @@ class BackendClient:
     async def get_buoys(self) -> list:
         return await self._get_json("buoys")
 
+    async def get_zones(self) -> dict:
+        return await self._get_json("zones")
+
     async def get_options(self, alert_id: str) -> dict:
         return await self._get_json(f"options/{alert_id}")
 

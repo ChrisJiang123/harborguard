@@ -19,6 +19,7 @@ runs/
 wandb/
 *.log
 logs/
+agent/runtime/
 
 # ---- 大型模型文件（权重 / GGUF / checkpoint） ----
 # 例外：ml/yolo/weights/best.pt 为最终交付的 nano 权重（几 MB），允许入库

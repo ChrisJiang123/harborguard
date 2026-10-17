@@ -125,14 +125,26 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   当前真实请求返回 429（余额/资源包不足），**未计作 cloud 成功**
 - ✅ 本地仅使用已安装的 `qwen3:1.7b`，显式关闭思考并用 JSON Schema；
   `harborguard-lora` 尚未训练或部署。连续 20 次真实 POST：local 20、cloud 0、template 0，
-  原始输出 20/20 合法，平均 5.153 秒、最大 8.650 秒，全部低于 10 秒
+  当时记录的结构与 ID 合格率为 20/20，平均 5.153 秒、最大 8.650 秒，全部低于 10 秒；
+  该数字不再表述为自然语言事实合格率
 - ✅ 无效云端凭证 + 本地不可达的隔离配置在 398 ms 内返回合法模板；
   不修改或输出真实凭证。不修改警报等级，不调用 `/api/decision`
-- ⏸ 二级警报、灾害及浮标建议触发留待下一阶段；云端成功验收受 Z.ai 账户 429 阻塞
+- ✅ 在结构与 ID 后增加确定性事实检查：浮标离线数量/ID、覆盖数量、置信度、方案风险与
+  延误、方案选择和证据不足；合法否定句不会因含“离线”误降级。健康状态分别统计结构
+  合格、事实合格、事实失败、重试成功、模型成功和模板兜底
+- ✅ 已补齐升到二级的 `alert_changed`、`reopen_plan`、down `buoy_changed`；计划按载荷去重并
+  最多每 20 秒仿真时间一次，reset/start 清理去重、节流和过期任务
+- ✅ 真实后端：场景 A 二级建议 `model=template`、9007.6 ms；浮标建议 `model=template`、
+  9002.6 ms；场景 B 灾害建议 `model=local`、5136.3 ms。灾害/浮标推荐 ID 均为 null，
+  evidence 全部为后端真实 ID；生成中 reset 后无迟到建议
+- ✅ 明确事实矛盾的脱敏失败样例写入被忽略的 `agent/runtime/`，不自动混入蒸馏集；
+  自由文本无法被规则完全验证，README 与 `/health` 均保留这一评估局限
+- ⏸ 云端成功验收仍受 Z.ai 账户 429 阻塞；本轮离线联调未重复发送付费请求探测
 
 ## 不入库的内容（.gitignore）
 
-`.env`、`.venv*/`、`ml/datasets/`（数据集，脚本可重跑）、`runs/`、`*.log`（训练日志）、
+`.env`、`.venv*/`、`ml/datasets/`（数据集，脚本可重跑）、`agent/runtime/`（脱敏失败样例）、
+`runs/`、`*.log`（训练日志）、
 `*.pt` / `*.pth` / `*.gguf` 等模型文件。
 唯一例外：`ml/yolo/weights/best.pt` 为最终交付的 nano 权重（几 MB），已放行入库。
 
