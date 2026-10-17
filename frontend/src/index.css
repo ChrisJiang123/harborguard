@@ -377,6 +377,7 @@ a { color: #70c8f9; text-decoration: none; }
 .three-display-controls select { min-width: 132px; padding: 3px 5px; background: #071522; color: #d7ebf7; border: 1px solid #35516b; border-radius: 3px; }
 .three-display-controls .three-range input { width: 92px; }
 .three-display-controls .three-range span { min-width: 30px; text-align: right; font-variant-numeric: tabular-nums; }
+.three-true-scale { padding: 4px 7px; color: #bce5f7; background: #143348; border: 1px solid #365e78; border-radius: 3px; font-size: 12px; }
 .three-layer-controls { position: absolute; top: 92px; right: 12px; z-index: 80; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; width: 360px; max-width: calc(100% - 24px); padding: 10px 12px; background: #091a2aeb; border: 1px solid #35516b; border-radius: 5px; color: #adc9df; font-size: 14px; }
 .three-layer-controls strong { grid-column: 1 / -1; color: #e0f2fe; font-weight: 600; }
 .three-layer-controls label { display: flex; align-items: center; gap: 7px; cursor: pointer; min-width: 0; }

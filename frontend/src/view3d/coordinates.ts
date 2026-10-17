@@ -10,6 +10,9 @@ export interface SceneBounds { center: Point3; span: number; width: number; leng
 export const HISTORY_CAPACITY = 60
 export const PREDICTED_CAPACITY = 12
 export const FLIGHT_SECONDS = 1.5
+// Presentation only: source elevations/depths and all business coordinates stay in meters.
+export const DEFAULT_VERTICAL_SCALE = 3
+export const VERTICAL_SCALES = [1, 2, 3, 4, 8] as const
 
 export function worldPosition(lat: number, lon: number, depth = 0, verticalScale = VZ): Point3 {
   const [east, north] = toLocal(lat, lon)
@@ -82,7 +85,7 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
     return { target, position: [target[0] + 80, -2 * verticalScale, target[2] + 100] }
   }
   const target: Point3 = [bounds.center[0], -8 * verticalScale, bounds.center[2]]
-  return { target, position: [bounds.center[0] + bounds.span * .3, bounds.span * .72, bounds.center[2] + bounds.span * .62] }
+  return { target, position: [bounds.center[0] + bounds.span * .3, bounds.span * .45, bounds.center[2] + bounds.span * .72] }
 }
 
 export function seabedElevation(x: number, z: number): number {

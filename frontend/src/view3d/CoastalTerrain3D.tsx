@@ -29,7 +29,7 @@ export function CoastalTerrain3D({ grid, verticalScale }: { grid: ShoreTerrainGr
         const elevation = grid.values[row * width + column]!
         const valid = elevation !== nodata_value
         const point = worldPosition(lat, lon)
-        positions.push(point[0], valid ? elevation * verticalScale : 0, point[2])
+        positions.push(point[0], valid ? elevation : 0, point[2])
         uvs.push(column / (width - 1), 1 - row / (height - 1))
         const color = valid ? heightColor(elevation, min_elevation_m, max_elevation_m) : BLACK
         colors.push(color.r, color.g, color.b)
@@ -49,7 +49,7 @@ export function CoastalTerrain3D({ grid, verticalScale }: { grid: ShoreTerrainGr
     result.computeVertexNormals()
     result.computeBoundingSphere()
     return result
-  }, [grid, verticalScale])
+  }, [grid])
   const sourceImagery = useTexture('/data/shore-ortho-usgs-naip.png')
   const imagery = useMemo(() => {
     const texture = sourceImagery.clone()
@@ -57,6 +57,7 @@ export function CoastalTerrain3D({ grid, verticalScale }: { grid: ShoreTerrainGr
     texture.anisotropy = 8
     return texture
   }, [sourceImagery])
-  useEffect(() => () => { geometry.dispose(); imagery.dispose() }, [geometry, imagery])
-  return <mesh geometry={geometry} raycast={() => {}} receiveShadow><meshStandardMaterial map={imagery} vertexColors roughness={1} metalness={0} side={DoubleSide} /></mesh>
+  useEffect(() => () => geometry.dispose(), [geometry])
+  useEffect(() => () => imagery.dispose(), [imagery])
+  return <mesh geometry={geometry} scale={[1, verticalScale, 1]} raycast={() => {}} receiveShadow><meshStandardMaterial map={imagery} vertexColors roughness={1} metalness={0} side={DoubleSide} /></mesh>
 }

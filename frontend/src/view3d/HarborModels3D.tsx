@@ -8,7 +8,7 @@ import type { ShoreTerrainGrid } from '../data/shoreTerrain'
 import { worldPosition } from './coordinates'
 import { CoastalTerrain3D } from './CoastalTerrain3D'
 
-function PortLines({ data }: { data: LocalBase }) {
+function PortLines({ data, terrain, verticalScale }: { data: LocalBase; terrain: ShoreTerrainGrid | null; verticalScale: number }) {
   const geometry = useMemo(() => {
     const positions: number[] = []
     const colors: number[] = []
@@ -18,7 +18,9 @@ function PortLines({ data }: { data: LocalBase }) {
       for (let i = 1; i < feature.geometry.coordinates.length; i++) {
         const previous = feature.geometry.coordinates[i - 1]!, current = feature.geometry.coordinates[i]!
         const a = worldPosition(previous[1]!, previous[0]!), b = worldPosition(current[1]!, current[0]!)
-        positions.push(a[0], 2.4, a[2], b[0], 2.4, b[2])
+        const groundA = terrain ? sampleShoreElevation(terrain, previous[1]!, previous[0]!) ?? 0 : 0
+        const groundB = terrain ? sampleShoreElevation(terrain, current[1]!, current[0]!) ?? 0 : 0
+        positions.push(a[0], Math.max(0, groundA) + 2.4, a[2], b[0], Math.max(0, groundB) + 2.4, b[2])
         colors.push(color.r, color.g, color.b, color.r, color.g, color.b)
       }
     })
@@ -26,9 +28,9 @@ function PortLines({ data }: { data: LocalBase }) {
     result.setAttribute('position', new Float32BufferAttribute(positions, 3))
     result.setAttribute('color', new Float32BufferAttribute(colors, 3))
     return result
-  }, [data])
+  }, [data, terrain])
   useEffect(() => () => geometry.dispose(), [geometry])
-  return <lineSegments geometry={geometry} raycast={() => {}}><lineBasicMaterial vertexColors transparent opacity={.82} /></lineSegments>
+  return <lineSegments geometry={geometry} scale={[1, verticalScale, 1]} raycast={() => {}}><lineBasicMaterial vertexColors transparent opacity={.82} /></lineSegments>
 }
 
 function PortBuildings({ data, verticalScale, terrain }: { data: LocalBase; verticalScale: number; terrain: ShoreTerrainGrid | null }) {
@@ -45,11 +47,11 @@ function PortBuildings({ data, verticalScale, terrain }: { data: LocalBase; vert
       const outer = toPoints(rings[0]!)
       const shape = new Shape(outer)
       shape.holes = rings.slice(1).filter(ring => ring.length >= 4).map(ring => new Path(toPoints(ring)))
-      const height = Math.min(100, Math.max(2, feature.properties.height_m ?? 8)) * verticalScale
+      const height = Math.min(100, Math.max(2, feature.properties.height_m ?? 8))
       const piece = new ExtrudeGeometry(shape, { depth: height, bevelEnabled: false, curveSegments: 1 })
       const anchor = rings[0]![0]!
       const ground = terrain ? sampleShoreElevation(terrain, anchor[1]!, anchor[0]!) ?? 0 : 0
-      piece.translate(0, 0, ground * verticalScale)
+      piece.translate(0, 0, ground)
       pieces.push(piece)
     }
     const merged = pieces.length ? mergeGeometries(pieces, false) : null
@@ -57,9 +59,9 @@ function PortBuildings({ data, verticalScale, terrain }: { data: LocalBase; vert
     const result = merged ?? new BufferGeometry()
     result.computeBoundingSphere()
     return result
-  }, [data, terrain, verticalScale])
+  }, [data, terrain])
   useEffect(() => () => geometry.dispose(), [geometry])
-  return <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><meshStandardMaterial color="#cdd7dc" roughness={.9} metalness={.04} flatShading /></mesh>
+  return <group scale={[1, verticalScale, 1]}><mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><meshStandardMaterial color="#e1e8ec" roughness={.9} metalness={.04} flatShading /></mesh></group>
 }
 
 export function HarborModels3D({ verticalScale, onStatus }: { verticalScale: number; onStatus: (status: string) => void }) {
@@ -81,7 +83,7 @@ export function HarborModels3D({ verticalScale, onStatus }: { verticalScale: num
     return () => { active = false }
   }, [onStatus])
   return <group>
-    {base && <PortLines data={base} />}
+    {base && <PortLines data={base} terrain={terrain} verticalScale={verticalScale} />}
     {terrain && <CoastalTerrain3D grid={terrain} verticalScale={verticalScale} />}
     {buildings && <PortBuildings data={buildings} verticalScale={verticalScale} terrain={terrain} />}
   </group>

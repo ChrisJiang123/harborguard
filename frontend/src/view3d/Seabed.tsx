@@ -25,7 +25,7 @@ export function Seabed({ grid, verticalScale, showSurface = true, showContours =
         const lon = bounds.west + column / (width - 1) * (bounds.east - bounds.west)
         const raw = grid.values[row * width + column]!
         const depth = raw === nodata_value ? max_depth_m : raw
-        positions.push(...worldPosition(lat, lon, depth, verticalScale))
+        positions.push(...worldPosition(lat, lon, depth, 1))
         const color = raw === nodata_value ? new Color('#172838') : depthColor(depth, min_depth_m, max_depth_m)
         colors.push(color.r, color.g, color.b)
       }
@@ -46,13 +46,13 @@ export function Seabed({ grid, verticalScale, showSurface = true, showContours =
     result.computeVertexNormals()
     result.computeBoundingSphere()
     return result
-  }, [grid, verticalScale])
+  }, [grid])
   const contours = useMemo(() => {
     const minor: number[] = [], major: number[] = []
     for (const segment of buildBathymetryContours(grid)) {
       const target = Math.abs(segment.depth % 10) < .001 ? major : minor
-      const from = worldPosition(segment.from.lat, segment.from.lon, segment.depth, verticalScale)
-      const to = worldPosition(segment.to.lat, segment.to.lon, segment.depth, verticalScale)
+      const from = worldPosition(segment.from.lat, segment.from.lon, segment.depth, 1)
+      const to = worldPosition(segment.to.lat, segment.to.lon, segment.depth, 1)
       from[1] += .15; to[1] += .15
       target.push(...from, ...to)
     }
@@ -63,9 +63,9 @@ export function Seabed({ grid, verticalScale, showSurface = true, showContours =
       return result
     }
     return { minor: make(minor), major: make(major) }
-  }, [grid, verticalScale])
+  }, [grid])
   useEffect(() => () => { geometry.dispose(); contours.minor.dispose(); contours.major.dispose() }, [geometry, contours])
-  return <group>
+  return <group scale={[1, verticalScale, 1]}>
     {showSurface && <><mesh geometry={geometry} raycast={() => {}}><meshStandardMaterial vertexColors roughness={.96} side={DoubleSide} /></mesh><mesh geometry={geometry} position={[0, -.04, 0]} raycast={() => {}}><meshBasicMaterial color="#a8c8d8" wireframe transparent opacity={.055} depthWrite={false} /></mesh></>}
     {showContours && <><lineSegments geometry={contours.minor} raycast={() => {}} renderOrder={5}><lineBasicMaterial color="#9bd8e5" transparent opacity={.38} depthWrite={false} /></lineSegments><lineSegments geometry={contours.major} raycast={() => {}} renderOrder={6}><lineBasicMaterial color="#d8f3f7" transparent opacity={.62} depthWrite={false} /></lineSegments></>}
   </group>

@@ -8,7 +8,7 @@ import { CLASS_NAMES, clock } from '../theme'
 import { AlertVolume } from './AlertVolume'
 import { Buoy3D } from './Buoy3D'
 import { CameraRig } from './CameraRig'
-import { cameraPreset, sceneBounds } from './coordinates'
+import { cameraPreset, DEFAULT_VERTICAL_SCALE, sceneBounds, VERTICAL_SCALES } from './coordinates'
 import type { CameraMode } from './coordinates'
 import { SceneBoundary } from './SceneBoundary'
 import { Seabed } from './Seabed'
@@ -80,7 +80,7 @@ export default function Scene() {
   const [layers, setLayers] = useState<Layers>(initialLayers)
   const [waterVisible, setWaterVisible] = useState(true)
   const [waterOpacity, setWaterOpacity] = useState(.24)
-  const [verticalScale, setVerticalScale] = useState(1)
+  const [verticalScale, setVerticalScale] = useState<number>(DEFAULT_VERTICAL_SCALE)
   const [environmentStatus, setEnvironmentStatus] = useState('Loading real harbor geometry…')
   const [labelMode, setLabelMode] = useState<'auto' | 'all' | 'minimal'>('auto')
   const [simple, setSimple] = useState(false)
@@ -92,7 +92,7 @@ export default function Scene() {
   const updateFps = useCallback((value: number) => setFps(value), [])
   const updateEnvironmentStatus = useCallback((status: string) => setEnvironmentStatus(status), [])
   const bounds = useMemo(() => sceneBounds(resources, grid), [resources, grid])
-  const camera = useMemo(() => ({ fov: 45, near: .25, far: Math.max(50000, bounds.span * 10), position: cameraPreset('overview', bounds, undefined, undefined, verticalScale).position }), [bounds, verticalScale])
+  const camera = useMemo(() => ({ fov: 45, near: .25, far: Math.max(50000, bounds.span * 10), position: cameraPreset('overview', bounds, undefined, undefined, DEFAULT_VERTICAL_SCALE).position }), [bounds])
   const mode: CameraMode = selected && selected !== choice.selectedAtChoice ? 'follow' : choice.mode === 'follow' && !selected ? 'overview' : choice.mode
   const choose = (next: CameraMode) => setChoice(current => ({ mode: next, selectedAtChoice: selected, revision: current.revision + 1 }))
   const setLayer = (key: keyof Layers, value: boolean) => setLayers(current => ({ ...current, [key]: value }))
@@ -102,7 +102,7 @@ export default function Scene() {
   const triangleCount = grid ? Math.max(0, (grid.metadata.width - 1) * (grid.metadata.height - 1) * 2 - grid.metadata.nodata_cells * 2) : 0
   return <div className="three-stage" ref={container} aria-label="Harbor surface and underwater 3D digital twin">
     <SceneBoundary><Canvas key={rendererVersion} camera={camera} dpr={[1, 1.35]} performance={{ min: .65 }} gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }} fallback={<div className="three-fallback"><h3>3D rendering is unavailable in this browser</h3><button onClick={() => useHarbor.getState().setView('2d')}>Return to 2D map</button></div>} onPointerMissed={() => useHarbor.getState().selectTrack(null)}>
-      <color attach="background" args={['#071522']} /><fog attach="fog" args={['#071522', bounds.span * .65, bounds.span * 3.2]} /><ambientLight intensity={1.25} /><hemisphereLight args={['#d7efff', '#324b42', 1.55]} /><directionalLight position={[2000, 3500, 1500]} intensity={2.4} />
+      <color attach="background" args={['#071522']} /><fog attach="fog" args={['#071522', bounds.span * .85, bounds.span * 3.2]} /><ambientLight intensity={.8} /><hemisphereLight args={['#d7efff', '#324b42', 1.2]} /><directionalLight position={[bounds.span * .35, bounds.span * .3, -bounds.span * .4]} intensity={2.4} />
       <SceneLabelMode.Provider value={labelMode}><AdaptiveDpr pixelated />{waterVisible && <Water bounds={bounds} opacity={waterOpacity} grid={grid} />}{layers.seabed && grid && <Seabed grid={grid} verticalScale={verticalScale} showContours={layers.contours} />}{layers.models && <HarborModels3D verticalScale={verticalScale} onStatus={updateEnvironmentStatus} />}{layers.risks && <Zone3D />}{layers.routes && <NavigationRoute3D />}{layers.risks && <AlertVolume simple={simple} verticalScale={verticalScale} maxDepth={maxDepth} />}{layers.buoys && <><Buoy3D verticalScale={verticalScale} maxDepth={maxDepth} /><BlindAreas3D /></>}{layers.vessels && <><Track3D verticalScale={verticalScale} /><Target3D verticalScale={verticalScale} /></>}<CameraRig mode={mode} revision={choice.revision} bounds={bounds} verticalScale={verticalScale} /><RendererLifecycle onLoss={onLoss} /><PerformanceProbe onSample={updateFps} /></SceneLabelMode.Provider>
     </Canvas></SceneBoundary>
     {showStats && <div className="three-fps" aria-label="3D frame rate"><strong>{fps ?? '—'}</strong><span>FPS</span></div>}
@@ -112,7 +112,7 @@ export default function Scene() {
     <SelectedReadout />
     <DisasterLegend className="three-disaster-legend" />
     <div className="three-layer-controls"><strong>Layers</strong>{(Object.keys(layers) as (keyof Layers)[]).map(key => <label key={key}><input type="checkbox" checked={layers[key]} disabled={key === 'contours' && !layers.seabed} onChange={event => setLayer(key, event.target.checked)} />{{ models: 'Buildings & land terrain', seabed: 'Seabed terrain', contours: 'Depth contours', vessels: 'Vessel targets', buoys: 'Buoy coverage', routes: 'Routes', risks: 'Risk areas' }[key]}</label>)}</div>
-    <div className="three-display-controls"><label><input type="checkbox" checked={waterVisible} onChange={event => setWaterVisible(event.target.checked)} />Show water</label><label className="three-range">Water opacity <input aria-label="Water opacity" type="range" min="0.05" max="0.6" step="0.05" value={waterOpacity} disabled={!waterVisible} onChange={event => setWaterOpacity(Number(event.target.value))} /><span>{Math.round(waterOpacity * 100)}%</span></label><label>Vertical scale <select aria-label="Vertical exaggeration" value={verticalScale} onChange={event => setVerticalScale(Number(event.target.value))}><option value="1">1× True scale</option><option value="4">4× Enhanced</option><option value="8">8× Terrain inspection</option></select></label><label>Labels <select aria-label="3D label density" value={labelMode} onChange={event => setLabelMode(event.target.value as typeof labelMode)}><option value="auto">Auto declutter</option><option value="minimal">Key labels only</option><option value="all">All labels</option></select></label><label><input type="checkbox" checked={simple} onChange={event => setSimple(event.target.checked)} />Simplify risk volumes</label><label><input type="checkbox" checked={showStats} onChange={event => setShowStats(event.target.checked)} />Show frame rate</label></div>
+    <div className="three-display-controls"><label><input type="checkbox" checked={waterVisible} onChange={event => setWaterVisible(event.target.checked)} />Show water</label><label className="three-range">Water opacity <input aria-label="Water opacity" type="range" min="0.05" max="0.6" step="0.05" value={waterOpacity} disabled={!waterVisible} onChange={event => setWaterOpacity(Number(event.target.value))} /><span>{Math.round(waterOpacity * 100)}%</span></label><label>Vertical scale <select aria-label="Vertical exaggeration" value={verticalScale} onChange={event => setVerticalScale(Number(event.target.value))}>{VERTICAL_SCALES.map(scale => <option key={scale} value={scale}>{scale}× {scale === 1 ? 'True scale' : scale === DEFAULT_VERTICAL_SCALE ? 'Enhanced (default)' : 'Enhanced'}</option>)}</select></label>{verticalScale !== 1 && <button className="three-true-scale" onClick={() => setVerticalScale(1)}>Restore true scale (1×)</button>}<label>Labels <select aria-label="3D label density" value={labelMode} onChange={event => setLabelMode(event.target.value as typeof labelMode)}><option value="auto">Auto declutter</option><option value="minimal">Key labels only</option><option value="all">All labels</option></select></label><label><input type="checkbox" checked={simple} onChange={event => setSimple(event.target.checked)} />Simplify risk volumes</label><label><input type="checkbox" checked={showStats} onChange={event => setShowStats(event.target.checked)} />Show frame rate</label></div>
     <div className="three-legend">
       <span>Vertical {verticalScale}× {verticalScale === 1 ? '(true scale)' : '(enhanced, not true scale)'} · Water 0 m (reference, not live tide)</span>
       <span>{grid ? `${grid.metadata.width}×${grid.metadata.height} grid · Depth ${grid.metadata.min_depth_m.toFixed(1)}–${grid.metadata.max_depth_m.toFixed(1)} m · NoData ${grid.metadata.nodata_cells} · ~${triangleCount.toLocaleString()} triangles` : 'Seabed grid not loaded'}</span>

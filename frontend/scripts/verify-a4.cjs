@@ -3,7 +3,7 @@ const { writeFileSync } = require('node:fs')
 const path = require('node:path')
 writeFileSync(path.join(__dirname, '../work/verify-a4/package.json'), '{"type":"commonjs"}\n')
 const root = path.join(__dirname, '../work/verify-a4')
-const { worldPosition, zoneRings, zoneCenter, zoneExtent, sceneBounds, cameraPreset, seabedElevation, smoothFlight, pingEnvelope, createTrackMotion, sampleTrackMotion, FLIGHT_SECONDS } = require(path.join(root, 'view3d/coordinates.js'))
+const { worldPosition, zoneRings, zoneCenter, zoneExtent, sceneBounds, cameraPreset, seabedElevation, smoothFlight, pingEnvelope, createTrackMotion, sampleTrackMotion, FLIGHT_SECONDS, DEFAULT_VERTICAL_SCALE, VERTICAL_SCALES } = require(path.join(root, 'view3d/coordinates.js'))
 const { parseBathymetry } = require(path.join(root, 'data/bathymetry.js'))
 const { parseShoreTerrain, sampleShoreElevation } = require(path.join(root, 'data/shoreTerrain.js'))
 const { parseLocalBase } = require(path.join(root, 'data/localBase.js'))
@@ -20,9 +20,38 @@ const nearPoint = (actual, expected) => actual.forEach((value, i) => near(value,
 
 async function main() {
 const { LineGeometry, LineMaterial, Line2 } = await import('three-stdlib')
+const { BufferGeometry, Float32BufferAttribute, Group, Mesh, Vector3 } = await import('three')
 nearPoint(worldPosition(ORIGIN.lat, ORIGIN.lon, 12), [0, -12, 0])
 nearPoint(worldPosition(ORIGIN.lat, ORIGIN.lon, 12, 4), [0, -48, 0])
 assert.equal(VZ, 1)
+assert.equal(DEFAULT_VERTICAL_SCALE, 3, 'presentation defaults to moderate vertical enhancement, not business-coordinate scaling')
+assert.deepEqual(VERTICAL_SCALES, [1, 2, 3, 4, 8])
+// The same meter-space geometry is reused through every display scale, including restore.
+const reliefGeometry = new BufferGeometry()
+reliefGeometry.setAttribute('position', new Float32BufferAttribute([10, -12, 20, 10, 8, 20, 10, 23, 20], 3))
+const reliefAttribute = reliefGeometry.getAttribute('position')
+const originalRelief = [...reliefAttribute.array]
+const reliefGroup = new Group()
+reliefGroup.add(new Mesh(reliefGeometry))
+for (const scale of [...VERTICAL_SCALES, 1]) {
+  reliefGroup.scale.set(1, scale, 1)
+  reliefGroup.updateMatrixWorld(true)
+  for (let i = 0; i < 3; i++) {
+    const actual = new Vector3().fromBufferAttribute(reliefAttribute, i).applyMatrix4(reliefGroup.matrixWorld)
+    nearPoint(actual.toArray(), [10, originalRelief[i * 3 + 1] * scale, 20])
+  }
+  nearPoint(worldPosition(ORIGIN.lat, ORIGIN.lon, 12, scale), [0, -12 * scale, 0])
+  assert.equal(reliefGeometry.getAttribute('position'), reliefAttribute)
+  assert.deepEqual([...reliefAttribute.array], originalRelief)
+}
+reliefGeometry.dispose()
+const readSource = file => require('node:fs').readFileSync(path.join(__dirname, '../src/view3d', file), 'utf8')
+for (const file of ['Seabed.tsx', 'CoastalTerrain3D.tsx', 'HarborModels3D.tsx']) {
+  assert.match(readSource(file), /scale=\{\[1, verticalScale, 1\]\}/, `${file}: apply enhancement at the object transform`)
+  assert.doesNotMatch(readSource(file), /\}, \[[^\]]*verticalScale[^\]]*\]\)/, `${file}: scale changes must not rebuild geometry or dispose textures`)
+}
+assert.match(readSource('Scene.tsx'), /useState<number>\(DEFAULT_VERTICAL_SCALE\)/)
+assert.match(readSource('Scene.tsx'), /Restore true scale \(1×\)/)
 const asset = DEMO_ASSETS[0], buoy = DEMO_BUOYS[0]
 const a2 = toLocal(asset.lat, asset.lon), b2 = toLocal(buoy.lat, buoy.lon)
 const a3 = worldPosition(asset.lat, asset.lon), b3 = worldPosition(buoy.lat, buoy.lon)
@@ -45,6 +74,7 @@ assert.ok(bounds.span >= 3600)
 const overview = cameraPreset('overview', bounds)
 assert.ok(overview.position[1] > 0)
 assert.equal(overview.target[1], -8)
+assert.ok(overview.position[1] / bounds.span < .6, 'lower overview angle should reveal vertical relief')
 const follow = cameraPreset('follow', bounds, { lat: ORIGIN.lat, lon: ORIGIN.lon, depth_m: 12 })
 nearPoint(follow.target, [0, -12, 0])
 assert.deepEqual(follow.position, [230, 138, 330])
