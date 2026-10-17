@@ -1,13 +1,11 @@
 import type { Asset } from '../types/contract'
 import type { StaticBuoy, ZoneCollection } from './mapGeometry'
+import { PROPOSED_SONARS } from './sonarDeployment'
 
 export const DEMO_ASSETS: Asset[] = [
   { id: 'asset-1', name: 'Demo Container Terminal', kind: 'berth', lat: 33.736, lon: -118.252, sensitivity: 0.9, rings_m: [1500, 800, 400] },
 ]
-export const DEMO_BUOYS: StaticBuoy[] = Array.from({ length: 10 }, (_, i) => ({
-  id: `B${i + 1}`, lat: 33.73 + Math.sin(i * Math.PI / 5) * 0.008,
-  lon: -118.26 + Math.cos(i * Math.PI / 5) * 0.011, range_m: 650,
-}))
+export const DEMO_BUOYS: StaticBuoy[] = PROPOSED_SONARS.map(({ id, lat, lon, range_m }) => ({ id, lat, lon, range_m }))
 // Example partitions only. These rectangles are not OSM or official port security boundaries.
 export const DEMO_ZONES: ZoneCollection = {
   type: 'FeatureCollection',

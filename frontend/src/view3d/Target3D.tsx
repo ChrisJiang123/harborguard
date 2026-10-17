@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useHarbor } from '../store/useHarbor'
 import { LEVEL_COLORS } from '../theme'
 import type { Cls } from '../types/contract'
-import { createTrackMotion, sampleTrackMotion } from './coordinates'
+import { blendHeading, createTrackMotion, sampleTrackMotion } from './coordinates'
 import { SceneLabel } from './SceneLabel'
 
 function FishSchool({ color }: { color: string }) {
@@ -47,11 +47,15 @@ function Target({ id, verticalScale }: { id: string; verticalScale: number }) {
   const heading = useHarbor(s => s.tracks[id]?.heading_deg ?? 0)
   const depth = useHarbor(s => s.tracks[id]?.depth_m ?? 0)
   const motion = useMemo(() => createTrackMotion(useHarbor.getState().tracks[id], verticalScale), [id, verticalScale])
-  useFrame(({ clock }) => {
+  const rotation = useRef({ heading: useHarbor.getState().tracks[id]?.heading_deg ?? 0, t: useHarbor.getState().latest?.t ?? 0 })
+  useFrame(({ clock }, delta) => {
     const track = useHarbor.getState().tracks[id]
     if (!track || !group.current) return
     group.current.position.fromArray(sampleTrackMotion(motion, track, clock.elapsedTime, verticalScale))
-    if (model.current) model.current.rotation.y = -track.heading_deg * Math.PI / 180
+    const time = useHarbor.getState().latest?.t ?? 0
+    rotation.current.heading = time < rotation.current.t || time - rotation.current.t > 5 ? track.heading_deg : blendHeading(rotation.current.heading, track.heading_deg, delta)
+    rotation.current.t = time
+    if (model.current) model.current.rotation.y = -rotation.current.heading * Math.PI / 180
   })
   const labelText = cls === 'vessel' ? `${id} · Vessel · ${Math.round(heading)}°` : `${id} · L${level} · ${depth.toFixed(1)} m`
   return <group ref={group} onClick={event => { event.stopPropagation(); useHarbor.getState().selectTrack(id) }}>

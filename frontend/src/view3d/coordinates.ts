@@ -10,6 +10,15 @@ export interface SceneBounds { center: Point3; span: number; width: number; leng
 export const HISTORY_CAPACITY = 60
 export const PREDICTED_CAPACITY = 12
 export const FLIGHT_SECONDS = 1.5
+// Presentation only: source elevations/depths and all business coordinates stay in meters.
+export const DEFAULT_VERTICAL_SCALE = 3
+export const VERTICAL_SCALES = [1, 2, 3, 4, 8] as const
+
+/** Shortest angular path across north; presentation only, no heading inference. */
+export function blendHeading(current: number, target: number, delta: number): number {
+  const difference = ((target - current + 540) % 360 + 360) % 360 - 180
+  return (current + difference * (1 - Math.exp(-10 * Math.max(0, Math.min(delta, .1)))) + 360) % 360
+}
 
 export function worldPosition(lat: number, lon: number, depth = 0, verticalScale = VZ): Point3 {
   const [east, north] = toLocal(lat, lon)
@@ -62,7 +71,8 @@ export function sceneBounds(resources: MapResources | null, bathymetry?: Bathyme
   return { center: [(minX + maxX) / 2, -SEABED_DEPTH_M / 3, (minZ + maxZ) / 2], span: Math.max(maxX - minX, maxZ - minZ), width: maxX - minX, length: maxZ - minZ }
 }
 
-export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: Pick<Track, 'lat' | 'lon' | 'depth_m'>, asset?: { lat: number; lon: number }, verticalScale = VZ): { position: Point3; target: Point3 } {
+export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: Pick<Track, 'lat' | 'lon' | 'depth_m'>, asset?: { lat: number; lon: number }, verticalScale = VZ, viewportAspect = 16 / 9): { position: Point3; target: Point3 } {
+  const framingSpan = bounds.span * Math.max(1, 1.5 / Math.max(.25, viewportAspect))
   if (mode === 'follow' && selected) {
     const target = worldPosition(selected.lat, selected.lon, selected.depth_m, verticalScale)
     return { target, position: [target[0] + 230, target[1] + 150, target[2] + 330] }
@@ -73,7 +83,7 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
   }
   if (mode === 'surface') {
     const target: Point3 = [bounds.center[0], 0, bounds.center[2]]
-    return { target, position: [target[0] + bounds.span * .27, Math.max(260, bounds.span * .13), target[2] + bounds.span * .52] }
+    return { target, position: [target[0] + framingSpan * .27, Math.max(260, framingSpan * .13), target[2] + framingSpan * .52] }
   }
   if (mode === 'underwater') {
     // Use a close, downward-looking underwater inspection angle. A span-scaled
@@ -82,7 +92,7 @@ export function cameraPreset(mode: CameraMode, bounds: SceneBounds, selected?: P
     return { target, position: [target[0] + 80, -2 * verticalScale, target[2] + 100] }
   }
   const target: Point3 = [bounds.center[0], -8 * verticalScale, bounds.center[2]]
-  return { target, position: [bounds.center[0] + bounds.span * .3, bounds.span * .72, bounds.center[2] + bounds.span * .62] }
+  return { target, position: [bounds.center[0] + framingSpan * .3, framingSpan * .45, bounds.center[2] + framingSpan * .72] }
 }
 
 export function seabedElevation(x: number, z: number): number {

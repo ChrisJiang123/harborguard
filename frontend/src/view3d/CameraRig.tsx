@@ -13,13 +13,14 @@ export function CameraRig({ mode, revision, bounds, verticalScale }: { mode: Cam
   const controls = useRef<OrbitControlsImpl>(null)
   const camera = useThree(s => s.camera)
   const clock = useThree(s => s.clock)
+  const aspect = useThree(s => s.size.width / Math.max(1, s.size.height))
   const flight = useRef({ active: false, at: 0, startCamera: new Vector3(), startTarget: new Vector3(), goalCamera: new Vector3(), goalTarget: new Vector3(), offset: new Vector3(), movement: new Vector3() })
   const motion = useRef(createTrackMotion())
   useEffect(() => {
     if (!controls.current) return
     const track = selected ? useHarbor.getState().tracks[selected] : undefined
     const asset = useMapData.getState().resources?.assets[0]
-    const preset = cameraPreset(mode, bounds, track, asset, verticalScale)
+    const preset = cameraPreset(mode, bounds, track, asset, verticalScale, aspect)
     const plan = flight.current
     plan.startCamera.copy(camera.position)
     plan.startTarget.copy(controls.current.target)
@@ -29,7 +30,7 @@ export function CameraRig({ mode, revision, bounds, verticalScale }: { mode: Cam
     plan.at = clock.elapsedTime
     plan.active = true
     motion.current = createTrackMotion(track, verticalScale)
-  }, [selected, mode, revision, bounds, camera, clock, verticalScale])
+  }, [selected, mode, revision, bounds, camera, clock, verticalScale, aspect])
   useFrame((_, delta) => {
     if (!controls.current) return
     const track = selected ? useHarbor.getState().tracks[selected] : undefined

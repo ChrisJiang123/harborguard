@@ -148,6 +148,15 @@ async function main() {
     assert.equal(useHarbor.getState().decisionsByAlert.A1.action, 'approve')
     useReplay.getState().driver.setSpeed(2)
     assert.equal(useReplay.getState().speed, 2)
+    useReplay.getState().driver.seek(35000)
+    useHarbor.getState().selectTrack('T3')
+    useReplay.getState().driver.play(true)
+    await new Promise(resolve => setTimeout(resolve, 260))
+    useReplay.getState().driver.play(false)
+    assert.equal(useHarbor.getState().selectedTrackId, 'T3', 'pause/resume must retain the selected vessel')
+    const pausedT3 = useHarbor.getState().tracks.T3
+    await new Promise(resolve => setTimeout(resolve, 100))
+    assert.equal(useHarbor.getState().tracks.T3, pausedT3)
     cleanup(); cleanup = null
     assert.equal(useReplay.getState().driver, null)
     assert.deepEqual(calls.slice(before), ['/demo_a.jsonl'])

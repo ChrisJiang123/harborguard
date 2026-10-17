@@ -346,7 +346,8 @@ a { color: #70c8f9; text-decoration: none; }
   .connection-group { flex-wrap: wrap; justify-content: flex-end; }.critical-badge { display: none; }
 }
 /* A4 underwater twin */
-.three-stage { position: relative; flex: 1; min-height: 180px; isolation: isolate; overflow: hidden; background: #071522; }
+.three-stage { position: relative; flex: 1; min-height: 180px; isolation: isolate; overflow: hidden; background: #071522; container-type: inline-size; }
+.three-camera-controls .three-settings-toggle { display: none; }
 .three-render-root { position: absolute; inset: 0; }
 .three-camera-controls { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 80; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; pointer-events: none; }
 .three-camera-controls > * { pointer-events: auto; }
@@ -377,6 +378,7 @@ a { color: #70c8f9; text-decoration: none; }
 .three-display-controls select { min-width: 132px; padding: 3px 5px; background: #071522; color: #d7ebf7; border: 1px solid #35516b; border-radius: 3px; }
 .three-display-controls .three-range input { width: 92px; }
 .three-display-controls .three-range span { min-width: 30px; text-align: right; font-variant-numeric: tabular-nums; }
+.three-true-scale { padding: 4px 7px; color: #bce5f7; background: #143348; border: 1px solid #365e78; border-radius: 3px; font-size: 12px; }
 .three-layer-controls { position: absolute; top: 92px; right: 12px; z-index: 80; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; width: 360px; max-width: calc(100% - 24px); padding: 10px 12px; background: #091a2aeb; border: 1px solid #35516b; border-radius: 5px; color: #adc9df; font-size: 14px; }
 .three-layer-controls strong { grid-column: 1 / -1; color: #e0f2fe; font-weight: 600; }
 .three-layer-controls label { display: flex; align-items: center; gap: 7px; cursor: pointer; min-width: 0; }
@@ -386,6 +388,18 @@ a { color: #70c8f9; text-decoration: none; }
 .three-context-notice { position: absolute; top: 70px; left: 12px; right: 12px; z-index: 100; padding: 12px; background: #432b1eea; color: #f7d49b; border: 1px solid #89603b; border-radius: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 14px; }
 .three-loading, .three-fallback { display: flex; flex: 1; height: 100%; min-height: 250px; flex-direction: column; justify-content: center; align-items: center; gap: 20px; color: #a0bfd7; text-align: center; padding: 30px; background: #071522; }
 .three-fallback h3 { color: #d9ecfa; }.three-fallback > div { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.three-panel { display: block; }
+.three-panel > summary { position: relative; padding-right: 24px; cursor: pointer; list-style: none; color: #c8e6f5; font-weight: 600; }
+.three-panel > summary::-webkit-details-marker { display: none; }
+.three-panel > summary::after { content: '+'; position: absolute; right: 0; top: 0; }
+.three-panel[open] > summary::after { content: '−'; }
+.three-panel > summary:focus-visible { outline: 2px solid #7dd3fc; outline-offset: 3px; }
+.three-panel-body { display: flex; flex-direction: column; gap: 7px; margin-top: 8px; max-height: 250px; overflow-y: auto; }
+.three-layer-controls .three-panel-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; }
+.three-display-controls { min-width: 270px; }
+.three-selected-readout { bottom: 58px; pointer-events: auto; }
+.three-data-panel { position: absolute; top: 58px; left: 12px; z-index: 75; max-width: min(680px, calc(100% - 390px)); background: #081827eb; border: 1px solid #466157; border-radius: 4px; padding: 7px 10px; font-size: 13px; }
+.three-data-panel .three-source-note, .three-data-panel .three-environment-note { position: static; display: block; max-width: none; padding: 6px 8px; font-size: 12px; }
 @media (max-width: 1450px) { .three-source-note { top: 96px; max-width: calc(100% - 390px); }.three-environment-note { top: 180px; max-width: calc(100% - 390px); }.three-layer-controls { top: 96px; }.three-selected-readout { max-width: calc(100% - 320px); } }
 @media (max-width: 650px) {
   .three-camera-controls { right: 12px; flex-wrap: wrap; }.three-camera-controls button { flex: 1; padding: 6px; }.three-object-picker { flex-basis: 100%; margin-left: 0; }.three-object-picker select { flex: 1; }
@@ -396,6 +410,27 @@ a { color: #70c8f9; text-decoration: none; }
   .three-display-controls .three-range input { width: 70px; }
   .three-legend { max-width: calc(100% - 24px); font-size: 12px; }.three-legend > span:nth-child(2) { display: none; }
   .three-selected-readout { bottom: 120px; max-width: calc(100% - 24px); }.three-selected-readout > span { display: none; }
+}
+
+/* Respond to the canvas width, not the full dashboard width. */
+@container (max-width: 700px) {
+  .three-camera-controls .three-settings-toggle { display: block; }
+  .three-camera-controls button { padding: 5px 7px; font-size: 12px; }
+  .three-object-picker { flex-basis: 100%; margin-left: 0; font-size: 12px; }
+  .three-object-picker select { flex: 1; }
+  .three-source-note, .three-environment-note, .three-layer-controls, .three-display-controls { display: none; }
+  .three-data-panel { top: 132px; width: calc(100% - 24px); max-width: none; font-size: 11px; }
+  .settings-open .three-layer-controls { display: block; left: 12px; right: auto; top: 185px; width: calc(50% - 18px); font-size: 12px; padding: 7px; }
+  .three-layer-controls .three-panel-body { grid-template-columns: 1fr; }
+  .settings-open .three-display-controls { display: block; top: 185px; bottom: auto; width: calc(50% - 18px); min-width: 0; font-size: 12px; padding: 7px; max-height: calc(100% - 260px); overflow-y: auto; }
+  .three-display-controls label { flex-wrap: wrap; gap: 4px; }
+  .three-display-controls select { min-width: 0; max-width: 100%; }
+  .three-legend { max-width: calc(100% - 24px); font-size: 12px; }
+  .three-legend > span:not(:first-child) { display: none; }
+  .three-selected-readout { bottom: 80px; max-width: calc(100% - 24px); padding: 6px 8px; font-size: 12px; }
+  .three-selected-readout > span { display: none; }
+  .three-selected-readout strong { font-size: 16px; }
+  .three-stage .three-fps { bottom: 180px; }
 }
 
 /* A6 projection and local recording tools */

@@ -8,8 +8,30 @@ export interface BathymetryGrid {
     nodata_value: number; width: number; height: number; bounds: BathymetryBounds
     approximate_spacing_m: { east_west: number; north_south: number }
     min_depth_m: number; max_depth_m: number; nodata_cells: number
+    source_spacing_m?: number
+    reference_water_level_note?: string
+    measurement_method?: 'multibeam_echosounder'
+    survey_id?: string
   }
   values: number[]
+}
+
+/** Labels come from the loaded dataset, never from a hard-coded MSL assumption. */
+export function bathymetryDescription(grid: BathymetryGrid): string {
+  const m = grid.metadata
+  if (m.source_kind === 'synthetic') return 'Demo terrain · Not surveyed bathymetry · Fixed reference water level'
+  const spacing = `${m.approximate_spacing_m.east_west.toFixed(1)}×${m.approximate_spacing_m.north_south.toFixed(1)} m display grid`
+  return `${m.title} · ${m.vertical_datum} · ${m.source_spacing_m ? `Finest original grid ${m.source_spacing_m} m · ` : ''}${spacing} · Grid spacing is not survey accuracy / Not for navigation`
+}
+
+/** Only replace aligned harbor cells with a finer grid from the same source/frame. */
+export function compatibleBathymetryDetail(main: BathymetryGrid, patch: BathymetryGrid): boolean {
+  const a = main.metadata, b = patch.metadata, x = a.bounds, y = b.bounds
+  if (a.source !== b.source || a.vertical_datum !== b.vertical_datum || a.horizontal_crs !== b.horizontal_crs || a.reference_water_level_m !== b.reference_water_level_m || y.west < x.west || y.east > x.east || y.south < x.south || y.north > x.north) return false
+  const dx = (x.east-x.west)/(a.width-1), dy = (x.north-x.south)/(a.height-1)
+  const aligned = (n: number) => Math.abs(n-Math.round(n)) < 1e-6
+  const spanX = (y.east-y.west)/dx, spanY = (y.north-y.south)/dy
+  return [(y.west-x.west)/dx,(y.east-x.west)/dx,(x.north-y.north)/dy,(x.north-y.south)/dy].every(aligned) && spanX > 0 && spanY > 0 && (b.width-1) > spanX && (b.height-1) > spanY && aligned((b.width-1)/spanX) && aligned((b.height-1)/spanY)
 }
 
 const object = (value: unknown): Record<string, unknown> | null => typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null
@@ -21,6 +43,7 @@ export function parseBathymetry(value: unknown): BathymetryGrid | null {
   const coordinates = [bounds.west, bounds.south, bounds.east, bounds.north]
   if (!coordinates.every(item => typeof item === 'number' && Number.isFinite(item)) || !(bounds.west as number < (bounds.east as number)) || !(bounds.south as number < (bounds.north as number)) || !values.every(item => typeof item === 'number' && Number.isFinite(item))) return null
   const noData = metadata.nodata_value as number
+  if (metadata.source_spacing_m !== undefined && (typeof metadata.source_spacing_m !== 'number' || !Number.isFinite(metadata.source_spacing_m) || metadata.source_spacing_m <= 0) || metadata.reference_water_level_note !== undefined && typeof metadata.reference_water_level_note !== 'string' || metadata.survey_id !== undefined && typeof metadata.survey_id !== 'string' || metadata.measurement_method !== undefined && metadata.measurement_method !== 'multibeam_echosounder') return null
   const valid = values.filter(item => item !== noData) as number[]
   const minDepth = valid.reduce((minimum, item) => Math.min(minimum, item), Infinity)
   const maxDepth = valid.reduce((maximum, item) => Math.max(maximum, item), -Infinity)
