@@ -19,20 +19,20 @@ const Scene = lazy(() => import('../view3d/Scene'))
 function ViewFooter() {
   const conn = useHarbor(s => s.conn)
   const mode = useHarbor(s => s.latest?.mode)
-  return <div className="view-footer"><span><i className="status-dot" />{conn === 'mock' ? '本地模拟数据 · 非真实港口态势' : conn === 'live' ? '后端实时数据' : conn === 'replay' ? '文件回放 · 只读 · 不连接后端' : '等待后端 · 可切换本地演示'}</span><span>{mode === 'disaster' ? '灾害模式 · 复航方案由数据源提供' : '安防模式 · 方案指标由数据源提供'}</span></div>
+  return <div className="view-footer"><span><i className="status-dot" />{conn === 'mock' ? 'Local simulated data · Not live port conditions' : conn === 'live' ? 'Live backend data' : conn === 'replay' ? 'File replay · Read-only · Backend disconnected' : 'Waiting for backend · Local demo available'}</span><span>{mode === 'disaster' ? 'Disaster mode · Source-provided reopening plan' : 'Security mode · Source-provided response metrics'}</span></div>
 }
 function MainView() {
   const view = useHarbor(s => s.view)
-  return <section className="main-view"><div className="view-toolbar"><div><span className="eyebrow">PORT OF LOS ANGELES</span><h2>港口态势总览</h2></div><div className="view-tabs"><button className={view === '2d' ? 'active' : ''} onClick={() => useHarbor.getState().setView('2d')}>2D 地图</button><button className={view === '3d' ? 'active' : ''} onClick={() => useHarbor.getState().setView('3d')}>3D 水下</button><DemoTools /></div></div><ReplayControls />{view === '2d' ? <MapView /> : <Suspense fallback={<div className="three-loading" role="status">正在加载 3D 水下视图…</div>}><Scene /></Suspense>}<ViewFooter /></section>
+  return <section className="main-view"><div className="view-toolbar"><div><span className="eyebrow">PORT OF LOS ANGELES</span><h2>Port Overview</h2></div><div className="view-tabs"><button className={view === '2d' ? 'active' : ''} onClick={() => useHarbor.getState().setView('2d')}>2D Map</button><button className={view === '3d' ? 'active' : ''} onClick={() => useHarbor.getState().setView('3d')}>3D View</button><DemoTools /></div></div><ReplayControls />{view === '2d' ? <MapView /> : <Suspense fallback={<div className="three-loading" role="status">Loading 3D view…</div>}><Scene /></Suspense>}<ViewFooter /></section>
 }
 function StatusNotice() {
   const error = useHarbor(s => s.error)
   const conn = useHarbor(s => s.conn)
   const recovery = useHarbor(s => s.recovery)
-  if (error) return <div className="status-notice error" role="alert">{error}<button onClick={() => useHarbor.getState().setError(null)} aria-label="关闭提示">×</button></div>
-  if (conn === 'disconnected' || conn === 'connecting') return <div className="status-notice">{conn === 'connecting' ? '正在连接后端…' : '后端未连接，正在自动重连。'} 可以点击顶栏“本地演示”继续查看。</div>
-  if (conn === 'live' && recovery.phase === 'loading') return <div className="status-notice">正在衔接实时事件并恢复刷新前记录…</div>
-  if (conn === 'live' && recovery.message) return <div className="status-notice warning" role="status">{recovery.message} 不会从自由文本日志推断审批结果。</div>
+  if (error) return <div className="status-notice error" role="alert">{error}<button onClick={() => useHarbor.getState().setError(null)} aria-label="Dismiss message">×</button></div>
+  if (conn === 'disconnected' || conn === 'connecting') return <div className="status-notice">{conn === 'connecting' ? 'Connecting to backend…' : 'Backend disconnected. Reconnecting automatically.'} Select Local Demo in the top bar to continue.</div>
+  if (conn === 'live' && recovery.phase === 'loading') return <div className="status-notice">Restoring history and joining live events…</div>
+  if (conn === 'live' && recovery.message) return <div className="status-notice warning" role="status">{recovery.message} Approval status is never inferred from free-text logs.</div>
   return null
 }
 export function AppShell() {
@@ -45,5 +45,5 @@ function NetworkNotice() {
   const model = useHarbor(s => s.latestRec?.model)
   const conn = useHarbor(s => s.conn)
   if (!offline) return null
-  return <div className="network-notice" role="status">{conn === 'mock' ? '模拟外网已断开' : conn === 'replay' ? '记录状态：外网已断开' : '外网已断开'} · {model === 'local' ? 'Agent 已切换本地模型' : model === 'template' ? '当前为模板建议，未运行本地模型' : '等待 Agent 确认本地模型状态'}</div>
+  return <div className="network-notice" role="status">{conn === 'mock' ? 'Simulated external network outage' : conn === 'replay' ? 'Recorded state: external network offline' : 'External network offline'} · {model === 'local' ? 'Agent switched to the local model' : model === 'template' ? 'Template recommendation active; local model is not running' : 'Waiting for Agent local-model status'}</div>
 }

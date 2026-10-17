@@ -53,7 +53,7 @@ function Target({ id, verticalScale }: { id: string; verticalScale: number }) {
     group.current.position.fromArray(sampleTrackMotion(motion, track, clock.elapsedTime, verticalScale))
     if (model.current) model.current.rotation.y = -track.heading_deg * Math.PI / 180
   })
-  const labelText = cls === 'vessel' ? `${id} · 船舶 · ${Math.round(heading)}°` : `${id} · L${level} · ${depth.toFixed(1)} m`
+  const labelText = cls === 'vessel' ? `${id} · Vessel · ${Math.round(heading)}°` : `${id} · L${level} · ${depth.toFixed(1)} m`
   return <group ref={group} onClick={event => { event.stopPropagation(); useHarbor.getState().selectTrack(id) }}>
     <group ref={model} scale={5}><TargetBody cls={cls} color={LEVEL_COLORS[level]} tentative={tentative} /></group>
     {selected && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -6, 0]} raycast={() => {}}><ringGeometry args={[19, 22, 40]} /><meshBasicMaterial color="#ffffff" transparent opacity={.85} depthWrite={false} side={2} /></mesh>}

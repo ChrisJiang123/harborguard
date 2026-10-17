@@ -105,7 +105,7 @@ async function testOrdinaryDelayDoesNotLookLikeRestart() {
   await request
   assert.equal(useHarbor.getState().latest.seq, 75)
   assert.equal(useHarbor.getState().recovery.phase, 'complete')
-  assert.doesNotMatch(useHarbor.getState().recovery.message ?? '', /重启|序列回退/)
+  assert.doesNotMatch(useHarbor.getState().recovery.message ?? '', /restart|sequence reset/)
 }
 
 async function testBackendRestartUsesConnectionBaseline() {
@@ -124,7 +124,7 @@ async function testBackendRestartUsesConnectionBaseline() {
   assert.deepEqual(useHarbor.getState().decisionsByAlert, {})
   assert.equal(useHarbor.getState().session, oldSession + 1)
   assert.equal(useHarbor.getState().recovery.phase, 'partial')
-  assert.match(useHarbor.getState().recovery.message, /重启前/)
+  assert.match(useHarbor.getState().recovery.message, /pre-restart/)
 }
 
 async function testResetAndNewSocketInvalidateLateResponses() {
@@ -178,7 +178,7 @@ async function testHistoryCapIsExplicitlyPartial() {
   const session = useHarbor.getState().session
   await recovery.recoverLiveFromBackend(makeState(600), undefined, { generation, session })
   assert.equal(useHarbor.getState().recovery.phase, 'partial')
-  assert.match(useHarbor.getState().recovery.message, /历史不完整/)
+  assert.match(useHarbor.getState().recovery.message, /Incomplete history/)
   assert.equal(useHarbor.getState().events.length, 500)
 }
 

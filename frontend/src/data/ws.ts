@@ -44,7 +44,7 @@ export function startLive(): () => void {
           // first snapshot from the restarted backend session.
           useHarbor.getState().reset()
         }
-        if (!receiveMessage(message)) throw new Error('数据格式与共享契约不一致')
+        if (!receiveMessage(message)) throw new Error('Message format does not match the shared contract')
         useHarbor.getState().setConnection('live')
         if (isInitialState) {
           recoveryStarted = true
@@ -56,7 +56,7 @@ export function startLive(): () => void {
         }
         armWatchdog()
       } catch {
-        useHarbor.getState().setError('收到无法解析的数据，请和后端核对共享契约 v1。')
+        useHarbor.getState().setError('Unreadable message received. Check shared contract v1 with the backend team.')
       }
     }
     current.onerror = () => current.close()

@@ -31,8 +31,8 @@ export function parseBathymetry(value: unknown): BathymetryGrid | null {
 
 export async function fetchBathymetry(url: string, timeoutMs = 8000): Promise<BathymetryGrid> {
   const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
-  if (!response.ok) throw new Error(`DEM 读取失败（HTTP ${response.status}）`)
+  if (!response.ok) throw new Error(`DEM request failed (HTTP ${response.status})`)
   const parsed = parseBathymetry(await response.json())
-  if (!parsed) throw new Error('DEM 元数据或网格格式无效')
+  if (!parsed) throw new Error('Invalid DEM metadata or grid format')
   return parsed
 }

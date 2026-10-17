@@ -62,9 +62,9 @@ export function sampleShoreElevation(grid: ShoreTerrainGrid, lat: number, lon: n
 let cached: Promise<ShoreTerrainGrid> | null = null
 export function loadShoreTerrain() {
   cached ??= fetch('/data/shore-dem-usgs-3dep.json', { signal: AbortSignal.timeout(12000) }).then(async response => {
-    if (!response.ok) throw new Error(`USGS 岸上 DEM 读取失败（HTTP ${response.status}）`)
+    if (!response.ok) throw new Error(`USGS land DEM request failed (HTTP ${response.status})`)
     const grid = parseShoreTerrain(await response.json())
-    if (!grid) throw new Error('USGS 岸上 DEM 元数据或网格格式无效')
+    if (!grid) throw new Error('Invalid USGS land DEM metadata or grid format')
     return grid
   }).catch(error => { cached = null; throw error })
   return cached

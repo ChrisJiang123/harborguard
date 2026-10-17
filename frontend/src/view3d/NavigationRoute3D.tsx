@@ -16,7 +16,7 @@ export function NavigationRoute3D() {
   }, [zones, planIds, planned])
   if (route.length < 2) return null
   const color = planned ? '#4ade80' : '#38bdf8'
-  const label = planned ? '数据源复航航线' : '港区航道参考线'
+  const label = planned ? 'Source-provided reopening route' : 'Reference harbor channel'
   const middle = route[Math.floor(route.length / 2)]!
   return <group>
     <Line points={route} color={color} lineWidth={planned ? 4 : 2.2} dashed={!planned} dashSize={55} gapSize={32} transparent opacity={planned ? .95 : .7} raycast={() => {}} />

@@ -12,13 +12,13 @@ export function parseLocalBase(value: unknown): LocalBase {
     if (geometry.type === 'Polygon') return geometry.coordinates.length > 0 && geometry.coordinates.every(ring => ring.length >= 4 && ring.every(validPoint) && ring[0]![0] === ring.at(-1)![0] && ring[0]![1] === ring.at(-1)![1])
     return false
   }
-  if (data?.type !== 'FeatureCollection' || !Array.isArray(data.features) || !data.features.length || !data.features.every(feature => feature.type === 'Feature' && typeof feature.properties?.id === 'string' && typeof feature.properties.kind === 'string' && validGeometry(feature.geometry))) throw new Error('本地 OSM 港区要素文件无效。')
+  if (data?.type !== 'FeatureCollection' || !Array.isArray(data.features) || !data.features.length || !data.features.every(feature => feature.type === 'Feature' && typeof feature.properties?.id === 'string' && typeof feature.properties.kind === 'string' && validGeometry(feature.geometry))) throw new Error('Invalid local OSM harbor features.')
   return data
 }
 let cached: Promise<LocalBase> | null = null
 export function loadLocalBase() {
   cached ??= fetch('/data/harbor-osm.geojson', { signal: AbortSignal.timeout(8000) }).then(async response => {
-    if (!response.ok) throw new Error('本地港区 OSM 数据尚未提供。')
+    if (!response.ok) throw new Error('Local OSM harbor data is unavailable.')
     return parseLocalBase(await response.json())
   })
   return cached
@@ -27,7 +27,7 @@ export function loadLocalBase() {
 let buildingsCached: Promise<LocalBase> | null = null
 export function loadPortBuildings() {
   buildingsCached ??= fetch('/data/lacounty-port-buildings.geojson', { signal: AbortSignal.timeout(12000) }).then(async response => {
-    if (!response.ok) throw new Error('洛杉矶县港区建筑轮廓尚未提供。')
+    if (!response.ok) throw new Error('LA County harbor building footprints are unavailable.')
     return parseLocalBase(await response.json())
   })
   return buildingsCached

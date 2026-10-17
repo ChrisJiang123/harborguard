@@ -7,5 +7,5 @@ export const FONT = { body: 14, metric: 24 } as const
 // Scene metres match real metres by default. Enhanced vertical relief is opt-in.
 export const VZ = 1
 export const SEABED_DEPTH_M = 18
-export const CLASS_NAMES: Record<Cls, string> = { unknown: '待识别目标', uuv: '水下无人航行器', fish_school: '鱼群', debris: '漂浮碎片', marine_mammal: '海洋哺乳动物', vessel: '船舶' }
+export const CLASS_NAMES: Record<Cls, string> = { unknown: 'Unclassified Target', uuv: 'UUV', fish_school: 'Fish School', debris: 'Floating Debris', marine_mammal: 'Marine Mammal', vessel: 'Vessel' }
 export const clock = (t: number) => `${Math.floor(t / 60).toString().padStart(2, '0')}:${Math.floor(t % 60).toString().padStart(2, '0')}`

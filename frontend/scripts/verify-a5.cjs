@@ -27,7 +27,7 @@ function recordScenario(scenario) {
     engine.advance(.2)
     if (i === 150) engine.inject({ type: 'buoy_down', target: 'B1' })
     if (i === 250) engine.inject({ type: 'network_down' })
-    if (scenario === 'a' && i === 350) engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: '测试录制' })
+    if (scenario === 'a' && i === 350) engine.decision({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: 'Test Recording' })
   }
   return { rows, engine }
 }
@@ -46,7 +46,7 @@ async function main() {
     assert.equal(replayPath('data/replay_a.jsonl'), '/data/replay_a.jsonl')
     for (const file of ['../x.jsonl', '/x.jsonl', 'https://example.com/a.jsonl', 'a.jsonl?x=1', 'a.txt']) assert.throws(() => replayPath(file))
     for (const text of ['', 'not json', '{}', 'null', '{"wall_ms":0,"msg":{}}', JSON.stringify({ wall_ms: 0, msg: { type: 'event', seq: 1, t: 0, event: 'log', data: {} } })]) assert.throws(() => parseReplay(text))
-    assert.throws(() => parseReplay([JSON.stringify({ ...a[0], wall_ms: 2 }), JSON.stringify({ ...a[1], wall_ms: 1 })].join('\n')), /倒序/)
+    assert.throws(() => parseReplay([JSON.stringify({ ...a[0], wall_ms: 2 }), JSON.stringify({ ...a[1], wall_ms: 1 })].join('\n')), /out-of-order/)
     assert.throws(() => parseReplay(JSON.stringify({ ...a[0], wall_ms: -1 })))
 
     useHarbor.getState().reset()
@@ -136,7 +136,7 @@ async function main() {
     cleanup(); cleanup = null
 
     useHarbor.setState(rebuildReplay(a, a.length, useHarbor.getState()))
-    for (const command of [() => api.startScenario('b'), () => api.control({ action: 'reset' }), () => api.mode('disaster'), () => api.inject({ type: 'network_down' }), () => api.ask('测试'), () => api.postLog({ level: 'info', source: 'operator', text: '测试' }), () => api.postRecommendation(useHarbor.getState().latestRec)]) await assert.rejects(command, /回放模式/)
+    for (const command of [() => api.startScenario('b'), () => api.control({ action: 'reset' }), () => api.mode('disaster'), () => api.inject({ type: 'network_down' }), () => api.ask('Test'), () => api.postLog({ level: 'info', source: 'operator', text: 'Test' }), () => api.postRecommendation(useHarbor.getState().latestRec)]) await assert.rejects(command, /disabled during replay/)
     assert.equal(calls.length, before)
     // Lifecycle: loading/seek/speed/cleanup work from a local file without a running backend.
     global.fetch = async url => { calls.push(url); return new Response(a.map(JSON.stringify).join('\n')) }

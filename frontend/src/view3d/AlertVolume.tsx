@@ -1,3 +1,4 @@
+import { englishText } from '../data/english'
 import { useMemo } from 'react'
 import { DoubleSide } from 'three'
 import type { Asset } from '../types/contract'
@@ -13,7 +14,7 @@ function AssetVolume({ asset, simple, verticalScale, maxDepth }: { asset: Asset;
   const height = maxDepth * verticalScale
   return <group position={position}>
     {!simple && asset.rings_m.map((radius, i) => <mesh key={i} position={[0, -height / 2, 0]} raycast={() => {}}><cylinderGeometry args={[radius, radius, height, 64, 1, true]} /><meshBasicMaterial color={LEVEL_COLORS[i + 1]} transparent opacity={level === i + 1 ? .14 : .035} depthWrite={false} side={DoubleSide} /></mesh>)}
-    <mesh position={[0, 7, 0]}><boxGeometry args={[24, 14, 24]} /><meshStandardMaterial color="#c1d8e8" emissive="#34566c" emissiveIntensity={.35} /></mesh><SceneLabel position={[0, 34, 0]} text={asset.name} color="#bcd7eb" borderColor="#48687e" pixelHeight={17} maxDistance={4800} importance={level > 0 ? 'high' : 'low'} />
+    <mesh position={[0, 7, 0]}><boxGeometry args={[24, 14, 24]} /><meshStandardMaterial color="#c1d8e8" emissive="#34566c" emissiveIntensity={.35} /></mesh><SceneLabel position={[0, 34, 0]} text={englishText(asset.name)} color="#bcd7eb" borderColor="#48687e" pixelHeight={17} maxDistance={4800} importance={level > 0 ? 'high' : 'low'} />
   </group>
 }
 export function AlertVolume({ simple, verticalScale, maxDepth }: { simple: boolean; verticalScale: number; maxDepth: number }) {

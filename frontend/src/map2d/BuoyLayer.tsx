@@ -23,7 +23,7 @@ const BuoyMarker = memo(function BuoyMarker({ id, baseline }: { id: string; base
   useEffect(() => () => animation.current?.cancel(), [])
   if (!current) return null
   const color = status === 'ok' ? '#38bdf8' : '#6B7280'
-  return <Fragment><Circle center={[current.lat, current.lon]} radius={current.range_m} interactive={false} pathOptions={{ color, weight: 1, opacity: .2, fillColor: color, fillOpacity: status === 'ok' ? .035 : .015, dashArray: status === 'ok' ? undefined : '4 6' }} /><Marker ref={marker} position={[current.lat, current.lon]} icon={icon} bubblingMouseEvents={false} title={`${id} · ${status === 'pending' ? '等待实时状态' : status === 'ok' ? '在线' : '离线'} · 覆盖 ${current.range_m} 米`}><Tooltip permanent direction="bottom" offset={[0, 9]} className="buoy-label">{id}{status === 'down' ? ' ×' : ''}</Tooltip></Marker></Fragment>
+  return <Fragment><Circle center={[current.lat, current.lon]} radius={current.range_m} interactive={false} pathOptions={{ color, weight: 1, opacity: .2, fillColor: color, fillOpacity: status === 'ok' ? .035 : .015, dashArray: status === 'ok' ? undefined : '4 6' }} /><Marker ref={marker} position={[current.lat, current.lon]} icon={icon} bubblingMouseEvents={false} title={`${id} · ${status === 'pending' ? 'Waiting for live status' : status === 'ok' ? 'Online' : 'Offline'} · Range ${current.range_m} m`}><Tooltip permanent direction="bottom" offset={[0, 9]} className="buoy-label">{id}{status === 'down' ? ' ×' : ''}</Tooltip></Marker></Fragment>
 })
 
 export function BuoyLayer() {

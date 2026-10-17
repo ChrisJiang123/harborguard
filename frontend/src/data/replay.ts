@@ -10,8 +10,8 @@ export function startReplay(filename: string): () => void {
   useReplay.setState({ loading: true, filename, position: 0, duration: 0, playing: false, speed: 1, driver: null, error: null })
   void (async () => {
     const response = await fetch(replayPath(filename), { signal: AbortSignal.any([abort.signal, AbortSignal.timeout(15000)]) })
-    if (!response.ok) throw new Error(`回放读取失败（HTTP ${response.status}）。请检查 public 中的文件。`)
-    if (Number(response.headers.get('content-length')) > 30_000_000) throw new Error('回放文件超过 30 MB。')
+    if (!response.ok) throw new Error(`Replay request failed (HTTP ${response.status}). Check the file in public.`)
+    if (Number(response.headers.get('content-length')) > 30_000_000) throw new Error('The replay file exceeds 30 MB.')
     const rows = parseReplay(await response.text())
     if (disposed) return
     const clock = createReplayClock(rows, row => receiveMessage(row.msg), end => useHarbor.setState(rebuildReplay(rows, end, useHarbor.getState())))
@@ -27,7 +27,7 @@ export function startReplay(filename: string): () => void {
     timer = setInterval(tick, 50)
   })().catch((error: unknown) => {
     if (disposed) return
-    const message = error instanceof Error ? error.message : '回放加载失败。'
+    const message = error instanceof Error ? error.message : 'Replay loading failed.'
     useHarbor.getState().setError(message)
     useReplay.setState({ loading: false, error: message })
   })

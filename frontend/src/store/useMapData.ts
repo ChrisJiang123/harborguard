@@ -31,7 +31,7 @@ export function ensureMapData(force = false): Promise<void> {
       const buoys = result[2].status === 'fulfilled' ? parseBuoys(result[2].value) : null
       useMapData.setState({ loading: false, resources: { zones: zones ?? fallback.zones, assets: assets ?? fallback.assets, buoys: buoys ?? fallback.buoys, sources: { zones: zones ? 'api' : fallback.sources.zones, assets: assets ? 'api' : fallback.sources.assets, buoys: buoys ? 'api' : fallback.sources.buoys } } })
     } catch {
-      useMapData.setState({ loading: false, error: '图层数据加载失败，请重新加载图层。' })
+      useMapData.setState({ loading: false, error: 'Could not load layer data. Reload the layers.' })
     }
   })().finally(() => { pending = null })
   return pending

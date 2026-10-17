@@ -75,8 +75,8 @@ export function HarborModels3D({ verticalScale, onStatus }: { verticalScale: num
       if (terrainResult.status === 'fulfilled') setTerrain(terrainResult.value)
       const lineCount = baseResult.status === 'fulfilled' ? baseResult.value.features.length : 0
       const buildingCount = buildingResult.status === 'fulfilled' ? buildingResult.value.features.filter(feature => feature.properties.kind === 'building').length : 0
-      const warnings = [baseResult.status === 'rejected' ? 'OSM 岸线未加载' : '', buildingResult.status === 'rejected' ? '县级建筑轮廓未加载' : '', terrainResult.status === 'rejected' ? 'USGS 实测岸上 DEM 未加载' : ''].filter(Boolean)
-      onStatus(`OSM 岸线/码头 ${lineCount} 条 · LA County 建筑 ${buildingCount} 栋 · USGS 3DEP 岸上地形 ${terrainResult.status === 'fulfilled' ? `${terrainResult.value.metadata.width}×${terrainResult.value.metadata.height} NAVD88 DEM + USGS/USDA NAIP 正射影像` : '不可用'}${warnings.length ? ` · ${warnings.join(' / ')}` : ''}`)
+      const warnings = [baseResult.status === 'rejected' ? 'OSM shoreline unavailable' : '', buildingResult.status === 'rejected' ? 'County building footprints unavailable' : '', terrainResult.status === 'rejected' ? 'USGS surveyed land DEM unavailable' : ''].filter(Boolean)
+      onStatus(`OSM shoreline/piers ${lineCount}  features · LA County: ${buildingCount}  buildings · USGS 3DEP land terrain ${terrainResult.status === 'fulfilled' ? `${terrainResult.value.metadata.width}×${terrainResult.value.metadata.height} NAVD88 DEM + USGS/USDA NAIP orthophoto` : 'Unavailable'}${warnings.length ? ` · ${warnings.join(' / ')}` : ''}`)
     })
     return () => { active = false }
   }, [onStatus])

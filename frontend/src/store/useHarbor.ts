@@ -140,13 +140,13 @@ export function recoverLiveState(state: HarborStore, snapshot: StateMsg, events:
   const effectiveMeta = meta ?? { eventsAvailable: true, eventsReturned: events.length, eventLimitReached: events.length >= 500, detailFailures: 0 }
   const phase: RecoveryPhase = !effectiveMeta.eventsAvailable ? 'failed' : serverRestarted || effectiveMeta.eventLimitReached || effectiveMeta.detailFailures > 0 ? 'partial' : 'complete'
   const message = !effectiveMeta.eventsAvailable
-    ? '历史加载失败：当前态势仍会实时更新，但刷新前的建议与审批状态无法恢复。'
+    ? 'History loading failed. Live state continues, but previous recommendations and approvals could not be restored.'
     : serverRestarted
-      ? '检测到后端事件序列回退，已清除旧会话缓存；重启前的建议与审批状态无法确认。'
+      ? 'Backend sequence reset detected. Previous-session data was cleared; pre-restart recommendation and approval status is unconfirmed.'
     : effectiveMeta.eventLimitReached
-      ? '历史不完整：服务器返回已达到 500 条缓存上限，较早的建议与审批状态可能无法恢复。'
+      ? 'Incomplete history: the server returned its 500-event cache limit. Older recommendations and approvals may be unavailable.'
       : effectiveMeta.detailFailures > 0
-        ? `历史部分恢复：${effectiveMeta.detailFailures} 条当前详情读取失败。`
+        ? `History partially restored: ${effectiveMeta.detailFailures}  detail requests failed.`
         : null
   return {
     ...recovered,
