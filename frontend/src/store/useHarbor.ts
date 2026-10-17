@@ -58,10 +58,10 @@ export type HarborStore = ReturnType<typeof initialData> & {
   chooseOption: (alertId: string, optionId: string) => void
   setDecisionRequest: (alertId: string, body: DecisionInput | null) => void
   markDecisionUncertain: (alertId: string, body: UncertainDecision | null) => void
-  setRecoveryLoading: () => void
+  setRecoveryLoading: (expectedSession?: number) => void
   cacheOptions: (alertId: string, options: Option[]) => void
   cacheDetection: (detection: Detection) => void
-  recoverLive: (snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]>, detections: Record<string, Detection>, meta?: RecoveryMeta) => void
+  recoverLive: (snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]>, detections: Record<string, Detection>, meta?: RecoveryMeta, expectedSession?: number) => void
 }
 
 export const useHarbor = create<HarborStore>((set) => ({
@@ -84,10 +84,10 @@ export const useHarbor = create<HarborStore>((set) => ({
     else delete uncertainDecisions[alertId]
     return { uncertainDecisions }
   }),
-  setRecoveryLoading: () => set({ recovery: { phase: 'loading', eventsReturned: 0, detailFailures: 0, checkedAt: null, message: null } }),
+  setRecoveryLoading: expectedSession => set(state => expectedSession !== undefined && state.session !== expectedSession ? state : { recovery: { phase: 'loading', eventsReturned: 0, detailFailures: 0, checkedAt: null, message: null } }),
   cacheOptions: (alertId, options) => set(state => ({ optionsByAlert: { ...state.optionsByAlert, [alertId]: options } })),
   cacheDetection: detection => set(state => ({ detections: { ...state.detections, [detection.id]: detection } })),
-  recoverLive: (snapshot, events, logs, options, detections, meta) => set(state => recoverLiveState(state, snapshot, events, logs, options, detections, meta)),
+  recoverLive: (snapshot, events, logs, options, detections, meta, expectedSession) => set(state => expectedSession !== undefined && state.session !== expectedSession ? state : recoverLiveState(state, snapshot, events, logs, options, detections, meta)),
   ingest: msg => set(state => reduceMessage(state, msg)),
 }))
 
@@ -105,8 +105,27 @@ export function eventIdentity(event: EventMsg): string {
   return `${event.seq}:${event.event}:${event.t}`
 }
 
+function logIdentity(log: LogEntry): string {
+  return `${log.t}:${log.level}:${log.source}:${log.text}`
+}
+
+/** Keep bounded REST history first, then append any logs observed while its request was pending. */
+export function mergeRecoveredLogs(newestFirstHistory: LogEntry[], recoveredEventLogs: LogEntry[], liveLogs: LogEntry[]): LogEntry[] {
+  const seen = new Set<string>()
+  const merged: LogEntry[] = []
+  for (const log of [...newestFirstHistory].reverse().concat(recoveredEventLogs, liveLogs)) {
+    const identity = logIdentity(log)
+    if (seen.has(identity)) continue
+    seen.add(identity)
+    merged.push(log)
+  }
+  return merged.slice(-200)
+}
+
 export function recoverLiveState(state: HarborStore, snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]> = {}, detections: Record<string, Detection> = {}, meta?: RecoveryMeta): Partial<HarborStore> {
-  const previousSnapshotSeq = meta?.previousSnapshotSeq ?? state.latest?.seq
+  // This is a connection-start baseline, not the snapshot that may have arrived
+  // while asynchronous REST recovery was still in flight.
+  const previousSnapshotSeq = meta?.previousSnapshotSeq
   const serverRestarted = previousSnapshotSeq !== undefined && snapshot.seq < previousSnapshotSeq
   const byIdentity = new Map<string, EventMsg>()
   for (const event of [...events, ...(serverRestarted ? [] : state.events)]) byIdentity.set(eventIdentity(event), event)
@@ -131,13 +150,15 @@ export function recoverLiveState(state: HarborStore, snapshot: StateMsg, events:
         : null
   return {
     ...recovered,
-    logs: logs.length ? [...logs].reverse().slice(-200) : recovered.logs,
+    logs: mergeRecoveredLogs(logs, recovered.logs, state.logs),
     optionsByAlert: { ...recovered.optionsByAlert, ...options },
     detections: { ...recovered.detections, ...detections },
     decisionRequests,
     uncertainDecisions,
     recovery: { phase, eventsReturned: effectiveMeta.eventsReturned, detailFailures: effectiveMeta.detailFailures, checkedAt: Date.now(), message },
-    session: serverRestarted ? state.session + 1 : state.session,
+    // A sequence rollback is handled synchronously by ws.ts before the new
+    // snapshot is ingested. Do not advance the session a second time here.
+    session: state.session,
     error: state.error,
     selectedTrackId: state.selectedTrackId && latest.tracks.some(track => track.id === state.selectedTrackId) ? state.selectedTrackId : null,
   }

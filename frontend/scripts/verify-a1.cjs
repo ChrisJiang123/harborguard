@@ -5,7 +5,7 @@ const path = require('node:path')
 // The compiled verification output is generated and ignored, not application source.
 writeFileSync(path.join(__dirname, '../work/verify-a1/package.json'), '{"type":"commonjs"}\n')
 const { createMockEngine } = require('../work/verify-a1/data/mock.js')
-const { eventIdentity, receiveMessage, useHarbor } = require('../work/verify-a1/store/useHarbor.js')
+const { eventIdentity, isHarborMessage, receiveMessage, useHarbor } = require('../work/verify-a1/store/useHarbor.js')
 
 const messages = []
 const engine = createMockEngine(msg => { messages.push(msg); assert.equal(receiveMessage(msg), true) })
@@ -87,8 +87,9 @@ assert.equal(receiveMessage({ type: 'event', seq: 1, t: 1, event: 'log', data: n
 
 const sessionBeforeServerRestart = useHarbor.getState().session
 const restartedSnapshot = { ...recoveredSnapshot, seq: 0, t: 0, tracks: [], alerts: [] }
-// WebSocket ingestion applies the new snapshot before async history recovery starts.
-useHarbor.setState({ latest: restartedSnapshot })
+// The WebSocket client clears a restarted session before ingesting its snapshot.
+useHarbor.getState().reset()
+useHarbor.getState().ingest(restartedSnapshot)
 useHarbor.getState().recoverLive(restartedSnapshot, [], [], {}, {}, { eventsAvailable: true, eventsReturned: 0, eventLimitReached: false, detailFailures: 0, previousSnapshotSeq: recoveredSnapshot.seq })
 assert.equal(useHarbor.getState().events.length, 0)
 assert.deepEqual(useHarbor.getState().decisionsByAlert, {})
@@ -122,7 +123,8 @@ const Module = require('node:module')
 const wsPath = path.join(__dirname, '../src/data/ws.ts')
 const wsCode = ts.transpileModule(readFileSync(wsPath, 'utf8').replace('import.meta.env.VITE_WS_URL', 'undefined'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2023 } }).outputText
 const wsModule = new Module(wsPath, module)
-wsModule.require = name => name === '../store/useHarbor' ? { receiveMessage, useHarbor } : name === './liveRecovery' ? { recoverLiveFromBackend: async () => {} } : require(name)
+let recoveryGeneration = 0
+wsModule.require = name => name === '../store/useHarbor' ? { isHarborMessage, receiveMessage, useHarbor } : name === './liveRecovery' ? { beginLiveRecoveryGeneration: () => ++recoveryGeneration, invalidateLiveRecoveryGeneration: generation => { if (generation === recoveryGeneration) recoveryGeneration++ }, recoverLiveFromBackend: async () => {} } : require(name)
 wsModule._compile(wsCode, wsPath)
 const original = { WebSocket: global.WebSocket, setTimeout: global.setTimeout, clearTimeout: global.clearTimeout }
 const timers = new Map()
