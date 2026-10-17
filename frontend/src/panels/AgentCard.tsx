@@ -11,7 +11,9 @@ import { activeAlertId, effectiveOptionId } from './selection'
 import { SectionHeading } from './SectionHeading'
 
 const EMPTY: Option[] = []
-const MODELS = { cloud: '云端', local: '本地 LoRA', template: '模板' }
+// local 目前是 Ollama 基座（qwen3:1.7b）；harborguard-lora 部署后如需标"本地 LoRA"再改回。
+// 在 LoRA 未部署前不得把本地路由标成已训练 LoRA（演示集成验收第 6 条）。
+const MODELS = { cloud: '云端', local: '本地模型', template: '模板' }
 const CONFIDENCE = { low: '低', medium: '中', high: '高' }
 
 function EvidenceChips({ recommendation }: { recommendation: Recommendation }) {

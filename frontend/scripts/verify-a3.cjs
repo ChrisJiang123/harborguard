@@ -32,6 +32,7 @@ function seedLive() {
 
 async function main() {
   const originalFetch = global.fetch
+  const originalAbortTimeout = AbortSignal.timeout
   let stop
   const calls = []
   try {
@@ -149,6 +150,15 @@ async function main() {
     global.fetch = async () => new Response('not json', { headers: { 'content-type': 'text/plain' } })
     await assert.rejects(() => requestJSON('https://example.invalid/'), error => error instanceof APIError && /有效 JSON/.test(error.message))
 
+    const timeoutCalls = []
+    AbortSignal.timeout = milliseconds => { timeoutCalls.push(milliseconds); return new AbortController().signal }
+    seedLive()
+    global.fetch = async url => new Response(JSON.stringify(url.endsWith('/agent/ask') ? { answer: '收到', model: 'template' } : { ok: true }), { headers: { 'content-type': 'application/json' } })
+    await api.health()
+    assert.deepEqual(await api.ask('当前态势？'), { answer: '收到', model: 'template' })
+    assert.deepEqual(timeoutCalls, [8000, 19000])
+    AbortSignal.timeout = originalAbortTimeout
+
     let release
     let duplicate = false
     const first = runOperation('测试操作', () => new Promise(resolve => { release = resolve }))
@@ -165,10 +175,11 @@ async function main() {
     assert.deepEqual(useHarbor.getState().decisionRequests, {})
     assert.deepEqual(useHarbor.getState().optionsByAlert, {})
     assert.equal(useHarbor.getState().latestRec, null)
-    console.log('PASS A3: scenario A approval/rejection; manual/default options; target-specific context; contribution display; network/mode/scenario controls; replay POST lock; real-event-only confirmation; HTTP/toast errors; request de-duplication; clean session reset.')
+    console.log('PASS A3: scenario A approval/rejection; manual/default options; target-specific context; contribution display; network/mode/scenario controls; replay POST lock; real-event-only confirmation; HTTP/toast errors; 8s default and 19s Agent ask timeouts; request de-duplication; clean session reset.')
   } finally {
     stop?.()
     global.fetch = originalFetch
+    AbortSignal.timeout = originalAbortTimeout
     useOperations.setState({ pending: null })
   }
 }
