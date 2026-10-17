@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+<defs><radialGradient id="g" cx="50%" cy="100%" r="100%"><stop stop-color="#90bba1"/><stop offset=".4" stop-color="#375e55"/><stop offset="1" stop-color="#0b1c23"/></radialGradient><pattern id="p" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 2H8M0 6H8" stroke="#9dbbad" stroke-opacity=".1"/></pattern></defs>
+<rect width="640" height="640" fill="#08121b"/><path d="M320 610 25 110Q320 -45 615 110Z" fill="url(#g)"/><rect width="640" height="640" fill="url(#p)"/>
+<g fill="none" stroke="#9ebbb4" opacity=".3"><path d="M275 520Q320 495 365 520M220 420Q320 355 420 420M165 320Q320 220 475 320M110 220Q320 85 530 220"/><path d="M320 610V70M320 610 175 75M320 610 465 75"/></g>
+<path d="m142 218 30-20 107 7 22 13-25 19-103-6Z" fill="#bad2a1"/><path d="m155 244 139 15-25 38-112-20Z" fill="#07141a" opacity=".75"/>
+<rect x="100" y="150" width="220" height="140" fill="none" stroke="#ffbc42" stroke-width="3"/><rect x="100" y="125" width="220" height="25" fill="#ffbc42"/><text x="110" y="143" fill="#08121b" font-size="16" font-family="sans-serif">STUB uuv 0.94</text>
+<text x="24" y="34" fill="#fbbf24" font-size="20" font-family="sans-serif">SYNTHETIC DEMO — NOT REAL SONAR</text><text x="24" y="62" fill="#bdc9d6" font-size="15" font-family="sans-serif">Pre-annotated illustration / no trained model</text><text x="24" y="625" fill="#bdc9d6" font-size="15" font-family="sans-serif">640 x 640 · bbox [100,150,320,290]</text>
+</svg>

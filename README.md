@@ -1,7 +1,6 @@
 # HarborGuard · C（AI 模型与 Agent）
 
-24h 黑客松：洛杉矶港水下安防数字孪生。本 README 只覆盖 **负责人 C** 的部分；
-A（前端 5173）与 B（后端 8000）的代码不在本目录，C 不修改。
+24h 黑客松：洛杉矶港水下安防数字孪生。本仓库现包含 A（前端 5173）、B（后端 8000）与 C（模型/Agent）三部分；本 README 前半保留 C 的环境说明，前端的完整启动、联调、3D 操作和验收状态见 [frontend/README.md](frontend/README.md)。
 
 ## C 负责的四个模块
 
@@ -84,9 +83,9 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
 唯一例外：`ml/yolo/weights/best.pt` 为最终交付的 nano 权重（几 MB），已放行入库。
 
 
-## B 后端 MVP 已加入
+## A 前端与 B 后端已加入
 
-后端源码、场景、测试位于 `backend/`、`data/`；完整启动、演示与对接说明见 [后端说明](backend/README.md)。上方 C 的原有工作说明保留，C 的后续进度由其负责人更新。
+前端源码位于 `frontend/`，后端源码、场景、测试位于 `backend/`、`data/`。完整说明分别见 [前端说明](frontend/README.md) 与 [后端说明](backend/README.md)。上方 C 的原有工作说明保留，C 的后续进度由其负责人更新。
 
 ```bash
 python3.11 -m venv .venv
@@ -98,5 +97,15 @@ make backend
 ```
 
 Windows 已建好环境时执行 `./dev.ps1 backend`；安装依赖可用 `./dev.ps1 setup`。后端端口 8000，WebSocket 为 `ws://localhost:8000/ws`，接口文档为 `http://localhost:8000/docs`。
+
+另开 PowerShell 启动前端：
+
+```powershell
+cd frontend
+npm.cmd install
+npm.cmd run dev
+```
+
+实时页面为 `http://localhost:5173/`，后端不可用时可用 `?mock=1` 或 `?replay=demo_full.jsonl`。当前 A6 仍未标记完成，真实投影、断网刷新和录屏跨设备试播仍待人工验收。
 
 共享契约字段维持 v1；B 的模型与样例在 `shared/`，并与 C 原有的 `docs/shared-contract-v1.md` 对照。A 的前端读取后端 REST / WS；C 的声呐与 Agent 实现完成后按冻结接口接入。回放在 `frontend/public/replay_a.jsonl`、`replay_b.jsonl`，配套图片在 `replay_assets/`。
