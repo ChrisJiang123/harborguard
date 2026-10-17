@@ -11,6 +11,7 @@
     "refresh:osm": "node scripts/fetch-osm.mjs",
     "refresh:buildings": "node scripts/fetch-lacounty-buildings.mjs",
     "refresh:noaa-bathy": "node scripts/refresh-noaa-crm.mjs",
+    "refresh:multibeam": "python scripts/refresh-multibeam.py",
     "refresh:shore-dem": "node scripts/refresh-usgs-shore-dem.mjs",
     "refresh:shore-imagery": "node scripts/refresh-shore-imagery.mjs",
     "make:bathymetry": "node scripts/make-demo-bathymetry.mjs",

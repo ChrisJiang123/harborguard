@@ -15,7 +15,7 @@ function buildWaterMask(grid: BathymetryGrid) {
 }
 
 export function Water({ bounds, opacity, grid }: { bounds: SceneBounds; opacity: number; grid: BathymetryGrid | null }) {
-  const mask = useMemo(() => grid?.metadata.source_kind === 'regional_dem' ? buildWaterMask(grid) : null, [grid])
+  const mask = useMemo(() => grid && grid.metadata.source_kind !== 'synthetic' ? buildWaterMask(grid) : null, [grid])
   useEffect(() => () => mask?.dispose(), [mask])
   const size = Math.max(8000, bounds.span * 2.2)
   return mask

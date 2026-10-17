@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute } from 'three'
-import type { BathymetryGrid } from '../data/bathymetry'
+import type { BathymetryBounds, BathymetryGrid } from '../data/bathymetry'
 import { worldPosition } from './coordinates'
 import { buildBathymetryContours } from './seabedContours'
 import { buildSeabedMeshData } from './seabedMesh'
@@ -13,11 +13,11 @@ function depthColor(depth: number, minDepth: number, maxDepth: number, color: Co
   return color.copy(stops[index]!).lerp(stops[index + 1]!, scaled - index)
 }
 
-export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true, showContours = true }: { grid: BathymetryGrid; verticalScale: number; refinement?: 1 | 2; showSurface?: boolean; showContours?: boolean }) {
+export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true, showContours = true, excludeBounds, colorRange }: { grid: BathymetryGrid; verticalScale: number; refinement?: 1 | 2; showSurface?: boolean; showContours?: boolean; excludeBounds?: BathymetryBounds; colorRange?: { min_depth_m: number; max_depth_m: number } }) {
   const geometry = useMemo(() => {
     const result = new BufferGeometry()
-    const { min_depth_m, max_depth_m } = grid.metadata
-    const { positions, depths, indices } = buildSeabedMeshData(grid, refinement)
+    const { min_depth_m, max_depth_m } = colorRange ?? grid.metadata
+    const { positions, depths, indices } = buildSeabedMeshData(grid, refinement, excludeBounds)
     const colors = new Float32Array(depths.length * 3)
     const color = new Color()
     for (let i = 0; i < depths.length; i++) {
@@ -32,10 +32,10 @@ export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true
     result.computeVertexNormals()
     result.computeBoundingSphere()
     return result
-  }, [grid, refinement])
+  }, [grid, refinement, excludeBounds, colorRange])
   const contours = useMemo(() => {
     const minor: number[] = [], major: number[] = []
-    for (const segment of buildBathymetryContours(grid, refinement === 2 ? 2 : 5)) {
+    for (const segment of buildBathymetryContours(grid, refinement === 2 ? 2 : 5, excludeBounds)) {
       const target = Math.abs(segment.depth % 10) < .001 ? major : minor
       const from = worldPosition(segment.from.lat, segment.from.lon, segment.depth, 1)
       const to = worldPosition(segment.to.lat, segment.to.lon, segment.depth, 1)
@@ -49,7 +49,7 @@ export function Seabed({ grid, verticalScale, refinement = 2, showSurface = true
       return result
     }
     return { minor: make(minor), major: make(major) }
-  }, [grid, refinement])
+  }, [grid, refinement, excludeBounds])
   useEffect(() => () => { geometry.dispose(); contours.minor.dispose(); contours.major.dispose() }, [geometry, contours])
   return <group scale={[1, verticalScale, 1]}>
     {showSurface && <mesh geometry={geometry} raycast={() => {}}><meshStandardMaterial vertexColors roughness={.96} side={DoubleSide} /></mesh>}

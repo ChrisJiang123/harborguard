@@ -4,7 +4,7 @@ const path = require('node:path')
 writeFileSync(path.join(__dirname, '../work/verify-a4/package.json'), '{"type":"commonjs"}\n')
 const root = path.join(__dirname, '../work/verify-a4')
 const { worldPosition, zoneRings, zoneCenter, zoneExtent, sceneBounds, cameraPreset, seabedElevation, smoothFlight, pingEnvelope, createTrackMotion, sampleTrackMotion, FLIGHT_SECONDS, DEFAULT_VERTICAL_SCALE, VERTICAL_SCALES } = require(path.join(root, 'view3d/coordinates.js'))
-const { parseBathymetry } = require(path.join(root, 'data/bathymetry.js'))
+const { parseBathymetry, bathymetryDescription, compatibleBathymetryDetail } = require(path.join(root, 'data/bathymetry.js'))
 const { parseShoreTerrain, sampleShoreElevation } = require(path.join(root, 'data/shoreTerrain.js'))
 const { parseLocalBase } = require(path.join(root, 'data/localBase.js'))
 const { updateLine } = require(path.join(root, 'view3d/lineBuffers.js'))
@@ -103,10 +103,20 @@ for (let x = -4000; x <= 4000; x += 200) for (let z = -4000; z <= 4000; z += 200
 }
 const dem = parseBathymetry(JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '../public/data/seabed-dem.json'), 'utf8')))
 assert.ok(dem)
-assert.equal(dem.metadata.source_kind, 'regional_dem')
+assert.equal(dem.metadata.source_kind, 'survey')
 assert.equal(dem.metadata.horizontal_crs, 'EPSG:4269')
-assert.match(dem.metadata.source, /NOAA\/NCEI/)
-assert.match(dem.metadata.vertical_datum, /Mean Sea Level/)
+assert.match(dem.metadata.source, /NOAA\/NOS H12617/)
+assert.equal(dem.metadata.measurement_method, 'multibeam_echosounder')
+assert.equal(dem.metadata.vertical_datum, 'MLLW (H12617 survey)')
+assert.equal(dem.metadata.source_spacing_m, 1)
+assert.ok(dem.metadata.approximate_spacing_m.east_west <= 8 && dem.metadata.approximate_spacing_m.north_south <= 8)
+assert.equal(dem.metadata.width, 1401)
+assert.equal(dem.metadata.height, 911)
+assert.match(bathymetryDescription(dem), /MLLW/)
+assert.doesNotMatch(bathymetryDescription(dem), /CoNED|MSL/)
+assert.match(dem.metadata.reference_water_level_note, /NOT MSL/)
+assert.equal(require('node:crypto').createHash('sha256').update(JSON.stringify(dem.values)).digest('hex'), dem.metadata.values_sha256)
+assert.ok(dem.values.some(value => value > 0 && value % 1 !== 0), 'higher-resolution elevations must retain fractional-metre information')
 assert.equal(dem.metadata.depth_positive, 'down')
 assert.equal(dem.metadata.reference_water_level_m, 0)
 assert.equal(dem.values.length, dem.metadata.width * dem.metadata.height)
@@ -149,17 +159,67 @@ const coastlineMesh = buildWaterSurfaceData({ ...waterGrid, values: [10, -9999, 
 assert.equal(coastlineMesh.indices.length, 0, 'water triangles must not cross land/NoData corners')
 const noaaWaterMesh = buildWaterSurfaceData(dem)
 const refinedNoaa = buildSeabedMeshData(dem, 2)
-assert.equal(refinedNoaa.indices.length, noaaWaterMesh.indices.length * 4)
-assert.equal(refinedNoaa.columns, (dem.metadata.width - 1) * 2 + 1)
+assert.equal(refinedNoaa.factor, 1, 'dense multibeam display must not be subdivided again')
+assert.equal(refinedNoaa.indices.length, noaaWaterMesh.supportedCells * 6)
+assert.equal(refinedNoaa.columns, dem.metadata.width)
 assert.ok(refinedNoaa.indices.every(index => Number.isFinite(refinedNoaa.depths[index])))
 for (let index = 0; index < dem.values.length; index += 97) {
   if (dem.values[index] === dem.metadata.nodata_value) continue
   const row = Math.floor(index / dem.metadata.width), column = index % dem.metadata.width
-  near(refinedNoaa.depths[row * 2 * refinedNoaa.columns + column * 2], dem.values[index])
+  near(refinedNoaa.depths[row * refinedNoaa.columns + column], dem.values[index], 2e-6)
 }
 assert.ok(noaaWaterMesh.indices.length > 0)
-assert.equal(noaaWaterMesh.positions.length, dem.values.length * 3)
-assert.ok(noaaWaterMesh.indices.every(index => dem.values[index] !== dem.metadata.nodata_value))
+assert.equal(noaaWaterMesh.positions.length, noaaWaterMesh.rectangles.length * 12)
+assert.ok(noaaWaterMesh.indices.length < noaaWaterMesh.supportedCells, 'flat water should not duplicate the dense seabed tessellation')
+const covered = new Uint8Array(dem.values.length)
+for (const { left, right, top, bottom } of noaaWaterMesh.rectangles) {
+  for (let row = top; row < bottom; row++) for (let col = left; col < right; col++) {
+    const a = row*dem.metadata.width+col
+    assert.equal(covered[a],0,'merged water rectangles must not overlap')
+    covered[a]=1
+    for (const i of [a,a+1,a+dem.metadata.width,a+dem.metadata.width+1]) assert.notEqual(dem.values[i],dem.metadata.nodata_value,'merged water must not bridge a NoData hole')
+  }
+}
+assert.equal(covered.reduce((sum,v)=>sum+v,0),noaaWaterMesh.supportedCells,'merged mask must preserve every supported cell')
+console.log(`PASS planar water optimization: ${noaaWaterMesh.supportedCells*2} -> ${noaaWaterMesh.indices.length/3} triangles; exact coverage, no overlaps or NoData bridges.`)
+const detail = parseBathymetry(JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '../public/data/seabed-detail-mb.json'), 'utf8')))
+assert.ok(detail)
+assert.equal(compatibleBathymetryDetail(dem,detail),true)
+const incompatible = structuredClone(detail)
+incompatible.metadata.vertical_datum='NAVD88'
+assert.equal(compatibleBathymetryDetail(dem,incompatible),false)
+incompatible.metadata.vertical_datum=detail.metadata.vertical_datum
+incompatible.metadata.bounds.west+=.00001
+assert.equal(compatibleBathymetryDetail(dem,incompatible),false,'unaligned LOD edges must not cut holes in the harbor surface')
+assert.equal(detail.metadata.measurement_method, 'multibeam_echosounder')
+assert.equal(detail.metadata.source, dem.metadata.source)
+assert.equal(detail.metadata.vertical_datum, dem.metadata.vertical_datum)
+assert.equal(detail.metadata.width, 801)
+assert.equal(detail.metadata.height, 705)
+assert.ok(detail.metadata.approximate_spacing_m.east_west <= 2 && detail.metadata.approximate_spacing_m.north_south <= 2)
+assert.equal(require('node:crypto').createHash('sha256').update(JSON.stringify(detail.values)).digest('hex'), detail.metadata.values_sha256)
+for (const source of dem.metadata.source_products) {
+  assert.match(source.file, /^H12617_MB_[12]m_MLLW_/)
+  assert.match(source.sha256, /^[a-f0-9]{64}$/)
+  assert.equal(source.source_nodata, 1000000)
+  assert.ok(source.valid_output_samples > 0)
+}
+assert.ok(dem.metadata.coverage_percent < 100 && dem.metadata.coverage_percent > 40)
+assert.ok(detail.metadata.coverage_percent < 30, 'missing survey coverage must remain missing, not fabricated')
+for (let row = 0; row <= 176; row++) for (let col = 0; col <= 200; col++) {
+  const coarse = dem.values[(row+368)*dem.metadata.width+col+600]
+  const fine = detail.values[(row*4)*detail.metadata.width+col*4]
+  near(coarse, fine, .011) // Shared LOD boundary/source coordinates must agree.
+}
+const clipped = buildSeabedMeshData(dem, 2, detail.metadata.bounds)
+const detailed = buildSeabedMeshData(detail)
+assert.ok(clipped.indices.length < refinedNoaa.indices.length, 'coarse faces under detail patch must be removed, not z-fight')
+assert.ok(detailed.indices.length > 0)
+assert.ok(detailed.indices.every(index => Number.isFinite(detailed.depths[index])))
+assert.equal(detailed.factor, 1)
+assert.equal(buildSeabedMeshData(refinementSource, 1, refinementSource.metadata.bounds).indices.length, 0)
+assert.equal(buildBathymetryContours(refinementSource, 5, refinementSource.metadata.bounds).length, 0)
+console.log(`PASS multibeam detail: source BAG IDs/checksums/NoData; 35,577 shared coarse/fine samples; 2 m patch ${detailed.indices.length/3} triangles; combined seabed ${(clipped.indices.length+detailed.indices.length)/3} triangles; coverage gaps retained; no overlapping LOD faces.`)
 const contours = buildBathymetryContours(dem)
 assert.ok(contours.length > 0)
 assert.ok(contours.every(segment => Number.isFinite(segment.from.lat) && Number.isFinite(segment.from.lon) && Number.isFinite(segment.to.lat) && Number.isFinite(segment.to.lon)))
@@ -257,6 +317,6 @@ updateLine(line, [])
 assert.equal(geometry.instanceCount, 0)
 geometry.dispose(); material.dispose()
 
-console.log(`PASS A4: shared 2D/3D coordinates; ${realBuildings.length} LA County building footprints/heights; NOAA/NCEI bathymetry ${dem.metadata.width}x${dem.metadata.height}, NAD83/MSL; USGS 3DEP land DEM ${shoreTerrain.metadata.width}x${shoreTerrain.metadata.height}, ${shoreTerrain.metadata.nodata_cells} masked cells, ${shoreTerrain.values.length - shoreTerrain.metadata.nodata_cells} land elevations, relief ${shoreTerrain.metadata.min_elevation_m.toFixed(1)}–${shoreTerrain.metadata.max_elevation_m.toFixed(1)} m NAVD88; coastline water-mask clipping (${noaaWaterMesh.indices.length / 3} triangles); ${contours.length} bathymetry contours; view presets; replay-synchronized motion/pause/resume; reusable Three.js buffers. Target-device 1920x1080 GPU/FPS validation remains outstanding.`)
+console.log(`PASS A4: shared 2D/3D coordinates; ${realBuildings.length} LA County buildings; NOAA H12617 multibeam ${dem.metadata.width}x${dem.metadata.height}, NAD83/MLLW, 1–2 m original / ~8 m harbor display sampling; source checksum; USGS 3DEP land NAVD88 (datum tie unresolved); coastline water-mask clipping (${noaaWaterMesh.indices.length / 3} triangles); ${contours.length} contours; view presets; replay-synchronized motion/pause/resume; reusable Three.js buffers. Browser/device acceptance is separate.`)
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

@@ -1,5 +1,11 @@
 # 3D clarity and collapsible panels — 2026-10-18
 
+Historical clarity evidence below predates the multibeam replacement. Current
+seabed source, sample counts, datum, screenshots and measured readings are in
+[MULTIBEAM-VALIDATION.md](MULTIBEAM-VALIDATION.md) and
+[MULTIBEAM-SOURCE.md](public/data/MULTIBEAM-SOURCE.md). Do not use the old CRM
+grid/FPS numbers as current MBES performance or acceptance evidence.
+
 ## Changes
 
 - Default 3× vertical enhancement, always identified as non-true-scale; restore 1× remains available. Real-backend coordinates/depths, the 2D renderer, backend, and shared contract are unchanged. The subsequent vessel-motion revision intentionally changes synthetic T3/T4 positions in the shared 2D/3D mock/replay source.

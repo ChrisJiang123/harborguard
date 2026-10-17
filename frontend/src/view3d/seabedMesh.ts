@@ -1,8 +1,8 @@
-import type { BathymetryGrid } from '../data/bathymetry'
+import type { BathymetryBounds, BathymetryGrid } from '../data/bathymetry'
 import { worldPosition } from './coordinates'
 
 /** Conservative display tessellation, not new soundings. Never bridges NoData. */
-export function buildSeabedMeshData(grid: BathymetryGrid, refinement: 1 | 2 = 2) {
+export function buildSeabedMeshData(grid: BathymetryGrid, refinement: 1 | 2 = 2, excludeBounds?: BathymetryBounds) {
   const { width, height, bounds, nodata_value } = grid.metadata
   // Bound the additional GPU/CPU cost for user-supplied larger survey grids.
   const factor = grid.values.length <= 150_000 ? refinement : 1
@@ -10,7 +10,18 @@ export function buildSeabedMeshData(grid: BathymetryGrid, refinement: 1 | 2 = 2)
   const positions = new Float32Array(columns * rows * 3)
   const depths = new Float32Array(columns * rows).fill(NaN)
   const indices: number[] = []
+  const northwest = worldPosition(bounds.north, bounds.west), southeast = worldPosition(bounds.south, bounds.east)
   for (let row = 0; row < rows; row++) for (let column = 0; column < columns; column++) {
+    if (factor === 1) {
+      // Dense measured grids need no interpolation. Avoid millions of temporary
+      // sample/weight/point arrays when remounting the 3D view.
+      const index = row*columns+column, depth = grid.values[index]!
+      positions[index*3] = northwest[0] + column/(columns-1)*(southeast[0]-northwest[0])
+      positions[index*3+1] = depth === nodata_value ? 0 : -depth
+      positions[index*3+2] = northwest[2] + row/(rows-1)*(southeast[2]-northwest[2])
+      if (depth !== nodata_value) depths[index] = depth
+      continue
+    }
     const x = column / factor, y = row / factor
     const left = Math.min(width - 2, Math.floor(x)), top = Math.min(height - 2, Math.floor(y))
     const tx = x - left, ty = y - top
@@ -25,8 +36,13 @@ export function buildSeabedMeshData(grid: BathymetryGrid, refinement: 1 | 2 = 2)
     if (valid) depths[index] = depth
   }
   for (let row = 0; row < height - 1; row++) for (let column = 0; column < width - 1; column++) {
+    if (excludeBounds) {
+      const lat = bounds.north - (row + .5) / (height - 1) * (bounds.north - bounds.south)
+      const lon = bounds.west + (column + .5) / (width - 1) * (bounds.east - bounds.west)
+      if (lon > excludeBounds.west && lon < excludeBounds.east && lat > excludeBounds.south && lat < excludeBounds.north) continue
+    }
     const source = row * width + column
-    if ([source, source + 1, source + width, source + width + 1].some(index => grid.values[index] === nodata_value)) continue
+    if (grid.values[source] === nodata_value || grid.values[source+1] === nodata_value || grid.values[source+width] === nodata_value || grid.values[source+width+1] === nodata_value) continue
     for (let y = 0; y < factor; y++) for (let x = 0; x < factor; x++) {
       const a = (row * factor + y) * columns + column * factor + x
       const b = a + 1, c = a + columns, d = c + 1

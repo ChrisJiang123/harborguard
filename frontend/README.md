@@ -10,7 +10,7 @@
 
 已接入 A5 的灾害复航演示、JSONL 回放播放器、声呐图弹窗和合成数据指标卡，并加入本地 OSM 岸线简图作为离线降级。已在本机浏览器验证 2D/3D、回放切换和刷新恢复；真实断网环境、目标投影设备及 B/C 全服务现场验收仍待完成。当前也不是完整 PMTiles 离线底图方案。
 
-已实现 A6 所需的生产构建收尾、投屏检查面板、三分钟合成回放和本机页签录屏，并完成 3D 场景、回放数据驱动和本地后端联调。**A6 仍标记为未完成**：已接入 NOAA/NCEI 南加州区域融合海岸地形模型的局部裁剪用于展示，但它不是港池最新精测、不可用于导航，垂直参考为 MSL 且 NAD83 到本地场景没有进行 realization 级基准转换；现场测深校核、实时潮位、真实投影仪、现场网络、最终录屏跨设备试播及现场验收仍未完成。录屏必须由操作员主动选择共享页面，不采集麦克风或系统声音，也不会上传。
+The 3D renderer is **Three.js / React Three Fiber, not Cesium**. The default seabed now uses NOAA H12617 **multibeam** BAG survey products (1 m / 2 m original grids, acquired 2013), with ~8 m harbor rendering and a ~2 m local inspection patch. See [multibeam provenance and regeneration](public/data/MULTIBEAM-SOURCE.md). It is not an ordinary land DEM or a synthetic/merged regional DEM masquerading as multibeam. **A6 remains incomplete**: historical survey/coverage/uncertainty acceptance, MLLW–NAVD88 alignment, live tide, current full-service rehearsal, target projector/network and field sign-off remain separate. Recording was cancelled by the user and is not performed.
 
 ## 开发运行
 
@@ -127,21 +127,23 @@ A4 自动检查覆盖业务坐标 1×、默认 3× 显示与 1×/2×/3×/4×/8×
 
 ### DEM 数据、基准与替换
 
-当前 `public/data/seabed-dem.json` 是 NOAA/NCEI U.S. Coastal Relief Model — Southern California Version 2（2012 产品）的区域综合拓扑海岸 DEM 裁剪，不是单一港池水深测量。来源为 [NCEI 数据页和 DOI](https://doi.org/10.7289/V5V985ZM)，从 [NOAA THREDDS NetCDF](https://www.ngdc.noaa.gov/thredds/catalog/crm/catalog.html?dataset=crmDatasetScan/crm_socal_1as_vers2.nc) 有界提取；CRM 融合多源地形与测深，网格 1 arc-second（约 25.7 m × 30.9 m）。当前切片大小 433 × 235，范围西 -118.31、南 33.70、东 -118.19、北 33.765；有 54,429 个低于 MSL 的水下格点，演示深度 1–26 m。按该产品元数据，水平坐标为 NAD83 经纬度（EPSG:4269），高程单位米、向上为正、垂直参考 MSL；转换为场景数据时仅对低于 MSL 的点取负号转换成“水深向下为正”，陆地/零高程和源 NoData 标为 -9999。局部场景直接将 NAD83 经度纬度喂给现有 WGS84 风格 ENU 地图投影，未做 realization 级大地基准转换，位置不应视为测量级对齐。水面参考平面是 MSL=0 m，不是实时潮位、MLLW 或导航水位；该产品明确不能用于导航，区域网格也无法解析所有港池/航道细节。
+The default `public/data/seabed-dem.json` is a crop of [NOAA H12617](https://www.ngdc.noaa.gov/nos/H12001-H14000/H12617.html), acquired with a **Reson 7125 multibeam echosounder in 2013**. Original finalized BAG products have 1 m and 2 m spacing. The harbor display grid is 1401×911 at ~8 m, with 599,472 supported samples, depths 1.15–28.27 m below MLLW. `seabed-detail-mb.json` adds an aligned 801×705 local ~2 m patch around the underwater preset. Only survey-supported cells render; the rest remain NoData. Do not equate display spacing, original spacing and measurement accuracy. Full provenance, uncertainty interpretation, source hashes, crop bounds, sign/CRS conversion and limitations are documented in [MULTIBEAM-SOURCE.md](public/data/MULTIBEAM-SOURCE.md).
 
-运行 `npm.cmd run refresh:noaa-bathy` 可从 NOAA THREDDS 有界获取该港区窗口并重建 JSON。若 NOAA 暂不可用，现有演示网格可用 `npm.cmd run make:bathymetry` 重新生成（注意该命令会将数据文件切回合成地形，非真实测深）；`VITE_BATHYMETRY_URL` 可指定自有同源或允许 CORS 的同结构 JSON。数据结构保留版本、来源、获取时间、CRS、单位、垂直基准、正负方向、参考水位、范围、网格间距、NoData 规则和校验统计。`source_kind` 可为 `regional_dem`、`survey` 或 `synthetic`；只有原始测深调查产品经过基准、坐标、覆盖与现场核验后才能标成 survey，不得把 NOAA 区域融合模型冒充港池精测。真实高精度替换数据应先做水平重投影/大地基准转换及已知垂直基准转换，再输出米制、深度向下为正的规则网格。应用加载 NOAA 区域 DEM 时，水面网格会只覆盖有水下高程支持的区域；合成数据仍明确标识为演示地形。
+Open **3D View → Underwater** to inspect the ~2 m patch. **Display Settings → Show water** hides the reference surface; opacity, orbit/zoom/pan, vertical scale and **Reset View** remain available. **Layers → 2 m multibeam inspection patch** toggles the local refinement without resetting playback; outside that patch the harbor is still ~8 m, not 2 m everywhere. At narrow widths first open **Scene Settings**. Data-source details identify historical acquisition, MLLW, unsupported coverage and unresolved shore datum alignment. See [current browser validation](MULTIBEAM-VALIDATION.md).
+
+Run `python -m pip install --target work/gis-python -r scripts/requirements-bathymetry.txt`, then `npm.cmd run refresh:multibeam` to regenerate from official BAGs. Python is not needed for normal frontend startup. Native BAGs/dependencies stay in ignored `work/`. `refresh:noaa-bathy` is the **legacy regional CRM** overwrite command; `make:bathymetry` overwrites with **synthetic terrain**. Neither regenerates MBES. `VITE_BATHYMETRY_URL` accepts version-1 survey JSON; a custom URL disables the bundled detail patch. Different source/datum metadata also disables incompatible patches. Survey source classification identifies provenance, **not field acceptance**. Water is fixed 0 m MLLW, not MSL or live tide. Native UTM11N/NAD83 metres are sampled into NAD83 geographic rows north-to-south, depth positive down. No realization-specific NAD83/WGS84 or spatial vertical datum transformation is applied.
 
 ### 实测岸上高程与建筑落地
 
 `public/data/shore-dem-usgs-3dep.json` 是 [USGS 3DEP Elevation ImageServer](https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer) 的洛杉矶港区裁剪；`public/data/shore-ortho-usgs-naip.png` 是 [USGS National Map NAIP 正射影像](https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer)，同范围贴图。运行 `npm.cmd run refresh:shore-dem` 重新生成两份静态快照；仅更新影像用 `npm.cmd run refresh:shore-imagery`（校验 PNG/尺寸后再覆盖；网络失败保留现有文件，不改变高程网格）。高程网格为 512×278 EPSG:4326，间距约 20–26 m；虽 3DEP 源服务在部分区域有 1 m 产品，本项目这份显示网格不是 1 m 数据。影像已从 1536×834 升为 3072×1668，显示像素数量提高 4 倍，约 3.6–4.3 m/显示像素，不代表源数据定位精度或采集分辨率。服务版权时间为 2025-01-09，但局部影像实际采集日期依区域而异。高程垂直基准 NAVD88、单位米、向上为正；NAIP 为正射影像拼接，不是实时视频。
 
-**垂直基准尚未统一**：岸上 DEM 为 NAVD88，而 NOAA 水下 DEM/水面参考平面为 MSL；当前没有做 NOAA VDatum 转换，图形用零偏移叠放仅供演示，不能用来判断岸线高程差、潮位或施工标高。USGS 服务是多分辨率区域 DEM，也不等价于港口现场地面测量。替换时应维持 `shore-dem-usgs-3dep.json` 的规则网格结构，或修改 `refresh-usgs-shore-dem.mjs` 输出；替换数据须说明水平 CRS、垂直基准、单位、NoData 和采集时间，完成场景坐标转换后才能用于工程判断。
+**Vertical alignment remains unaccepted**: shore DEM is NAVD88; seabed/water is MLLW. No NOAA VDatum spatial transformation has been applied. Their zero-offset display is not an engineering elevation tie, current tide or construction level. USGS regional 3DEP is not a site ground survey. Replacement must retain documented CRS, vertical datum, units/sign, NoData and acquisition time; see `refresh-usgs-shore-dem.mjs` and the existing shore JSON format.
 
 ### 真实港区建筑白模
 
 `public/data/lacounty-port-buildings.geojson` 保存洛杉矶县 GISNET Public 的 Countywide Building Outline (2023) 图层，几何坐标由服务投影到 EPSG:4326，与业务场景共用原点 `(33.73, -118.26)` 和 ENU 米制转换。原服务空间参考 EPSG:2229 为 US survey foot；`HEIGHT` 按 `1200/3937` 转米。查询范围与 DEM 覆盖范围一致，只保留 footprint 面积大于 10,000 平方英尺的建筑以控制 draw calls，本次静态数据为 487 栋；没有高度的记录不进入模型。3D 将建筑挤出网格合批绘制，场景“垂直显示”会同步缩放建筑高度。
 
-高度字段表示建筑高度；屋顶 elevation 没有可核实基准，建筑底部改由单独的 USGS 岸上 DEM 采样定位。由于该 DEM 是 NAVD88，水面/海床目前为 MSL，建筑绝对标高仍有未转换的垂直基准差异。这不是完整港区三维城市模型。数据来源、时间字段差异、署名与更新方式见 `public/data/LA-COUNTY-BUILDINGS.md`；使用 `npm.cmd run refresh:buildings` 更新静态 footprint。县级数据服务的自定义使用条款应在对外再分发前复核。
+The height field supplies building extrusion height; roof elevation has no verified datum, so building bases use sampled USGS shore elevations (NAVD88). Seabed/water is MLLW; absolute elevation alignment remains unverified. These are measured footprints/heights, not detailed LiDAR roof/façade models. See `public/data/LA-COUNTY-BUILDINGS.md` for provenance and attribution; `npm.cmd run refresh:buildings` updates footprints. Review county redistribution terms before external distribution.
 
 ## 第五阶段如何查看
 
