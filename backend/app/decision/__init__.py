@@ -18,7 +18,7 @@ class DecisionEngine:
         self.reset()
 
     def reset(self, mode="security"):
-        # Names remain unique during this server lifetime, so a delayed operator
+        # Counters are also checkpointed across restarts. A delayed operator
         # request or cached sonar URL cannot refer to a different scenario object.
         previous_alert_counter = getattr(getattr(self, "alert_manager", None), "counter", 0)
         previous_detection_counter = getattr(getattr(self, "pinger", None), "counter", 0)
@@ -113,10 +113,9 @@ class DecisionEngine:
             raise ValueError("option is not available for this alert")
         if not isinstance(operator, str) or not operator.strip():
             raise ValueError("operator must be a nonempty string")
-        events = []
+        events = [("decision", {"alert_id": alert_id, "option_id": option_id,
+                                "action": action, "operator": operator})]
         if action == "approve":
-            events.append(("decision", {"alert_id": alert_id, "option_id": option_id,
-                                        "action": action, "operator": operator}))
             for zid in option["zones_closed"]:
                 self.operator_restrictions.add(zid)
                 if self.zone_statuses[zid]["state"] != "restricted":

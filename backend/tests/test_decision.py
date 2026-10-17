@@ -160,7 +160,7 @@ def test_only_operator_approve_can_restrict_and_reset_clears():
     assert engine.options[aid]["options"]
     assert all(s["state"] == "open" for s in engine.zone_statuses.values())
     oid = engine.options[aid]["options"][0]["id"]
-    assert [n for n, _ in engine.approve(aid, oid, "reject", "Chris", 300)] == ["log"]
+    assert [n for n, _ in engine.approve(aid, oid, "reject", "Chris", 300)] == ["decision", "log"]
     assert not engine.operator_restrictions
     events = engine.approve(aid, oid, "approve", "Chris", 301)
     assert any(name == "decision" for name, _ in events)

@@ -49,8 +49,8 @@ def found(value, description):
 
 @router.get("/health", response_model=Ok)
 async def health(request: Request):
-    if getattr(request.app.state, "runtime_error", None):
-        raise HTTPException(503, "Simulation paused after an internal error; inspect server logs")
+    if getattr(request.app.state, "runtime_error", None) or engine(request).persistence_error:
+        raise HTTPException(503, "Backend runtime or durable history unavailable; inspect server logs")
     return Ok()
 
 
@@ -81,27 +81,27 @@ async def buoys(request: Request):
 
 @router.get("/tracks/{track_id}", response_model=Track)
 async def track(request: Request, track_id: str):
-    return found(engine(request).get_track(track_id), f"track: {track_id}")
+    return found(engine(request).detail("track", track_id), f"track: {track_id}")
 
 
 @router.get("/alerts/{alert_id}", response_model=Alert)
 async def alert(request: Request, alert_id: str):
-    return found(engine(request).decision.alerts.get(alert_id), f"alert: {alert_id}")
+    return found(engine(request).detail("alert", alert_id), f"alert: {alert_id}")
 
 
 @router.get("/detections/{det_id}", response_model=Detection)
 async def detection(request: Request, det_id: str):
-    return found(engine(request).decision.detections.get(det_id), f"detection: {det_id}")
+    return found(engine(request).detail("detection", det_id), f"detection: {det_id}")
 
 
 @router.get("/options/{alert_id}", response_model=OptionsPayload)
 async def options(request: Request, alert_id: str):
-    return found(engine(request).decision.options.get(alert_id), f"options for alert: {alert_id}")
+    return found(engine(request).detail("options", alert_id), f"options for alert: {alert_id}")
 
 
 @router.get("/sonar/{det_id}.png", response_class=Response)
 async def sonar(request: Request, det_id: str):
-    image = found(engine(request).decision.images.get(det_id), f"sonar image: {det_id}")
+    image = found(engine(request).image(det_id), f"sonar image: {det_id}")
     return Response(image, media_type="image/png", headers={"Cache-Control":"no-cache"})
 
 
@@ -134,17 +134,12 @@ async def start(request: Request, scenario_id: str, body: StartRequest | None = 
 @router.post("/control", response_model=Ok)
 async def control(request: Request, body: ControlRequest):
     game = engine(request)
+    try:
+        game.control(body.action, body.value)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
     if body.action == "reset":
-        game.reset()
         request.app.state.runtime_error = None
-    elif body.action == "speed":
-        game.world.speed = body.value
-    elif body.action == "pause":
-        game.world.paused = True
-    elif body.action == "resume":
-        if not game.world.scenario_id or game._ended:
-            raise HTTPException(409, "Start a scenario before resuming")
-        game.world.paused = False
     return Ok()
 
 
@@ -167,7 +162,7 @@ async def inject(request: Request, body: InjectRequest):
 async def decision(request: Request, body: DecisionRequest):
     game = engine(request)
     try:
-        game.emit_all(game.decision.approve(body.alert_id, body.option_id, body.action, body.operator, game.world.t))
+        game.decide(body.alert_id, body.option_id, body.action, body.operator)
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
     return Ok()
