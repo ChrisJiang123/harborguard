@@ -51,6 +51,14 @@ __pycache__/
 
 # B backend development and local verification
 node_modules/
+dist/
+dist-ssr/
+frontend/work/
+coverage/
+*.tsbuildinfo
+recordings/
+*.webm
+*.mp4
 .coverage
 artifacts/
 .tools/
