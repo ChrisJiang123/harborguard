@@ -1,5 +1,18 @@
 # 本次开发文件清单
 
+## 最终集成与交付
+
+本轮新增/更新以下 8 个 B 文档和结果文件，不修改 A 前端源码、C 源码、生产 API 或冻结契约。候选同时保留 PR #3/#4 的原始提交；这些团队既有文件的差异并非本轮新增实现。
+
+- [docs/final-integration-report.md](final-integration-report.md)：分支/PR、模块状态、阻塞与非阻塞问题、合并预检。
+- [docs/final-integration-results.json](final-integration-results.json)：测试与真实组合服务的机器可读指标。
+- [docs/demo-runbook.md](demo-runbook.md)：环境准备、准确启动命令、五分钟流程与故障兜底。
+- [backend/README.md](../backend/README.md)：修正当前组合启动说明与交付入口。
+- [docs/frontend-integration.md](frontend-integration.md)：保留冻结接口，更新 C3 与 A 待办状态。
+- [docs/acceptance.md](acceptance.md)：逐项最新验收边界。
+- [docs/validation.md](validation.md)：保留历史记录，追加最终复核结果。
+- [docs/files.md](files.md)：本清单。
+
 ## 后续前后端联调交付
 
 后端主体已由仓库方通过 PR #2 合入 main。本轮在相同 feature 分支补充以下 8 个文件；不修改生产 API、模型、共享契约、C 代码或 A 前端源码。

@@ -1,5 +1,7 @@
 # 前后端与 AI 联调交接（冻结契约 v1）
 
+最终集成状态见 [检查报告](final-integration-report.md)，现场步骤见 [五分钟操作单](demo-runbook.md)。A6 已在 main，C3 模板 Agent 已在本地候选完成真实闭环；本文件的接口格式保持 v1。
+
 本文整理现有实现，不新增或修改字段、路由与事件。权威契约：[shared/contract.md](../shared/contract.md)、[shared/types.ts](../shared/types.ts)、[C 的契约副本](shared-contract-v1.md)。参数约束与响应 Schema 见 [OpenAPI JSON](integration/openapi.json)，路由实现见 [rest.py](../backend/app/api/rest.py)。
 
 ## 启动与环境
@@ -171,7 +173,7 @@ breakdown.C/P/B/Z/D 是未加权的分类/资产接近/行为/分区敏感度/�
 
 Recommendation.kind 为 security/disaster/buoy，model cloud/local/template，confidence low/medium/high；summary<=60、explanation<=300 字符。alert_id/recommended_option_id 可 null；非空必须是当前有效警报及其所属方案。evidence_ids 只能引用存在的航迹、警报、识别、浮标、分区、资产、方案。
 
-C 实现 `POST http://localhost:8001/ask`，请求 `{question,track_id?}`，响应 `{answer,model}`；A 只调用 B `/api/agent/ask`。B 超时 20 秒，C0 本地模型预算 30 秒：C 应在 20 秒内响应或提前降级，本次不修改契约。没有获取最新建议的 REST，state 也不含 recommendation/options/reopen_plan，须处理事件和近期缓存。
+C3 已实现 `POST http://localhost:8001/ask`，请求 `{question,track_id?}`，响应 `{answer,model}`；A 只调用 B `/api/agent/ask`。B 超时 20 秒，C3 模板问答预算 18 秒，本次不修改契约。没有获取最新建议的 REST，state 也不含 recommendation/options/reopen_plan，须处理事件和近期缓存；A 当前刷新/重连未做该补偿，仍是 A 的验收待办。
 
 C 声呐接口为 `ml/sonar/render.py:render_ping`、`ml/yolo/infer.py:SonarDetector`，签名见共享契约。B 显式传 max_range_m=300、fov_deg=120、noise=0.3、seed、size=640；返回灰度 uint8、像素角点框。权重默认 ml/yolo/weights/best.pt，缺模块/权重或失败回退 stub，A 保留模型来源标签。
 
@@ -201,4 +203,4 @@ Mock 为既有 v1 合成样例，经真实路由返回；mock_images 复用已�
 
 联调顺序：Mock 布局 → B health/WS 首帧与 5Hz → 场景 A 三级/方案/approve/reject → 故障、reset、断线重连去重 → 场景 B 碎片与复航 → 两份离线回放 → C 真实识别/Agent/离线降级 → 三人演示彩排。
 
-边界：港区为人工示意几何，未核验水陆；A UI/回放器、C 真实声呐/Agent 尚待联调；此前 20 分钟耐久检查通过，但单 tick <20ms 仍有峰值超限。本次仅准备联调，不新增功能，详见 [验证记录](validation.md)、[验收清单](acceptance.md)。
+边界：港区为人工示意几何，未核验水陆；真实 A UI/回放器与 C 渲染器/模板 Agent 的基础联调已通过，A 的刷新恢复与碎片识别入口仍待 A 修复；训练后 YOLO、云端/Ollama/LoRA 不在本轮范围。此前 B 的 20 分钟耐久检查通过，但单 tick <20ms 仍有峰值超限。本轮不新增功能，详见 [验证记录](validation.md)、[验收清单](acceptance.md)。
