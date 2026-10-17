@@ -6,6 +6,8 @@
 
 2026-10-17 持久化更新：见 [给 A 的恢复交接](docs/history-handoff.md) 和 [B 验证记录](docs/history-verification.md)。下文保留初始 MVP 背景；关于重启、驳回和历史范围请以本次交接为准。
 
+后续本地性能改进与新版耐久结果见 [性能跟进报告](docs/performance-followup.md)。严格每 tick <20ms 尚未通过，不把平均耗时改善算作全部验收通过。
+
 本次新增文件见 [文件清单](../docs/files.md)，逐项验收范围见 [任务书验收范围](../docs/acceptance.md)。
 
 ## 安装与启动
