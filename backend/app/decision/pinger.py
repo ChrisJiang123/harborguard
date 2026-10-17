@@ -5,6 +5,7 @@ from math import atan2, degrees, hypot
 
 from .. import config
 from ..geo import to_local
+from ..perception.classifier import sonar_pixel
 from .alerts import AlertManager
 
 
@@ -67,10 +68,10 @@ class Pinger:
         # Aim toward the track. Select the detection closest to its predicted central pixel.
         target_range = expected_range if expected_range is not None else min(
             (p["range_m"] for p in targets), default=0)
-        expected_y = config.SONAR_SIZE-1-target_range/config.PING_RANGE_M*(config.SONAR_SIZE-1)
+        expected_x, expected_y = sonar_pixel(target_range, projection=result.get("_projection", "stub_linear"))
         def rank(item):
             box = item["bbox"]
-            return ((box[0]+box[2])/2-config.SONAR_SIZE/2)**2 + ((box[1]+box[3])/2-expected_y)**2
+            return ((box[0]+box[2])/2-expected_x)**2 + ((box[1]+box[3])/2-expected_y)**2
         chosen = min(detections, key=rank) if detections else {"cls": "unknown", "conf": 0.0, "bbox": [0, 0, 0, 0]}
         self.counter += 1
         did = f"det-{self.counter}"

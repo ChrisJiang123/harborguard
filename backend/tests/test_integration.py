@@ -1,4 +1,9 @@
-"""Real numerical pipeline and offline artifacts, without DEBUG_TRUTH_TRACKS."""
+"""Real tracking + explicit B stub recognition positive controls, without truth tracks.
+
+The original timing/four-debris expectations describe B's self-contained stub.
+Real C weights have separate conservative acceptance; do not silently select a
+different detector merely because weights/dependencies happen to be installed.
+"""
 import hashlib
 import json
 from collections import Counter
@@ -10,6 +15,21 @@ from backend.app import config
 from backend.app.engine import GameEngine
 from backend.app.models import EventMsg, StateMsg
 from backend.tools.record import record
+
+
+@pytest.fixture(scope="module", autouse=True)
+def explicit_stub_recognition():
+    from backend.app.perception import classifier as adapter
+
+    original = adapter.SonarClassifier
+    with pytest.MonkeyPatch.context() as patch:
+        def stub(*args, **kwargs):
+            kwargs["weights"] = config.ROOT / "artifacts/explicitly-absent-stub-weights.pt"
+            result = original(*args, **kwargs)
+            result.renderer = None
+            return result
+        patch.setattr(adapter, "SonarClassifier", stub)
+        yield
 
 
 @pytest.fixture(scope="module")

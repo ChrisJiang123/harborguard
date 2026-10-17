@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import time
 from importlib import import_module
 from io import BytesIO
 from numbers import Real
@@ -13,6 +14,23 @@ from PIL import Image, ImageDraw
 from .. import config
 
 SONAR_CLASSES = {"uuv", "fish_school", "debris", "marine_mammal"}
+
+
+def sonar_pixel(distance, bearing_deg=0.0, *, projection="stub_linear"):
+    """B-private projection matching the renderer actually used for this image.
+
+    C fits the entire fan in the square; B's fallback uses the full height.
+    The detector/model label alone cannot distinguish these two image layouts.
+    """
+    size = config.SONAR_SIZE
+    radius = size-1
+    center = size/2
+    if projection == "c_fan":
+        radius = min(radius, (size/2-1)/math.sin(math.radians(config.SONAR_FOV_DEG)/2))
+        center = (size-1)/2
+    theta = math.radians(bearing_deg)
+    radial = distance/config.PING_RANGE_M*radius
+    return center+radial*math.sin(theta), size-1-radial*math.cos(theta)
 
 
 def _validated_result(item, *, confidence=False):
@@ -45,6 +63,7 @@ class SonarClassifier:
         self.renderer = renderer
         self.detector = detector
         self.last_error: str | None = None
+        self._warmup_result = None
         if self.renderer is None:
             try:
                 self.renderer = import_module("ml.sonar.render").render_ping
@@ -58,6 +77,20 @@ class SonarClassifier:
                 self.detector = import_module("ml.yolo.infer").SonarDetector(weights=str(weights), conf=config.DETECTION_MIN_CONF)
             except Exception as error:  # noqa: BLE001 - Missing/incompatible third-party model fallback.
                 self.last_error = str(error)
+
+    def warmup(self):
+        """Prime CPU inference before readiness, without touching world RNG/events."""
+        if self._warmup_result is None:
+            begin = time.perf_counter()
+            model = self.classify([], seed=0)["model"] if self.detector is not None else "stub"
+            self._warmup_result = {"model": model, "ms": (time.perf_counter()-begin)*1000}
+        return dict(self._warmup_result)
+
+    @property
+    def survey_min_range_m(self):
+        # C's polar fan is degenerate at its origin. The self-contained B
+        # fallback has its own rectangular pixel support, tested at zero range.
+        return config.DISASTER_MIN_RANGE_M if self.renderer is not None else 0.0
 
     def _stub_render(self, targets, rng):
         size = config.SONAR_SIZE
@@ -119,6 +152,7 @@ class SonarClassifier:
             draw.text((bbox[0], max(0, bbox[1] - 12)), f"{detection['cls']} {float(detection['conf']):.2f}", fill="lime")
         buffer = BytesIO()
         pil.save(buffer, format="PNG", compress_level=config.SONAR_PNG_COMPRESSION_LEVEL)
-        return {"model": model, "image": buffer.getvalue(), "detections": normalized}
+        return {"model": model, "image": buffer.getvalue(), "detections": normalized,
+                "_projection": "c_fan" if rendered_by_c else "stub_linear"}
 
     render_and_classify = classify

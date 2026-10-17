@@ -25,6 +25,11 @@ def create_app(*, run_loop=True, debug_truth=None, storage_path=None):
         store = HistoryStore(path)
         try:
             app.state.engine = GameEngine(debug_truth=debug_truth, store=store)
+            warmed = app.state.engine.decision.pinger.classifier.warmup()
+            logger.info("Sonar startup warmup model=%s elapsed_ms=%.1f", warmed["model"], warmed["ms"])
+            if warmed["model"] == "stub":
+                logger.warning("Sonar running in explicit stub mode: %s",
+                               app.state.engine.decision.pinger.classifier.last_error)
         except Exception:
             store.close()
             raise

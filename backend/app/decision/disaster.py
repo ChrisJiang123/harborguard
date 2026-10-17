@@ -19,11 +19,13 @@ class DisasterSurvey:
         self.detected_debris: set[str] = set()
         self.blocked_zones: set[str] = set()
         self.coverage_weights: dict[str, dict[str, float]] = {}
+        self.attempts: dict[str, dict] = {}
 
     def reset(self):
         self.detected_debris.clear()
         self.blocked_zones.clear()
         self.coverage_weights.clear()
+        self.attempts.clear()
 
     def step(self, world, tracks, dt, statuses, restrictions, pinger) -> list[tuple]:
         events = []
@@ -38,33 +40,64 @@ class DisasterSurvey:
             for zid, fraction in self.coverage_weights[bid].items():
                 statuses[zid]["coverage"] = min(1.0, statuses[zid]["coverage"]+
                                                 dt*config.DISASTER_COVERAGE_RATE*fraction)
-            for index, target in enumerate(world.targets):
-                if value(target, "cls") != "debris":
-                    continue
-                target_key = str(value(target, "id", index))
-                if target_key in self.detected_debris:
-                    continue
-                x, y = value(target, "x"), value(target, "y")
-                if hypot(x-bx, y-by) > config.DISASTER_DETECT_RANGE_M:
-                    continue
-                if not pinger.safe(buoy, tracks):
-                    continue
-                scene = [{"cls": "debris", "range_m": hypot(x-bx, y-by), "bearing_deg": 0.0,
-                          "length_m": value(target, "length_m", 2.0),
-                          "width_m": value(target, "width_m", 0.5), "aspect_deg": 0.0}]
-                detection, generated = pinger.detect("", buoy, scene, world)
-                events.extend(generated)
-                self.detected_debris.add(target_key)
-                if detection["cls"] == "debris" and detection["conf"] >= config.DETECTION_MIN_CONF:
-                    zid = self.zones.zone_of(x, y)
-                    if zid:
-                        self.blocked_zones.add(zid)
-                        events.append(AlertManager.log(world.t, f"分区 {zid} 检测到碎片，等待人工清理", "warn"))
+        # The simulation supplies survey candidates as before; their truth class
+        # is never used as a successful classification. A failed observation is
+        # neither confirmed debris nor evidence that its zone is safe to reopen.
+        for index, target in enumerate(world.targets):
+            if value(target, "cls") != "debris":
+                continue
+            key = str(value(target, "id", index))
+            if key in self.detected_debris:
+                continue
+            x, y = value(target, "x"), value(target, "y")
+            available = []
+            for bid, buoy in world.buoys.items():
+                bx, by = to_local(buoy["lat"], buoy["lon"])
+                distance = hypot(x-bx, y-by)
+                if buoy["status"] == "ok" and distance <= config.DISASTER_DETECT_RANGE_M:
+                    available.append((distance, bid, buoy))
+            if not available:
+                continue
+            if key not in self.attempts:
+                self.attempts[key] = {"zone_id": self.zones.zone_of(x, y), "count": 0,
+                                      "last_t": None, "buoy_ids": []}
+            attempt = self.attempts[key]
+            if (attempt["count"] >= config.DISASTER_RETRY_MAX
+                    or (attempt["last_t"] is not None
+                        and world.t-attempt["last_t"] < config.DISASTER_RETRY_S-config.SIM_TIME_EPSILON_S)):
+                continue
+            min_range = getattr(pinger.classifier, "survey_min_range_m", config.DISASTER_MIN_RANGE_M)
+            suitable = [item for item in available if item[0] >= min_range
+                        and pinger.safe(item[2], tracks)]
+            if not suitable:
+                continue  # Near-field/mammal-protected candidates remain uncertain.
+            distance, bid, buoy = min(suitable, key=lambda item: (
+                item[1] in attempt["buoy_ids"], item[0], item[1]))
+            scene = [{"cls": "debris", "range_m": distance, "bearing_deg": 0.0,
+                      "length_m": value(target, "length_m", 2.0),
+                      "width_m": value(target, "width_m", 0.5), "aspect_deg": 0.0}]
+            detection, generated = pinger.detect("", buoy, scene, world, expected_range=distance)
+            events.extend(generated)
+            attempt["count"] += 1
+            attempt["last_t"] = world.t
+            attempt["buoy_ids"].append(bid)
+            zid = attempt["zone_id"]
+            if detection["cls"] == "debris" and detection["conf"] >= config.DETECTION_MIN_CONF:
+                self.detected_debris.add(key)
+                if zid:
+                    self.blocked_zones.add(zid)
+                    events.append(AlertManager.log(world.t, f"分区 {zid} 检测到碎片，等待人工清理", "warn"))
+            elif zid:
+                events.append(AlertManager.log(world.t,
+                    f"分区 {zid} 声呐结果未确认，保持未勘测（{attempt['count']}/{config.DISASTER_RETRY_MAX}）", "warn"))
+        uncertain = {a["zone_id"] for key, a in self.attempts.items() if key not in self.detected_debris}
         for zid, status in statuses.items():
             if zid in restrictions:
                 state = "restricted"
             elif zid in self.blocked_zones:
                 state = "blocked"
+            elif zid in uncertain:
+                state = "unsurveyed"
             elif status["coverage"] >= config.DISASTER_CLEAR_COVERAGE:
                 state = "clear"
             else:
