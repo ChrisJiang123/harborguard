@@ -6,8 +6,8 @@
 
 ## 环境说明（与运行环境、YOLO 训练环境分开）
 
-- **训练在 Colab**（Unsloth 在 macOS 不可用；Windows WSL 方案以后再修，不阻塞）。
-  安装见 `requirements-lora-train.txt`；笔记本 `train_lora.ipynb` 自带安装 cell。
+- **正式训练已在 Lenovo/Windows 完成**；Mac 仅做 GGUF/Ollama 接入与评估，本轮不重训。
+  可重跑笔记本为 `train_lora.ipynb`，环境依赖见 `requirements-lora-train.txt`。
 - 基座：Qwen3.5 小尺寸（先 0.8B，模型名以 Unsloth 文档为准）；笔记本内置候选链，
   兼容问题自动落到 Qwen3 1.7B / 0.6B（对应本机已拉基座 `qwen3:1.7b`）。
 - bf16 LoRA（rank 16 / alpha 32 / lr 2e-4 / 3 epoch / max_len 4096），不做 4-bit 训练。
@@ -29,6 +29,8 @@
 - ✅ 生成器/蒸馏/截取/评估四脚本 + pytest（`tests/test_lora_*.py`）
 - ✅ 训练集 **501 条** = 450 合成（精确 450/50 划分，seed=0）+ 51 条真实场景样本
   （`--append-train` 只进训练集）；测试集固定 50 条合成样本，不参与训练与提示词改动
+- ✅ Lenovo 实际将这 501 条按文件顺序分为前 493 条正式训练与末 8 条内部验证；
+  构成为训练 450 合成 + 43 真实、内部验证 8 真实。独立 test50 与二者均零精确重复。
 - ✅ 蒸馏：OpenRouter（gemini-2.5-flash 结构化输出），合成 552/580 = 95.2% 合格，
   真实 51/51 = 100% 合格；实测总花费 ≈ $0.55
 - ✅ 真实上下文 51 条（security 23 / disaster 21 / buoy 7；network offline 12 条，
@@ -43,9 +45,9 @@
   **配对基座**（同一基座的未微调 GGUF，同量化/同模板/同参数），规模差异不能归因微调
 - ✅ **AI 抽查**（脚本复核）30 条蒸馏样本：方案全部与 ranked[0]（或 null）一致、
   无编造 ID、中文简洁（摘要 ≤60 字、说明 ≤300 字）；**人工复核待负责人确认**
-- ⏸ `metrics.json` 未生成：等配对部署（lora + base）后跑 `python -m ml.lora.eval`
-  一次性写入（配对两者齐才写，无 LoRA 不写占位数据，与 ml/yolo/eval.py 同约定）
-- ⏸ Colab 训练待跑（LoRA 验收线：结构合法 ≥ 0.90、方案一致 ≥ 0.80、单条 ≤ 10 s）
+- ✅ `metrics.json` 已生成：format=json 下 test50 结构 50/50、事实 44/50、
+  方案 31/33、null 14/14、平均 3.75 s；confirm60 另列为结构 60/60、事实 39/60、
+  方案 35/36、null 18/18、平均 4.71 s。两组均是合成上下文，不代表真实海域效果。
 
 ## 设计要点
 
@@ -68,3 +70,22 @@ buoy_changed 全部四类事件，截取 **51 条唯一真实上下文**（secur
 buoy 7；offline 12 条），走 C3 同一 collect_* 代码路径（UTF-8 ≤ 3 KB）。
 固定种子的场景重复跑会产生重复事件，脚本按 key 去重、跳过已有；
 事件缓存里旧会话的失效警报计入 dropped（HTTPStatusError 39/36/36），不入库。
+
+## 线上切换与回退（2026-10-17，C4 format=json 候选）
+
+当前 .env：`OLLAMA_MODEL=harborguard-lora` + `OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json`。
+完整 schema 约束下该 LoRA 在 Mac/Ollama grammar 解码中循环不终止（见 ml/lora/metrics.json
+的 `history_schema_mode`），故本模型以 `format=json` 运行；qwen3:1.7b 等未列入覆盖表的模型
+仍走完整 schema。回退：`OLLAMA_MODEL=qwen3:1.7b`、清空 `OLLAMA_FORMAT_OVERRIDES`，
+重启 Agent（`python -m agent.main`）并检查 `GET :8001/health`。这一回退路径有单测与配置备份，
+但尚未实际演练“切回 qwen3 后再切回 LoRA”，不得记为已验证回退。
+部署注意：若未来改用原生 llama.cpp 运行 LoRA，schema 必须保持 pydantic 声明序（勿排序键）。
+
+## 来源审计补充（2026-10-17）
+
+可重跑脚本与逐文件 SHA256 见 [来源审计](../../acceptance_c4/data_provenance_20261017/README.md)。
+test50 可由合成蒸馏记录同序重建，原“capture_real 真实采集 test”仅为标签错误；
+没有发现测试集更换或与训练输入的精确上下文重叠。confirm60 也与训练输入和 test50 零精确重复。
+`capture_real` 是本机仿真后端运行截取，不是物理声呐实采；缺少逐条 capture-run ID，
+无法从该文件单独证明三次采集的批次边界。精确去重不能证明语义独立。
+原两组指标和完整 schema 失败归档保留；没有重新训练、调参或重跑整套模型评估。

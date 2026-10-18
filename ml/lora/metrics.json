@@ -1,0 +1,284 @@
+{
+  "base": {
+    "model": "harborguard-base",
+    "struct_valid_raw": 0.88,
+    "struct_valid": 0.88,
+    "id_fact_valid_raw": 0.16,
+    "id_fact_valid": 0.16,
+    "option_agree": 0.515,
+    "option_agree_n": 33,
+    "option_agree_given_valid": 1.0,
+    "option_agree_valid_n": 6,
+    "null_recommend_correct": 0.5,
+    "null_recommend_n": 14,
+    "latency_s": 7.41,
+    "counts": {
+      "struct_valid": {
+        "pass": 44,
+        "total": 50
+      },
+      "id_fact_valid": {
+        "pass": 8,
+        "total": 50
+      },
+      "option_agree": {
+        "pass": 17,
+        "total": 33
+      },
+      "null_recommend_correct": {
+        "pass": 7,
+        "total": 14
+      }
+    }
+  },
+  "lora": {
+    "model": "harborguard-lora",
+    "struct_valid_raw": 1.0,
+    "struct_valid": 1.0,
+    "id_fact_valid_raw": 0.88,
+    "id_fact_valid": 0.88,
+    "option_agree": 0.939,
+    "option_agree_n": 33,
+    "option_agree_given_valid": 1.0,
+    "option_agree_valid_n": 28,
+    "null_recommend_correct": 1.0,
+    "null_recommend_n": 14,
+    "latency_s": 3.75,
+    "counts": {
+      "struct_valid": {
+        "pass": 50,
+        "total": 50
+      },
+      "id_fact_valid": {
+        "pass": 44,
+        "total": 50
+      },
+      "option_agree": {
+        "pass": 31,
+        "total": 33
+      },
+      "null_recommend_correct": {
+        "pass": 14,
+        "total": 14
+      }
+    }
+  },
+  "system_baseline": {
+    "model": "qwen3:1.7b",
+    "struct_valid_raw": 1.0,
+    "struct_valid": 1.0,
+    "id_fact_valid_raw": 0.16,
+    "id_fact_valid": 0.16,
+    "option_agree": 0.455,
+    "option_agree_n": 33,
+    "option_agree_given_valid": 1.0,
+    "option_agree_valid_n": 1,
+    "null_recommend_correct": 1.0,
+    "null_recommend_n": 14,
+    "latency_s": 9.87,
+    "counts": {
+      "struct_valid": {
+        "pass": 50,
+        "total": 50
+      },
+      "id_fact_valid": {
+        "pass": 8,
+        "total": 50
+      },
+      "option_agree": {
+        "pass": 15,
+        "total": 33
+      },
+      "null_recommend_correct": {
+        "pass": 14,
+        "total": 14
+      }
+    }
+  },
+  "n_test": 50,
+  "teacher": "google/gemini-2.5-flash",
+  "pairing_note": "base=与 lora 同一基座的未微调 GGUF（同量化/同模板/同推理参数）；system_baseline=当前系统本地兜底（规模不同，差异不能全归因微调）",
+  "mode": "json-candidate",
+  "generated_at": "2026-10-17T23:38:17.751398+00:00",
+  "metadata_corrected_at": "2026-10-18T00:08:57.634612+00:00",
+  "counts_note": "整数分子由原始三位小数聚合指标唯一还原；原始结果文件与历史失败归档保留不变。",
+  "eval_config": {
+    "runtime": "Ollama 0.40.5 (qwen35)",
+    "model": "harborguard-lora",
+    "model_gguf_sha256": "95704489c1ee021bd52bb0632a7701f76bad70c4e2e5fb9ec84775a712676baa",
+    "paired_base_model": "harborguard-base",
+    "paired_base_gguf_sha256": "9d71d66049417f130e68113b557cab67743a79c55203012c2e75a81602b7bac1",
+    "output_format": "format=json（OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json,harborguard-base:json；候选配置）",
+    "format_note": "完整 schema 约束下该 LoRA 在 Mac/Ollama 循环不终止（见 history_schema_mode）；format=json 为最小修复",
+    "sampling": "temperature 0 / seed 0 / num_predict 450 / think false / 请求级覆盖 Modelfile",
+    "validation": "与 C3 运行时同一链：JSON→pydantic 六字段→ID 存在性→确定性事实；无模板兜底；失败/超时计入分母",
+    "attempts": "首试 + 附校验错误重试 1 次（temp0/seed0 确定性）",
+    "timeout_s": 30
+  },
+  "sample_sets": {
+    "test50": {
+      "provenance": "gen_contexts.py 固定种子合成上下文；552 条合格合成蒸馏记录经 split_records(seed=0) 取前 50 条（contexts.jsonl 来源 40 条，contexts_extra.jsonl 来源 10 条）；不是 capture_real 真实采集",
+      "path": "ml/lora/datasets/test.jsonl",
+      "sha256": "4453b8e2e0df089ec8623f14258c6f156db450d6ac2a2569211f731dca793845",
+      "n": 50
+    },
+    "confirm60": {
+      "provenance": "gen_contexts.py 合成上下文（--n 60 --seed 424242，含故障注入）；非真实采集",
+      "path": "acceptance_c4/candidate_json_20261017/confirm60.eval.jsonl",
+      "sha256": "d6360787f9bda3d828bd2cdb0ac3990da63cf4793b210a28867f71f239e9aa28",
+      "n": 60
+    },
+    "train501": {
+      "provenance": "450 条合成固定划分 + 51 条 capture_real 真实场景上下文；Lenovo 训练程序取前 493 条训练、末 8 条仅作内部验证",
+      "path": "ml/lora/datasets/train.jsonl",
+      "sha256": "b8afd68e3258a08cae76c39e60a6a505b93e011e62e5f1dbd161f8382e3afc87",
+      "n": 501,
+      "formal_training_n": 493,
+      "formal_training_composition": {
+        "synthetic": 450,
+        "captured_real": 43
+      },
+      "internal_validation_n": 8,
+      "internal_validation_composition": {
+        "synthetic": 0,
+        "captured_real": 8
+      }
+    },
+    "source_audit": "acceptance_c4/data_provenance_20261017/audit.json"
+  },
+  "confirm60_synthetic": {
+    "note": "seed=424242 的独立合成确认集，与 test50 无精确上下文重复；事实合格率保留独立分母，不与 test50 平均或替代",
+    "lora": {
+      "model": "harborguard-lora",
+      "struct_valid_raw": 1.0,
+      "struct_valid": 1.0,
+      "id_fact_valid_raw": 0.65,
+      "id_fact_valid": 0.65,
+      "option_agree": 0.972,
+      "option_agree_n": 36,
+      "option_agree_given_valid": 1.0,
+      "option_agree_valid_n": 18,
+      "null_recommend_correct": 1.0,
+      "null_recommend_n": 18,
+      "latency_s": 4.71,
+      "counts": {
+        "struct_valid": {
+          "pass": 60,
+          "total": 60
+        },
+        "id_fact_valid": {
+          "pass": 39,
+          "total": 60
+        },
+        "option_agree": {
+          "pass": 35,
+          "total": 36
+        },
+        "null_recommend_correct": {
+          "pass": 18,
+          "total": 18
+        }
+      }
+    },
+    "base": {
+      "model": "harborguard-base",
+      "struct_valid_raw": 0.817,
+      "struct_valid": 0.817,
+      "id_fact_valid_raw": 0.067,
+      "id_fact_valid": 0.067,
+      "option_agree": 0.583,
+      "option_agree_n": 36,
+      "option_agree_given_valid": 0.0,
+      "option_agree_valid_n": 0,
+      "null_recommend_correct": 0.722,
+      "null_recommend_n": 18,
+      "latency_s": 8.36,
+      "counts": {
+        "struct_valid": {
+          "pass": 49,
+          "total": 60
+        },
+        "id_fact_valid": {
+          "pass": 4,
+          "total": 60
+        },
+        "option_agree": {
+          "pass": 21,
+          "total": 36
+        },
+        "null_recommend_correct": {
+          "pass": 13,
+          "total": 18
+        }
+      }
+    },
+    "lora_id_fact_pass_n": 39,
+    "lora_id_fact_total_n": 60,
+    "n_test": 60
+  },
+  "history_schema_mode": {
+    "date": "2026-10-17",
+    "config": "format=完整 RecommendationDraft JSON Schema（C3 原口径），模型同 harborguard-lora",
+    "outcome": "未达标：LoRA 结构合法 20%、方案一致 30.3%、null 0%、14.4s/条；未切线上",
+    "root_cause": "Mac/Ollama 下 schema grammar 约束解码循环不终止；键序经 Ollama 不可达（Windows 原生键序效应不适用于 Mac）",
+    "full_metrics": {
+      "base": {
+        "model": "harborguard-base",
+        "struct_valid_raw": 0.78,
+        "struct_valid": 0.78,
+        "id_fact_valid_raw": 0.12,
+        "id_fact_valid": 0.12,
+        "option_agree": 0.515,
+        "option_agree_n": 33,
+        "option_agree_given_valid": 1.0,
+        "option_agree_valid_n": 3,
+        "null_recommend_correct": 0.5,
+        "null_recommend_n": 14,
+        "latency_s": 9.58
+      },
+      "lora": {
+        "model": "harborguard-lora",
+        "struct_valid_raw": 0.2,
+        "struct_valid": 0.2,
+        "id_fact_valid_raw": 0.2,
+        "id_fact_valid": 0.2,
+        "option_agree": 0.303,
+        "option_agree_n": 33,
+        "option_agree_given_valid": 1.0,
+        "option_agree_valid_n": 10,
+        "null_recommend_correct": 0.0,
+        "null_recommend_n": 14,
+        "latency_s": 14.4
+      },
+      "system_baseline": {
+        "model": "qwen3:1.7b",
+        "struct_valid_raw": 1.0,
+        "struct_valid": 1.0,
+        "id_fact_valid_raw": 0.16,
+        "id_fact_valid": 0.16,
+        "option_agree": 0.455,
+        "option_agree_n": 33,
+        "option_agree_given_valid": 1.0,
+        "option_agree_valid_n": 1,
+        "null_recommend_correct": 1.0,
+        "null_recommend_n": 14,
+        "latency_s": 9.42
+      },
+      "n_test": 50,
+      "teacher": "google/gemini-2.5-flash",
+      "pairing_note": "base=与 lora 同一基座的未微调 GGUF（同量化/同模板/同推理参数）；system_baseline=当前系统本地兜底（规模不同，差异不能全归因微调）"
+    }
+  },
+  "runtime_budget_events": {
+    "preswitch": "12/12：三类上下文×方案/null 覆盖；模型合格 3、事实失败→模板 1、超时 0；重置零迟到 POST；云端隔离",
+    "part1_pure": "16/16：任务淘汰/代际失效/过期 deadline→模板（provider 零调用）",
+    "part2_real_budget": "12/12：生成中取消→模板 0.71s；qwen3 事实失败→模板兜底 3/3（8.6-9.0s ≤ 9.5s 预算）",
+    "artifacts": "acceptance_c4/candidate_json_20261017/{preswitch_events.json,test_runtime_events_part1,2}.py"
+  },
+  "reports": {
+    "diagnosis": "acceptance_c4/diag_c4_20261017/report_diagnosis.md",
+    "crossruntime_supplement": "~/Desktop/HarborGuard-C4-crossruntime-supplement.zip",
+    "lenovo_order_minrepro": "acceptance_c4/lenovo_minrepro_20261017/",
+    "matrix_note": "Windows 原生 b11707：声明序 9/9 EOS、字母序 1-2/9 循环（键序敏感，限定已测版本配置）；Mac 原生 b11707 未验证"
+  }
+}

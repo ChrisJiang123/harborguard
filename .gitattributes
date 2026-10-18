@@ -10,3 +10,8 @@ Makefile text eol=lf
 *.ps1 text eol=crlf
 *.png binary
 *.docx binary
+
+# Preserve delivered provenance bytes (CRLF) and frozen unified-diff context markers.
+acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/training_meta.json -text whitespace=cr-at-eol
+acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/FINAL_REPORT.md -text whitespace=cr-at-eol
+acceptance_c4/candidate_json_20261017/frozen_config.diff -whitespace
