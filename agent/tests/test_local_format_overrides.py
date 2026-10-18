@@ -13,7 +13,7 @@ import pytest
 
 from agent.config import load_settings
 from agent.prompts import SYSTEM_PROMPT
-from agent.router import LocalProvider, parse_format_overrides
+from agent.router import LocalProvider, Router, parse_format_overrides
 from agent.schemas import RecommendationDraft
 
 
@@ -78,6 +78,17 @@ def test_explicit_override_only_affects_listed_models(monkeypatch: pytest.Monkey
     assert payload["format"] == RecommendationDraft.model_json_schema()
 
 
+def test_provider_exposes_effective_draft_format(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OLLAMA_MODEL", "harborguard-lora")
+    monkeypatch.setenv("OLLAMA_FORMAT_OVERRIDES", "harborguard-lora:json")
+    provider = LocalProvider(load_settings())
+    assert provider.draft_output_format == "json"
+
+    monkeypatch.setenv("OLLAMA_MODEL", "qwen3:1.7b")
+    fallback = LocalProvider(load_settings())
+    assert fallback.draft_output_format == "json_schema"
+
+
 def test_non_draft_requests_never_carry_format(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OLLAMA_MODEL", "harborguard-lora")
     monkeypatch.setenv("OLLAMA_FORMAT_OVERRIDES", "harborguard-lora:json")
@@ -85,6 +96,24 @@ def test_non_draft_requests_never_carry_format(monkeypatch: pytest.MonkeyPatch) 
     provider._http = _CaptureHttp()
     asyncio.run(provider.complete("非建议系统提示", [{"role": "user", "content": "x"}], 5.0))
     assert "format" not in provider._http.payloads[0]
+
+
+@pytest.mark.parametrize("model, expected", [("harborguard-lora", "json"), ("qwen3:1.7b", "json_schema")])
+def test_health_reports_format_and_identity_without_inference(monkeypatch, model, expected):
+    monkeypatch.setenv("OLLAMA_FORMAT_OVERRIDES", "harborguard-lora:json")
+    settings = replace(load_settings(), cloud_provider="disabled", ollama_model=model)
+    router = Router(settings)
+    try:
+        health = router.health()
+        local = health["providers"]["local"]
+        assert local["draft_output_format"] == expected
+        assert local["request_model"] == model
+        assert local["base_url"] == settings.ollama_base_url
+        assert health["providers"]["cloud"]["provider"] == "disabled"
+        assert local["draft_attempts"] == health["providers"]["cloud"]["draft_attempts"] == 0
+        assert local["ask_attempts"] == health["providers"]["cloud"]["ask_attempts"] == 0
+    finally:
+        asyncio.run(router.aclose())
 
 
 def test_settings_default_is_empty(monkeypatch: pytest.MonkeyPatch) -> None:

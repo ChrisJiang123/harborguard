@@ -1,0 +1,84 @@
+diff --git a/.env.example b/.env.example
+index f903dad..5305968 100644
+--- a/.env.example
++++ b/.env.example
+@@ -47,3 +47,7 @@ OLLAMA_MODEL=qwen3:1.7b
+ # 契约：本地超时 30 秒
+ OLLAMA_TIMEOUT_S=30
+ OLLAMA_KEEP_ALIVE=30m
++# 显式按模型覆盖本地输出格式（C4 候选验收用）：逗号分隔 model:json|schema。
++# 未设/为空 = 所有模型走完整 schema（C3 现状，回退即清空此变量）。
++# 示例：OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json,harborguard-base:json
++OLLAMA_FORMAT_OVERRIDES=
+diff --git a/agent/config.py b/agent/config.py
+index 9488c8f..e99a55b 100644
+--- a/agent/config.py
++++ b/agent/config.py
+@@ -101,6 +101,7 @@ class Settings:
+     ollama_model: str
+     ollama_timeout_s: float            # 契约：本地超时 30 秒
+     ollama_keep_alive: str
++    ollama_format_overrides: str       # 显式按模型覆盖输出格式："model:json,…";空 = 全部完整 schema（C3 现状，可回退）
+ 
+ 
+ def load_settings() -> Settings:
+@@ -134,6 +135,7 @@ def load_settings() -> Settings:
+         ollama_model=_get_str("OLLAMA_MODEL", "qwen3:1.7b"),
+         ollama_timeout_s=_get_float("OLLAMA_TIMEOUT_S", 30.0),
+         ollama_keep_alive=_get_str("OLLAMA_KEEP_ALIVE", "30m"),
++        ollama_format_overrides=_get_str("OLLAMA_FORMAT_OVERRIDES", ""),
+     )
+ 
+ 
+diff --git a/agent/router.py b/agent/router.py
+index 7dd16e2..962bcf0 100644
+--- a/agent/router.py
++++ b/agent/router.py
+@@ -249,6 +249,27 @@ def build_cloud_provider(settings: Settings) -> CompletionProvider:
+ CloudProvider = AnthropicCloudProvider
+ 
+ 
++def parse_format_overrides(raw: str | None) -> dict[str, str]:
++    """解析 OLLAMA_FORMAT_OVERRIDES："model:json,model2:schema"。空/未设 = 无覆盖。
++
++    只接受显式 model:format 对（format ∈ {json, schema}）；按模型名精确匹配，
++    不做名称模式猜测，也不提供全局开关。配置非法直接抛错——显式配置不允许静默降级。
++    """
++    overrides: dict[str, str] = {}
++    for part in (raw or "").split(","):
++        entry = part.strip()
++        if not entry:
++            continue
++        model, sep, fmt = entry.partition(":")
++        model, fmt = model.strip(), fmt.strip().lower()
++        if not sep or not model or fmt not in ("json", "schema"):
++            raise ValueError(
++                f"OLLAMA_FORMAT_OVERRIDES 条目非法：{entry!r}（应为 model:json 或 model:schema）"
++            )
++        overrides[model] = fmt
++    return overrides
++
++
+ class LocalProvider:
+     def __init__(self, settings: Settings):
+         self.provider = "ollama"
+@@ -257,6 +278,7 @@ class LocalProvider:
+         self.base_url = settings.ollama_base_url
+         self.keep_alive = settings.ollama_keep_alive
+         self.timeout_s = settings.ollama_timeout_s
++        self.format_overrides = parse_format_overrides(settings.ollama_format_overrides)
+         self._http = httpx.AsyncClient(timeout=settings.ollama_timeout_s)
+ 
+     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
+@@ -273,7 +295,10 @@ class LocalProvider:
+             },
+         }
+         if system == SYSTEM_PROMPT:
+-            payload["format"] = RecommendationDraft.model_json_schema()
++            override = self.format_overrides.get(self.request_model)
++            # 默认完整 schema（C3 现状）；仅当该模型在 OLLAMA_FORMAT_OVERRIDES 中显式
++            # 配置为 json 时放宽为任意合法 JSON——候选验收用，回退=清空环境变量。
++            payload["format"] = "json" if override == "json" else RecommendationDraft.model_json_schema()
+         response = await self._http.post(
+             self._native_url("/api/chat"),
+             json=payload,

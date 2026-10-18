@@ -1,0 +1,34 @@
+{
+  "c_scoped_tests": {
+    "passed": 86,
+    "failed": 0
+  },
+  "metadata_archive_regression": {
+    "passed": 1,
+    "failed": 0,
+    "temporary_fixtures_only": true
+  },
+  "remote_b_safety_tests": {
+    "passed": 16,
+    "skipped": 0,
+    "failed": 0
+  },
+  "frontend_build": "passed; existing Node20.18.0 vs Vite minimum20.19 warning retained; no environment rebuilt",
+  "browser": "LIVE 5173, evaluated model/format, both synthetic sets, integer counts, fact failure caveats visibly checked",
+  "source_generation_config_unchanged_from_handoff": {
+    "agent/prompts.py": "261eaa5581ca00318c342969425f62481fa8ffd810421e19f247509485bcbb46",
+    "agent/factcheck.py": "e1ff9926fc719bdf70c743efd96cf694f567dcd00cdd4a9218b6a66106879277",
+    "agent/schemas.py": "096dcc90a1f29edbf1e91d67773d9c808a7a40ad23c5d955b41d08c64d82a1dc",
+    "agent/config.py": "a27ce177fdd38b32f601aee5d2cb6ce8336d45ba9bf91fffc78bf0d15b5d197d",
+    "ml/lora/eval.py": "970c5eb1349dc56cebb1c703c870ca3416782c03cdb58e9cf71758ed9f6007fa",
+    "ml/yolo/weights/best.pt": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839"
+  },
+  "local_evidence": {
+    "runs/codex-c4-handoff/scoped-tests.log": "0529fd937b97da07b5dfc2720550c4dcdf4bf31d71a157dac4f816d4a6fdcfc7",
+    "runs/codex-c4-handoff/metadata-tests.log": "a71df3ef716cabe43ead70bd8311cda3aeadcb986bea501da0ea9262f31c3925",
+    "runs/codex-c4-handoff/b-safety-tests.log": "1fab0c1fc30ec49eb0544204fde11d27d4037ff89a579c6f2a78d18b0f551fec",
+    "runs/codex-c4-handoff/ui-test50.png": "aacf232affb963e3e671d0a23c61ad35c6328045d11a4c727e78874e2e64fe6a",
+    "runs/codex-c4-handoff/ui-confirm60.png": "78689ec099b9afb7c11e1d2921d7ce5d217e5985e1408121e1d3ce6d2f6766ee",
+    "runs/codex-c4-handoff/ui-ax.txt": "96476443dcab17faa9fb7716d5bb4f20e2c5ad3dc3a83b85a820d550d8d116f3"
+  }
+}

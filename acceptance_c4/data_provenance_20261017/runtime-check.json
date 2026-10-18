@@ -1,0 +1,26 @@
+{
+  "service": "agent",
+  "backend": "http://localhost:8000",
+  "configured_cloud": {
+    "provider": "openrouter",
+    "configured": true,
+    "request_model": "google/gemini-2.5-flash"
+  },
+  "live_local": {
+    "provider": "ollama",
+    "configured": true,
+    "request_model": "harborguard-lora",
+    "draft_output_format": null
+  },
+  "current_file_configuration": {
+    "cloud_provider": "openrouter",
+    "ollama_model": "harborguard-lora",
+    "ollama_format_overrides": "harborguard-lora:json",
+    "effective_format_if_started_now": "json",
+    "event_budget_s": 9.5,
+    "post_reserve_s": 0.5
+  },
+  "live_format_exposure_pending_coordinated_restart": true,
+  "warmup_note": "Probe latency excluded from business evaluation.",
+  "no_restart_or_model_requests_this_audit": true
+}

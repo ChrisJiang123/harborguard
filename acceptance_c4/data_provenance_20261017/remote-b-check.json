@@ -1,0 +1,205 @@
+{
+  "remote_commit": "c7840813c6a98c32ada5b91da6e6221dc74b121d",
+  "b_implementation_commit": "6353421",
+  "weights_sha256": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839",
+  "scope": "Fetched remote B with tracked C renderer; does not update the live demo, does not include uncommitted C geometry helpers.",
+  "b_safety_tests": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0
+  },
+  "b_repeats": [
+    {
+      "scenario": "b",
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "semantic_sha256": "048c7cffa17fc58714e045805a037f366f0360fc82c433472f44e21af47c93df",
+      "no_obstacle_clear_throughout": true,
+      "tick_ms": {
+        "p50": 0.28375000692903996,
+        "p95": 0.36166809586575255,
+        "p99": 0.4304345764103343,
+        "max": 915.9571249911096
+      }
+    },
+    {
+      "scenario": "b",
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "semantic_sha256": "048c7cffa17fc58714e045805a037f366f0360fc82c433472f44e21af47c93df",
+      "no_obstacle_clear_throughout": true,
+      "tick_ms": {
+        "p50": 0.28181300149299204,
+        "p95": 0.3471089876256883,
+        "p99": 0.38056159275583923,
+        "max": 188.7708330177702
+      }
+    },
+    {
+      "scenario": "b",
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "semantic_sha256": "048c7cffa17fc58714e045805a037f366f0360fc82c433472f44e21af47c93df",
+      "no_obstacle_clear_throughout": true,
+      "tick_ms": {
+        "p50": 0.279416999546811,
+        "p95": 0.3463874905719422,
+        "p99": 0.4027575088548472,
+        "max": 188.35558299906552
+      }
+    }
+  ],
+  "b_deterministic_semantics": true,
+  "a_timing": {
+    "first_levels": {
+      "1": 1.0,
+      "2": 150.7,
+      "3": 505.0
+    },
+    "first_uuv_t": 363.9,
+    "security_level3_within_500s": false
+  },
+  "http_call_attempts": 0,
+  "cloud_provider": "disabled",
+  "live_demo_updated": false,
+  "raw_evidence": {
+    "runs/codex-c4-handoff/b-offline-raw.json": "7bcb7f397af6c735138520128b1fbd2f84b4c02f7c57cdc4923d122df12be7b9",
+    "runs/codex-c4-handoff/a-offline-raw.json": "a6bfad5498fa83f3ad4186035f4edc4f813e75c2f7a4e834e303233509b426f5",
+    "runs/codex-c4-handoff/b-safety-tests.log": "1fab0c1fc30ec49eb0544204fde11d27d4037ff89a579c6f2a78d18b0f551fec"
+  }
+}

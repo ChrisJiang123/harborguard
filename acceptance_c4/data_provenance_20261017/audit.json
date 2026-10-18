@@ -1,0 +1,166 @@
+{
+  "audit": "HarborGuard C4 dataset provenance",
+  "generated_at": "2026-10-18T00:15:33.120091+00:00",
+  "result": "pass",
+  "handoff_baseline": "git show 6da0831:ml/lora/metrics.json (original source label corrected; dataset hashes unchanged)",
+  "checks": {
+    "all_frozen_hashes_match": true,
+    "contexts500_reproduced_seed0": true,
+    "contexts_extra80_reproduced_seed1": true,
+    "confirm60_reproduced_seed424242": true,
+    "distilled_keys_match_message_contexts": true,
+    "test_rebuilt_exact_order_from_synthetic_seed0": true,
+    "train450_rebuilt_exact_order_from_synthetic_seed0": true,
+    "all_real51_appended_to_train_tail": true,
+    "confirm60_wrapper_matches_raw_contexts": true,
+    "train_test_exact_overlap_zero": true,
+    "test_real_exact_overlap_zero": true,
+    "test_confirm60_exact_overlap_zero": true,
+    "train_confirm60_exact_overlap_zero": true,
+    "test50_unique": true,
+    "confirm60_unique": true,
+    "training_meta_hash_matches_train501": true,
+    "training_meta_split_is_493_plus_8": true,
+    "training_did_not_read_test": true,
+    "handoff_commit_test50_hash_unchanged": true,
+    "handoff_commit_confirm60_hash_unchanged": true
+  },
+  "files": {
+    "contexts500": {
+      "path": "ml/lora/datasets/contexts.jsonl",
+      "rows": 500,
+      "sha256": "1cdae128ca5f6d269fea321de8ed4064d39f5ee061cc90c82e487522fb5422c5"
+    },
+    "contexts_extra80": {
+      "path": "ml/lora/datasets/contexts_extra.jsonl",
+      "rows": 80,
+      "sha256": "276e6b2b8229f199322c8f33de65a2d726ba8e046199503dc687e0f5c4af6937"
+    },
+    "real_contexts51": {
+      "path": "ml/lora/datasets/real_contexts.jsonl",
+      "rows": 51,
+      "sha256": "45c5588f90d3a2a8b46cf865f998c9986fb01fe1aaa97ef40255cd34a8a71b6d"
+    },
+    "distilled603": {
+      "path": "ml/lora/datasets/distilled.jsonl",
+      "rows": 603,
+      "sha256": "b06f57161c4a2a3988999a37be1149cddd71879ec093ce4780f127af0f83e079"
+    },
+    "train501": {
+      "path": "ml/lora/datasets/train.jsonl",
+      "rows": 501,
+      "sha256": "b8afd68e3258a08cae76c39e60a6a505b93e011e62e5f1dbd161f8382e3afc87"
+    },
+    "test50": {
+      "path": "ml/lora/datasets/test.jsonl",
+      "rows": 50,
+      "sha256": "4453b8e2e0df089ec8623f14258c6f156db450d6ac2a2569211f731dca793845"
+    },
+    "confirm_contexts60": {
+      "path": "acceptance_c4/candidate_json_20261017/confirm_contexts_seed424242_n60.jsonl",
+      "rows": 60,
+      "sha256": "8678746ea194057cc98d11c8e610cf5abc09327cb45d431706457a295466cbaa"
+    },
+    "confirm_eval60": {
+      "path": "acceptance_c4/candidate_json_20261017/confirm60.eval.jsonl",
+      "rows": 60,
+      "sha256": "d6360787f9bda3d828bd2cdb0ac3990da63cf4793b210a28867f71f239e9aa28"
+    }
+  },
+  "evidence_files": {
+    "ml/lora/gen_contexts.py": "1cf26f9615cb52c8f8fc43d1920f5d6d729ba83a1b4f0fa80a0108c84d6c11bb",
+    "ml/lora/distill.py": "492d4e21cb050f7c997d5f39f7324a7bdeaba9a17c7394147aebdb805f9ac7ae",
+    "ml/lora/eval.py": "970c5eb1349dc56cebb1c703c870ca3416782c03cdb58e9cf71758ed9f6007fa",
+    "acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/training_meta.json": "f5461cc3441c55bf0643115b3dc2c40f31debb9a0dbe7fa5ab88e60745e325d3",
+    "acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/FINAL_REPORT.md": "3c47659c16e05b19004712ba898c475f722c4bc95550ca3c4f7076da6f9c7374",
+    "acceptance_c4/candidate_json_20261017/FREEZE.md": "baa01020d5dca07d9ecc39f7b75585eb266132b87e831656e24576a8cbd96cc5",
+    "acceptance_c4/candidate_json_20261017/metrics_candidate_json.json": "1fc98c077c5ea0540400fedc092c3abc8054fa5ca1d9e4b6134476e43ac4d473",
+    "acceptance_c4/candidate_json_20261017/metrics_confirm60.json": "422db6a7d05d1dd09875daf8a4f0935ef277d88c1467eb521ddb130a38499c9e"
+  },
+  "source_membership": {
+    "contexts500": {
+      "distilled": 476,
+      "train": 390,
+      "test": 40
+    },
+    "contexts_extra80": {
+      "distilled": 76,
+      "train": 60,
+      "test": 10
+    },
+    "real_contexts51": {
+      "distilled": 51,
+      "train": 51,
+      "test": 0
+    },
+    "confirm_contexts60": {
+      "distilled": 0,
+      "train": 0,
+      "test": 0
+    }
+  },
+  "test50": {
+    "source": "synthetic gen_contexts outputs, fixed split_records(seed=0); not capture_real",
+    "source_breakdown": {
+      "contexts500": 40,
+      "contexts_extra80": 10,
+      "real_contexts51": 0
+    },
+    "kinds": {
+      "buoy": 3,
+      "disaster": 11,
+      "security": 36
+    }
+  },
+  "train501": {
+    "source_breakdown": {
+      "synthetic": 450,
+      "captured_real": 51
+    },
+    "kinds": {
+      "buoy": 55,
+      "disaster": 119,
+      "security": 327
+    },
+    "formal_training_first493": {
+      "source_breakdown": {
+        "synthetic": 450,
+        "captured_real": 43
+      },
+      "kinds": {
+        "buoy": 53,
+        "disaster": 113,
+        "security": 327
+      }
+    },
+    "internal_validation_last8": {
+      "source_breakdown": {
+        "synthetic": 0,
+        "captured_real": 8
+      },
+      "kinds": {
+        "buoy": 2,
+        "disaster": 6
+      }
+    }
+  },
+  "exact_context_overlap": {
+    "train501_vs_test50": 0,
+    "real51_vs_test50": 0,
+    "confirm60_vs_test50": 0,
+    "confirm60_vs_train501": 0,
+    "confirm60_vs_formal_train493": 0,
+    "confirm60_vs_internal_validation8": 0
+  },
+  "split_details": {
+    "valid_synthetic_distilled": 552,
+    "selected_train": 450,
+    "selected_test": 50,
+    "valid_synthetic_not_selected": 52
+  },
+  "limitations": [
+    "Exact context hashes prove split membership and absence of byte-equivalent contexts; they do not prove semantic independence of every generated scenario.",
+    "real_contexts.jsonl has no per-row capture-run identifier, so the three reported A/B capture runs cannot be reconstructed as separate batches from this file alone.",
+    "Both test50 and confirm60 are synthetic-context evaluations and do not establish real-harbor generalization."
+  ]
+}
