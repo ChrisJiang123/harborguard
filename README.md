@@ -6,7 +6,7 @@ A port-security and disaster-recovery digital-twin prototype built for the Innov
 
 The current demonstration uses **synthetic acoustic observations and simulated AIS**. It is not certified for real-world navigation, underwater surveillance or port reopening.
 
-[Demo runbook](docs/demo-runbook.md) · [Acceptance evidence](docs/final-delivery-20261017.md) · [Project story](docs/devpost-story-en.md) · [Three twists](docs/twist-responses-en.md) · [Chinese documentation archive](docs/README.zh-CN.md)
+[Demo runbook](docs/demo-runbook.md) · [Acceptance evidence](docs/final-delivery-20261017.md) · [Project story](docs/devpost-story-en.md) · [Three twists](docs/twist-responses-en.md) · [Historical documentation archive](docs/README.zh-CN.md)
 
 ## What it does
 
@@ -20,7 +20,7 @@ The frontend displays live state, detection images, recommendations, decisions a
 
 | Evidence | Exact scope |
 | --- | --- |
-| Latest official main checked out for this README | `e9ae07fbf1e233d83c983803b3992b165eae163c`: includes B fix #16, report #17, A's 3D update #18, and C's subsequent #19 language/configuration fixes. These upstream changes were fetched into an isolated worktree; this documentation task did not merge them into main or rerun complete system acceptance on that SHA. |
+| Latest official main included in the English delivery branch | `07f42a2`: includes B #16, report #17, A #18, C #19, submission copy #20 and Vercel/Mac/CORS preparation #21. These upstream changes were merged into the independent feature branch; main was not changed by this task. Current regression and immutable-source checks are in the [English translation audit](docs/english-translation-audit.json). A regression run does not establish complete current browser/field acceptance. |
 | Last complete Windows acceptance run | Main `a841bf9a70d8bf8237b9e03763852a34bed10368`: **232 Python tests passed, 2 skipped**; frontend build, lint and A1-A6 passed; approximately **4.98 Hz** state delivery. |
 | Actual browser demonstration | One real A/B/C **2D** flow in **4 minutes 46 seconds** on a841bf9. 3D was unavailable in that test browser. Screenshots were saved; this is not a recorded video. |
 | B options-publication fix | Tested source `e1b3305`, report commit `390687a`: **237 passed, 2 skipped**, with actual browser/Agent metric consistency and Reject checks. Subsequently merged in #16; this does not automatically validate every later frontend change. |

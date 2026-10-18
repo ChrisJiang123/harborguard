@@ -1,7 +1,23 @@
 # English repository presentation and preserved originals
 
-Baseline: official main `d2d4c6fbdff72de5b2d2c02aab0c39723513f3a8`.
+Translation began at main `d2d4c6fbdff72de5b2d2c02aab0c39723513f3a8`.
 Feature branch: `codex/harborguard-english-live`.
+
+Latest main `07f42a21f30e9aad8a79369362abc5fe09f43744` (PR #21) was subsequently merged **into this feature
+branch**, retaining the team's Vercel/Mac-tunnel/CORS preparation. Main itself
+was not changed by this task. Final source comparisons use that newer main;
+the initial 255-pass/2-skip regression belongs to the earlier translation
+commit `4361210`. The audit records the separate rerun after PR #21.
+
+Final preparation moved to `D:\HarborGuard-delivery\20261017-live3d-english\repo`
+to use available D: storage. C: originals were retained. The capture itself
+still belongs to the explicitly recorded earlier source and was not relabeled.
+
+The final D:-drive regression after PR #21 is **259 passed, 2 skipped in
+125.75 seconds**. The two skips lack optional cached COCO smoke weights; the
+delivered sonar model was exercised. Frontend build, lint and the new deployment
+configuration check pass. The earlier A1-A6/English/recovery checks also pass;
+the frontend application source is unchanged between those baselines.
 
 The project owner approved translating documentation, comments, interface copy
 and normal runtime output while preserving original data and evidence. This is
