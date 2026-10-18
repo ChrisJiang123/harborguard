@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { BufferGeometry, Color, ExtrudeGeometry, Float32BufferAttribute, Path, Shape, Vector2 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { loadLocalBase, loadPortBuildings } from '../data/localBase'
 import type { LocalBase } from '../data/localBase'
 import { loadShoreTerrain, sampleShoreElevation } from '../data/shoreTerrain'
 import type { ShoreTerrainGrid } from '../data/shoreTerrain'
+import type { BathymetryGrid } from '../data/bathymetry'
 import { worldPosition } from './coordinates'
 import { CoastalTerrain3D } from './CoastalTerrain3D'
 
@@ -64,7 +65,7 @@ function PortBuildings({ data, verticalScale, terrain }: { data: LocalBase; vert
   return <group scale={[1, verticalScale, 1]}><mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><meshStandardMaterial color="#e1e8ec" roughness={.9} metalness={.04} flatShading /></mesh></group>
 }
 
-export function HarborModels3D({ verticalScale, onStatus }: { verticalScale: number; onStatus: (status: string) => void }) {
+export function HarborModels3D({ verticalScale, onStatus, quayWalls = true, smoothing = true, shoreline = true, floor, detailFloor }: { verticalScale: number; onStatus: (status: string) => void; quayWalls?: boolean; smoothing?: boolean; shoreline?: boolean; floor?: BathymetryGrid | null; detailFloor?: BathymetryGrid | null }) {
   const [base, setBase] = useState<LocalBase | null>(null)
   const [buildings, setBuildings] = useState<LocalBase | null>(null)
   const [terrain, setTerrain] = useState<ShoreTerrainGrid | null>(null)
@@ -84,7 +85,9 @@ export function HarborModels3D({ verticalScale, onStatus }: { verticalScale: num
   }, [onStatus])
   return <group>
     {base && <PortLines data={base} terrain={terrain} verticalScale={verticalScale} />}
-    {terrain && <CoastalTerrain3D grid={terrain} verticalScale={verticalScale} />}
+    {/* Local imagery may still be decoding. Keep the canvas, water and survey
+        mounted rather than propagating its suspension to the entire 3D view. */}
+    {terrain && <Suspense fallback={null}><CoastalTerrain3D grid={terrain} verticalScale={verticalScale} quayWalls={quayWalls} smoothing={smoothing} shoreline={shoreline} floor={floor} detailFloor={detailFloor} /></Suspense>}
     {buildings && <PortBuildings data={buildings} verticalScale={verticalScale} terrain={terrain} />}
   </group>
 }

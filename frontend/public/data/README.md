@@ -6,3 +6,5 @@
 harbor-osm.geojson 是单独的 OSM 地理岸线简图（并非业务分区），来源和 ODbL 许可见 OSM-SOURCE.md。
 sonar-stub.svg 是模拟声呐示意图，不是真实声呐或训练模型输出。
 B 提供的 JSONL 放入 public/；回放配套图片也需本地打包，例如 public/sonar/det-1.png。
+
+`seabed-fill-regional.json` is a separate NOAA CRM regional model/interpolation layer, not additional H12617 measurements. Its metadata explicitly retain native datum/resolution and the unresolved vertical tie. See [current shoreline validation](../../../docs/3d-shoreline-realism/README.md).

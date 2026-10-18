@@ -11,6 +11,8 @@ export interface ShoreTerrainGrid {
     imagery_date_note: string
     imagery_file: string
     imagery_grid: string
+    imagery_bounds?: { west: number; south: number; east: number; north: number }
+    grid_registration?: 'pixel_centres'
     horizontal_crs: 'EPSG:4326'
     horizontal_units: 'degrees'
     vertical_datum: 'NAVD88'
@@ -43,7 +45,7 @@ export function parseShoreTerrain(value: unknown): ShoreTerrainGrid | null {
   if (typeof west !== 'number' || typeof south !== 'number' || typeof east !== 'number' || typeof north !== 'number' || ![west, south, east, north].every(Number.isFinite) || !(west < east) || !(south < north)) return null
   const valid = value.values.filter(item => item !== metadata.nodata_value) as number[]
   if (!valid.length || valid.length < width * height * .2 || valid.some(item => item < -15000 || item > 9000) || metadata.nodata_cells !== width * height - valid.length) return null
-  if (Math.abs(Math.min(...valid) - Number(metadata.min_elevation_m)) > .11 || Math.abs(Math.max(...valid) - Number(metadata.max_elevation_m)) > .11) return null
+  if (Math.abs(valid.reduce((a,b) => Math.min(a,b), Infinity) - Number(metadata.min_elevation_m)) > .11 || Math.abs(valid.reduce((a,b) => Math.max(a,b), -Infinity) - Number(metadata.max_elevation_m)) > .11) return null
   return value as unknown as ShoreTerrainGrid
 }
 
