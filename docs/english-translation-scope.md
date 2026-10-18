@@ -44,6 +44,34 @@ adapter to reproduce the byte-identical original Chinese integration fixture;
 it does not change the live service. Existing message assertions were updated
 only for equivalent English text, without removing conditions or thresholds.
 
+## English file paths and GitHub history
+
+PR #22 was merged as `a99756d8ad8f9248cd8f2310093fd65e9a033a9e`.
+A subsequent filename-only cleanup renames the original C taskbook to
+[`HarborGuard-Taskbook-C-AI-Models-and-Agent.docx`](HarborGuard-Taskbook-C-AI-Models-and-Agent.docx),
+preserving its original bytes. The English historical README is now
+[`project-notes-archive.md`](project-notes-archive.md), with current links updated.
+The taskbook's original language is retained under the approved preservation
+scope. This is a path change, not a replacement or translation of the taskbook.
+
+GitHub's file listing shows the subject of the last commit that changed each
+file. For example, `pyproject.toml` was last changed by historical commit
+`2dd1196c0a0dd36c8ac7159c0a3c620d0278483d`, whose subject is Chinese even
+though the filename and TOML contents are English. This cleanup documents the
+existing test commands in English comments without changing parsed TOML values.
+New commits use English subjects. Existing commit subjects, commit IDs, PR
+discussions and original evidence remain part of history; they are not rewritten.
+
+The [translation audit](english-translation-audit.json) is the prior translation
+snapshot at `e573c5a`; its historical path lists are intentionally retained.
+Renaming current files does not invalidate the original source measurements.
+
+The cleanup verified all **439 tracked paths are ASCII**, all **46 local
+Markdown links** in the affected documents resolve, the taskbook's SHA-256 is
+unchanged, and parsed TOML configuration is identical. Runtime source and shared
+contracts have no diff from the merged baseline. These structural checks do not
+constitute another runtime regression or browser acceptance run.
+
 ## Preserved Chinese and why it remains
 
 | Original material | Reason and English access |
