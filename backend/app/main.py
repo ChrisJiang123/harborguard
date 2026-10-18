@@ -87,7 +87,8 @@ def create_app(*, run_loop=True, debug_truth=None, storage_path=None):
         logger.error("Durable history failure: %s", exc, exc_info=exc)
         request.app.state.engine.persistence_error = str(exc)
         return JSONResponse(status_code=503, content={"detail": "Durable history unavailable; operation not confirmed. Inspect backend logs."})
-    app.add_middleware(CORSMiddleware, allow_origins=_cors_origins(),
+    app.state.allowed_origins = tuple(_cors_origins())
+    app.add_middleware(CORSMiddleware, allow_origins=app.state.allowed_origins,
                        allow_methods=["GET","POST","OPTIONS"], allow_headers=["*"])
     app.include_router(rest.router)
     app.include_router(ws.router)

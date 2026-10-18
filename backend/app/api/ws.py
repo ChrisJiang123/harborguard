@@ -8,6 +8,12 @@ router = APIRouter()
 
 @router.websocket("/ws")
 async def websocket(websocket: WebSocket):
+    # Browsers send Origin; the local Python Agent connects without one.
+    # Use the same startup allowlist as REST CORS, before accepting the socket.
+    origin = websocket.headers.get("origin")
+    if origin is not None and origin not in websocket.app.state.allowed_origins:
+        await websocket.close(code=1008)
+        return
     await websocket.accept()
     game = websocket.app.state.engine
     queue = game.bus.subscribe()
