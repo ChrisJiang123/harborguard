@@ -9,7 +9,7 @@
 | `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据 + **后端真实调用联调通过** |
 | `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | ✅ Lenovo 训练交付已通过 **Mac 验收**：mAP50=0.9771、CPU 49.7ms/张（600 张合成 val）；后端 detection.model=yolo26n，/api/metrics 已出数（见 ml/yolo/ACCEPTANCE-MAC.md） |
 | `agent/` | Agent 服务（端口 8001）：上下文/三级路由/问答 | C3 | ✅ 云端(OpenRouter)→本地→模板闭环，20/20 实测 `model=cloud` |
-| `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | 🟨 生成/蒸馏/截取/评估脚本完成，450/50 样本就绪，基座已评；**待 Colab 训练与部署** |
+| `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | ✅ Lenovo 训练/导出与 Mac 接入完成；本地 `harborguard-lora` 用 `format=json`，test50 事实 44/50、confirm60 事实 39/60（均为合成上下文） |
 
 共享接口（`render_ping` / `SonarDetector` / REST / Recommendation）严格按
 **`docs/shared-contract-v1.md`**（共享契约 v1，B 维护，H2 冻结），字段名一字不改。
@@ -20,7 +20,7 @@
 | --- | --- | --- | --- |
 | 运行环境 | `.venv`（仓库根） | Agent 服务、render_ping、SonarDetector CPU 推理、自检 | MacBook（开发/演示主机）· Python 3.11（实测） |
 | YOLO 训练 | `.venv-yolo-train` / Colab | `yolo detect train`（50 epoch） | ✅ Lenovo 已实测：Windows · Python 3.12.10 · cu130；Colab 备选 |
-| LoRA 训练 | Colab（暂定） | Unsloth + TRL SFT | 暂定 Colab；Unsloth 在 GPU 上未验证（WSL 方案以后修，不阻塞 C1） |
+| LoRA 训练 | Lenovo/Windows（已完成） | Unsloth + TRL SFT | 本机只接入与复验，不重建训练环境、不重训 |
 
 ```bash
 # 运行环境（MacBook，Python 3.11）
@@ -43,9 +43,10 @@ PYTHON_VERSION=3.12 YOLO_CUDA_INDEX=cu130 bash scripts/setup_env_yolo_train.sh
 cp .env.example .env   # 然后填写密钥；.env 已被 .gitignore 忽略，绝不提交
 ```
 
-模型 ID 说明：任务书原文写 `claude-sonnet-5-5`；本机已实测可用并作为默认保留的
-ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是否为有效
-官方 ID **未做验证**——以真实调用响应的 `model` 字段为准，不反复调 API 试名。
+当前配置：`CLOUD_PROVIDER=openrouter`、`OPENROUTER_MODEL=google/gemini-2.5-flash`、
+`OLLAMA_MODEL=harborguard-lora`、`OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json`。
+路由为 OpenRouter → 本地 LoRA → 确定性模板；未列出的本地模型继续完整 schema。
+Agent 只解释与推荐，操作员批准才调用决策接口。历史 C0/C3 记录不代表当前配置。
 
 ## C0 自检
 
@@ -128,8 +129,7 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
 - ✅ 云端已切到 OpenRouter 结构化路由（`google/gemini-2.5-flash`，json_schema strict +
   `require_parameters`，禁 fallback，SDK 不重试）；2026-10-17 隔离实测 20/20 次真实生成
   与 POST 全部 `model=cloud` 且首次结构/事实双合格（详见 agent/README.md）
-- ✅ 本地仅使用已安装的 `qwen3:1.7b`，显式关闭思考并用 JSON Schema；
-  `harborguard-lora` 尚未训练或部署。连续 20 次真实 POST：local 20、cloud 0、template 0，
+- ✅ C3 切换前历史基线：`qwen3:1.7b`，显式关闭思考并用 JSON Schema。连续 20 次真实 POST：local 20、cloud 0、template 0，
   当时记录的结构与 ID 合格率为 20/20，平均 5.153 秒、最大 8.650 秒，全部低于 10 秒；
   该数字不再表述为自然语言事实合格率
 - ✅ 无效云端凭证 + 本地不可达的隔离配置在 398 ms 内返回合法模板；
@@ -183,9 +183,15 @@ ID 是 `claude-sonnet-5`（可改 `ANTHROPIC_MODEL`）。`claude-sonnet-5-5` 是
   终止不静默换模型；GPU 支持 bf16 用 bf16、否则兼容 fp16（互斥、不硬编码，Qwen3.5 非 4-bit）；
   训练前审计 token 长度并断言 4096 不截断 assistant 答案；训练集尾部留 8 条验证切片，
   **test.jsonl 不进笔记本**；依赖按当前官方 Unsloth 指南（pip install unsloth）
-- ⏸ **Colab 训练未跑**：无 GGUF、`harborguard-lora` 未部署、`metrics.json` 未生成
-  （无 LoRA 不写占位数据，与 ml/yolo/eval.py 同约定）。LoRA 验收线：
-  json_valid ≥ 0.90、option_agree ≥ 0.80、本地单条 ≤ 10 s、断网 `ollama run` 可用
+- ✅ Lenovo 正式训练、GGUF 导出和 Mac 切换已完成；完整 schema 的历史失败证据保留。
+  当前 `format=json` 的 test50：结构 50/50、事实 44/50、方案 31/33、null 14/14、平均 3.75 s；
+  confirm60：结构 60/60、事实 39/60、方案 35/36、null 18/18、平均 4.71 s。
+  **两组都是合成上下文评估**；test50 可从合格合成蒸馏记录同序重建，原“实采测试集”标签错误。
+  501 条训练输入按原顺序分为 493 条训练（450 合成 + 43 后端实跑截取）与 8 条内部验证。
+  来源、哈希与重复检查见 [C4 来源审计](acceptance_c4/data_provenance_20261017/README.md)。
+  这里的“真实上下文”指本机仿真后端运行截取，**不是物理声呐或真实海域采集**。
+- ⏸ qwen3 → LoRA 的实际往返回退演练未做；真实关闭 Wi-Fi、投影与跨设备试播待负责人确认。
+  远端 B 的 P0 修复已做独立真实权重三轮复验，但未接入当前演示；两项历史集成时序失败仍未豁免，等待 B/A 接入与最终组合验收。
 
 ## 不入库的内容（.gitignore）
 

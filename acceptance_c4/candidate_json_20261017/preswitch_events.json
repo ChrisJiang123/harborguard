@@ -1,0 +1,78 @@
+{
+  "events": [
+    {
+      "event": "security-有方案",
+      "kind": "security",
+      "elapsed_s": 2.07,
+      "outcome": "model_pass",
+      "attempts": 1,
+      "rec_option": "opt-2",
+      "expected": "opt-2",
+      "posted": 1
+    },
+    {
+      "event": "security-无方案",
+      "kind": "security",
+      "elapsed_s": 3.62,
+      "outcome": "fact_or_id_fail->template",
+      "attempts": 0,
+      "rec_option": null,
+      "expected": null,
+      "posted": 2
+    },
+    {
+      "event": "disaster(null)",
+      "kind": "disaster",
+      "elapsed_s": 2.54,
+      "outcome": "model_pass",
+      "attempts": 1,
+      "rec_option": null,
+      "expected": null,
+      "posted": 3
+    },
+    {
+      "event": "buoy(null)",
+      "kind": "buoy",
+      "elapsed_s": 1.3,
+      "outcome": "model_pass",
+      "attempts": 1,
+      "rec_option": null,
+      "expected": null,
+      "posted": 4
+    }
+  ],
+  "local_stats": {
+    "draft_attempts": 5,
+    "draft_raw_outputs": 5,
+    "draft_raw_valid": 5,
+    "draft_first_structure_valid": 4,
+    "draft_first_fact_valid": 3,
+    "draft_invalid": 0,
+    "draft_fact_valid": 3,
+    "draft_fact_invalid": 2,
+    "draft_retries": 1,
+    "draft_retry_success": 0,
+    "success": 3,
+    "errors": 0,
+    "timeouts": 0,
+    "ask_attempts": 0,
+    "ask_success": 0,
+    "request_model": "harborguard-lora",
+    "response_model": "harborguard-lora",
+    "upstream_provider": null,
+    "usage_requests": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "reasoning_tokens": 0,
+    "total_tokens": 0,
+    "reported_cost_usd": null,
+    "cost_reports": 0,
+    "last_error": null
+  },
+  "config": {
+    "ollama_model": "harborguard-lora",
+    "format_overrides": "harborguard-lora:json",
+    "cloud_provider": "disabled",
+    "budget_s": 9.5
+  }
+}

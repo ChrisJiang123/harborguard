@@ -71,6 +71,7 @@ class CompletionProvider(Protocol):
     provider: str
     request_model: str
     enabled: bool
+    base_url: str | None
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse: ...
 
@@ -90,6 +91,7 @@ class AnthropicCloudProvider:
     def __init__(self, settings: Settings):
         self.provider = _provider_label(settings.anthropic_base_url)
         self.request_model = settings.anthropic_model
+        self.base_url = settings.anthropic_base_url or "https://api.anthropic.com"
         self.enabled = bool(settings.anthropic_api_key or settings.anthropic_auth_token)
         self._client = (
             AsyncAnthropic(
@@ -142,6 +144,7 @@ class OpenRouterProvider:
     def __init__(self, settings: Settings):
         self.provider = "openrouter"
         self.request_model = settings.openrouter_model
+        self.base_url = settings.openrouter_base_url
         self.enabled = bool(settings.openrouter_api_key)
         self._client = (
             AsyncOpenAI(
@@ -223,6 +226,7 @@ class DisabledCloudProvider:
     provider = "disabled"
     request_model = "none"
     enabled = False
+    base_url = None
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
         raise RuntimeError("cloud provider is disabled")
@@ -279,6 +283,9 @@ class LocalProvider:
         self.keep_alive = settings.ollama_keep_alive
         self.timeout_s = settings.ollama_timeout_s
         self.format_overrides = parse_format_overrides(settings.ollama_format_overrides)
+        self.draft_output_format = (
+            "json" if self.format_overrides.get(self.request_model) == "json" else "json_schema"
+        )
         self._http = httpx.AsyncClient(timeout=settings.ollama_timeout_s)
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
@@ -448,8 +455,13 @@ class Router:
         result = copy.deepcopy(self.stats)
         result["providers"]["cloud"]["provider"] = self.cloud.provider
         result["providers"]["cloud"]["configured"] = bool(self.cloud.enabled)
+        result["providers"]["cloud"]["base_url"] = getattr(self.cloud, "base_url", None)
         result["providers"]["local"]["provider"] = self.local.provider
         result["providers"]["local"]["configured"] = bool(self.local.enabled)
+        result["providers"]["local"]["base_url"] = getattr(self.local, "base_url", None)
+        result["providers"]["local"]["draft_output_format"] = getattr(
+            self.local, "draft_output_format", None
+        )
         result["warmup"] = copy.deepcopy(self.warmup)
         result["last_route"] = copy.deepcopy(self.last_route)
         result["cloud_circuit"] = {
