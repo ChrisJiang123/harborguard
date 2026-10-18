@@ -118,7 +118,7 @@ def test_mammal_ping_prohibition_limit_and_duration():
     tr = track(y=100, level=2)
     events = pinger.step([tr, track("T2", x=400, cue="call")], w)
     assert not pinger.detections
-    assert "海洋哺乳动物" in events[0][1]["log"]["text"]
+    assert "Marine mammal" in events[0][1]["log"]["text"]
     events = pinger.step([tr], w)
     assert events[0][0] == "detection" and tr["cls"] == "uuv"
     assert w.buoys["B1"]["pinging"]

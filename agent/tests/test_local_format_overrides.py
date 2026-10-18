@@ -1,9 +1,9 @@
-"""OLLAMA_FORMAT_OVERRIDES 行为测试（C4 候选修复，离线，不依赖 Ollama）。
-
-覆盖：解析器合法/非法输入、默认（未设置）全部完整 schema、
-显式按模型覆盖 json、未列出模型不受影响、非 RecommendationDraft 请求永不携带 format。
-回退保证：清空环境变量后 payload 与 C3 原行为逐字段一致。
+"""Offline C4 candidate tests for OLLAMA_FORMAT_OVERRIDES. Cover valid/invalid input, complete-schema
+defaults, explicit per-model JSON overrides, unchanged unlisted models and no format for non-
+RecommendationDraft requests. Clearing the variable restores C3 payloads field for field.
 """
+
+
 from __future__ import annotations
 
 import asyncio
@@ -21,7 +21,7 @@ class _CaptureHttp:
     def __init__(self) -> None:
         self.payloads: list[dict] = []
 
-    async def post(self, url, json=None, timeout=None):  # noqa: A002 - 与 httpx 形参对齐
+    async def post(self, url, json=None, timeout=None):  # noqa: A002 - Match the httpx parameter name.
         self.payloads.append(json)
 
         class _R:
@@ -124,7 +124,7 @@ def test_settings_default_is_empty(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_settings_are_pure_data(monkeypatch: pytest.MonkeyPatch) -> None:
-    """配置对象可被 replace 派生（测试/隔离用），不携带行为。"""
+    """Settings can be derived via replace for isolated tests without embedding behavior."""
     monkeypatch.delenv("OLLAMA_FORMAT_OVERRIDES", raising=False)
     settings = load_settings()
     isolated = replace(settings, cloud_provider="disabled")

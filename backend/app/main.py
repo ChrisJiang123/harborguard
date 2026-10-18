@@ -57,7 +57,7 @@ def create_app(*, run_loop=True, debug_truth=None, storage_path=None):
                     app.state.runtime_error = "simulation failure"
                     app.state.engine.world.paused = True
                     try:
-                        app.state.engine.log("critical", "sim", "仿真发生错误，已暂停；请检查后端日志")
+                        app.state.engine.log("critical", "sim", "Simulation error; paused. Check the backend logs.")
                     except StorageError:
                         logger.exception("Cannot persist failure log; backend remains unhealthy")
                 tick += 1

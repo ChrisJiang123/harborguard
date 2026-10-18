@@ -1,4 +1,4 @@
-"""C3 统一提示词：云端、本地与后续蒸馏必须引用同一个常量。"""
+"""Shared C3 system prompts for cloud, local generation and later distillation."""
 
 from .config import get_settings
 

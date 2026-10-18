@@ -1,17 +1,17 @@
-# 任务书验收范围
+# Taskbook Acceptance Scope
 
-以任务书 B 为主要依据，先交付本地可运行、可测试、接口可对接的 MVP。下列区分代码验证与需要真人、队友代码或外部仓库才能完成的验收。
+Taskbook B is the primary development basis. The initial goal is a locally runnable, testable MVP with integrable interfaces. Implementation, code verification, and acceptance requiring teammates, people, or external systems are distinct.
 
-2026-10-17更新：基线main `782d04d` 已含A #7/#11、B #10、C #4。原始37个复选框及历史证据见 [B完整报告](../backend/docs/B-final-acceptance.md)，新声呐模型限制见 [安全修复报告](../backend/docs/sonar-safety-integration.md)，本轮交接迁移验证见 [最终集成报告](final-integration-report.md)。此表不将“已实现”自动视为“已验收”。
+2026-10-17 update: historical main `782d04d` includes A #7/#11, B #10, and C #4. See the [complete B report](../backend/docs/B-final-acceptance.md) for all 37 original checkboxes and historical evidence, [sonar safety](../backend/docs/sonar-safety-integration.md) for real-model limits, and the [integration report](final-integration-report.md) for handoff migration tests. Implemented does not automatically mean accepted.
 
-| 步骤 | 已实现的后端能力 | 剩余团队或外部验收 |
+| Stage | Implemented backend capability | Remaining team/external acceptance |
 | --- | --- | --- |
-| B0–B1 | 21 REST、14事件、Pydantic v2、CORS、5Hz目标、500事件窗口和同库持久化；均已在main | 新main真实浏览器复测及全历史分页仍未验收/未批准，不能把500缓存称为全历史 |
-| B2 | 12 个有效分区、6 泊位区、4 航道、2 锚地、双向图、5 资产、10 浮标、40 船期、集中参数、前端静态副本 | 几何为演示示意；尚未按真实海图核验港区、水陆和浮标部署；A 地图实际显示 |
-| B3 | 固定种子场景、五类目标、固定子步运动、WGS84 换算、暂停/恢复/倍速/重置、真值兜底 | A 地图运动验收 |
-| B4 | 匿名声学测量、正向交会、SNR 一致性排除多船虚假交点、聚类、Kalman、马氏关联、确认/删除、AIS、历史与预测 | 实际声呐或真实海况性能不在本演示验证范围 |
-| B5 | 五项风险、三级与迟滞、哺乳动物保护、PNG、方案优化、批准/拒绝结构化持久化；交付YOLO对合成图单独实测 | 真实模型三级505秒超过原500秒上限；实海识别及新main浏览器审批尚待验收 |
-| B6 | 保守灾害判定、有限重试、BFS、故障、回放工具、Agent校验与广播；模板HTTP/WS已在独立候选验证 | 真实YOLO燃料泊位未确认保持unsurveyed，最新LIVE与旧回放结果不同；云/本地模型单独验收 |
-| B7 | 回归、明确模型标签、状态包约束、独立启动/五分钟操作单；20ms仅尽力目标 | 新模型20分钟耐久、全员三次彩排、目标电脑和从零安装计时；平均5Hz不能代替间隔/延迟验收 |
+| B0–B1 | 21 REST operations, 14 events, Pydantic v2, CORS, 5 Hz target, 500-event window, same-database persistence; in main | New-main browser regression; all-history pagination remains unapproved/unaccepted. A 500-event cache is not complete history |
+| B2 | 12 valid zones: 6 berths, 4 channels, 2 anchorages; bidirectional graph, 5 assets, 10 buoys, 40 vessel schedules, centralized parameters, frontend static copies | Demonstration geometry has not been validated against real charts, land/water boundaries, or deployments; A map display |
+| B3 | Seeded scenarios, five target types, fixed-step motion, WGS84 conversion, pause/resume/speed/reset, truth fallback | A map-motion acceptance |
+| B4 | Anonymous acoustic measurements, forward intersections, SNR consistency rejection of false multi-vessel intersections, clustering, Kalman, Mahalanobis association, confirmation/deletion, AIS, history/prediction | Physical sonar and real-sea performance are outside this demo's validation |
+| B5 | Five-factor risk, three alert levels/hysteresis, mammal protection, PNGs, option optimization, structured persistent approve/reject; delivered YOLO tested separately on synthetic images | Real-model level 3 occurs at 505 s, exceeding the original 500 s limit; real-sea recognition and new-main browser decisions pending |
+| B6 | Conservative disaster decisions, bounded retries, BFS, faults, replay tools, Agent validation/broadcast; template HTTP/WS verified in an isolated candidate | Real YOLO leaves the fuel berth unsurveyed; latest LIVE differs from old replay; cloud/local models need separate acceptance |
+| B7 | Regression, explicit model labels, state-size bounds, isolated startup/five-minute runbook; 20 ms is best effort | New-model 20-minute endurance, three full-team rehearsals, target computer, first-install timing; average 5 Hz does not establish every latency/interval bound |
 
-后端只提供方案与状态；安防 `restricted` 状态仅由操作员 approve 写入。灾害模式的 `clear`、`blocked`、`unsurveyed` 是模拟调查结果，不触发自动封港。所有降级桩在消息中标明 `model: "stub"`，离线建议标明 `model: "template"`。
+B supplies options/state. Security restricted zones require operator approve. Disaster clear/blocked/unsurveyed are simulated survey conclusions and do not automatically close a real port. Fallback detections are labeled model=stub; offline recommendations model=template.

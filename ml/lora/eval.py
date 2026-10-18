@@ -1,29 +1,11 @@
-"""C4 评估：Ollama 上对比「配对未微调基座」vs「harborguard-lora」，另报「当前系统基线」。
-
-配对原则：base 与 lora 必须来自同一基座（同一 GGUF 量化 / chat template / 推理参数，
-由 train_lora.ipynb 成对导出），LoRA 与 base 的差异才能归因于微调；
-qwen3:1.7b 是当前系统在用的本地兜底，单列为 system_baseline——它与 0.8B 级 LoRA
-的差距包含模型规模差异，不能全部记在微调头上。
-
-每个模型分别报告（任务书 C4 验收 + 训练前检查第 7 条）：
-- struct_valid_raw / struct_valid：首次 / 重试一次后的结构合法率（JSON 对象 + 六字段 pydantic）；
-- id_fact_valid_raw / id_fact_valid：首次 / 重试后「ID 存在性 + 确定性事实」双合格率（C3 全套）；
-- option_agree：有方案的 security 样本中 recommended_option_id == ranked[0] 的比例，
-  分母 option_agree_n 为该类样本总数（含生成失败的）；另报仅双合格口径及分母；
-- null_recommend_correct：disaster/buoy 样本中 recommended_option_id 正确为 null 的比例及分母；
-- latency_s：平均每条总耗时（含重试与失败尝试；串行评测，不受并发排队干扰）。
-
-评测请求与 C3 运行时完全同构（同一 SYSTEM_PROMPT、Ollama 原生 /api/chat、同一
-JSON Schema 约束、超时 30 秒）。评测**没有模板兜底**：请求失败/超时的样本按不合格
-计入分母，绝不计作生成成功。配对 base 与 lora 都评测成功才写 ml/lora/metrics.json
-（后端 /api/metrics 读取）；system_baseline 未测时写 null。
-
-用法::
-
-    python -m ml.lora.eval                    # 配对 base + LoRA + 系统基线 -> metrics.json
-    python -m ml.lora.eval --skip-lora        # 只评当前系统基线（训练前），不写 metrics.json
-    python -m ml.lora.eval --skip-baseline    # 只跑配对对比
+"""C4 serial Ollama evaluation: paired untuned base versus harborguard-lora, with qwen3:1.7b reported
+separately as system_baseline. The paired base shares model, GGUF quantization, chat template and
+parameters so differences can be attributed to tuning. Report first/retry structure and ID+facts,
+option agreement with explicit denominators, null correctness and latency including failures. No
+template fallback; failed calls remain in denominators. Write metrics.json only for a complete
+paired comparison; diagnostics stay on stdout.
 """
+
 
 from __future__ import annotations
 
@@ -47,7 +29,7 @@ DATASETS = REPO_ROOT / "ml" / "lora" / "datasets"
 DEFAULT_TEST = DATASETS / "test.jsonl"
 DEFAULT_DISTILLED = DATASETS / "distilled.jsonl"
 DEFAULT_METRICS = REPO_ROOT / "ml" / "lora" / "metrics.json"
-MAX_ATTEMPTS = 2  # 与 C3 一致：首次 + 附校验错误重试一次
+MAX_ATTEMPTS = 2  # Match C3: initial attempt plus one validation-guided retry.
 WARMUP_TIMEOUT_S = 30.0
 
 
@@ -66,7 +48,9 @@ def load_test_records(path: Path, limit: int | None) -> list[dict]:
 
 
 def teacher_name(distilled_path: Path, fallback: str) -> str:
-    """从蒸馏产物读实际教师模型（多数票）；无记录时退回配置的云端模型名。"""
+    """Read the actual teacher model by majority from distillation output; otherwise use cloud
+    configuration.
+    """
     counts: Counter = Counter()
     if distilled_path.exists():
         with distilled_path.open(encoding="utf-8") as stream:
@@ -78,10 +62,8 @@ def teacher_name(distilled_path: Path, fallback: str) -> str:
 
 def stage_of(raw: str, context: dict, known_ids: set[str],
              option_ids: set[str]) -> tuple[str, RecommendationDraft | None]:
-    """把一次输出按 C3 校验链分箱，返回（到达的最远阶段，draft 或 None）。
-
-    阶段：json（可解析对象）→ struct（六字段 pydantic）→ id（ID 存在性）→
-    fact（确定性事实）→ ok。失败停在失败阶段；ok 表示全部通过。
+    """Classify one response by the furthest reached C3 stage: json -> struct -> id -> fact -> ok.
+    Return (stage, draft or None); ok means every check passed.
     """
     try:
         payload = json.loads(raw)
@@ -91,7 +73,7 @@ def stage_of(raw: str, context: dict, known_ids: set[str],
         return "json", None
     try:
         draft = normalize_draft(RecommendationDraft.model_validate(payload))
-    except Exception:  # noqa: BLE001 - pydantic ValidationError / strict 类型错误
+    except Exception:  # noqa: BLE001 - Pydantic validation or strict type errors.
         return "struct", None
     unknown = [e for e in draft.evidence_ids if e not in known_ids]
     opt = draft.recommended_option_id
@@ -103,30 +85,30 @@ def stage_of(raw: str, context: dict, known_ids: set[str],
 
 
 async def warmup(provider: LocalProvider) -> None:
-    """预热一次（首次调用含模型冷加载，不计入延迟）。"""
+    """Warm up once; the initial cold-load request is excluded from latency."""
     try:
         await provider.complete(
             SYSTEM_PROMPT,
             [{"role": "user", "content": '{"kind": "security", "t": 0}'}],
             WARMUP_TIMEOUT_S,
         )
-    except Exception as exc:  # noqa: BLE001 - 预热失败留给正式请求报明确错误
-        print(f"  警告：{provider.request_model} 预热失败: {type(exc).__name__}: {str(exc)[:160]}")
+    except Exception as exc:  # noqa: BLE001 - Let the actual request report a failed warmup explicitly.
+        print(f"  Warning: {provider.request_model} warmup failed: {type(exc).__name__}: {str(exc)[:160]}")
 
 
 def _passed(stage: str, level: str) -> bool:
-    """stage 到达或超过 level 视为通过该级（顺序 json < struct < id < fact < ok）。"""
+    """A reached stage passes a level when it is at or beyond json < struct < id < fact < ok."""
     order = ("json", "struct", "id", "fact", "ok")
     return stage in order and order.index(stage) >= order.index(level)
 
 
 async def eval_model(provider: LocalProvider, records: list[dict], *, timeout_s: float) -> dict:
-    """串行评测一个模型；无模板兜底，传输失败/超时按不合格计入分母。"""
-    first_stages: Counter = Counter()  # 首次尝试到达的阶段
-    final_stages: Counter = Counter()  # 重试后最终阶段
-    option_n = option_agree = 0              # 有方案 security 样本（全量分母）
-    option_valid_n = option_agree_valid = 0  # 仅双合格（fact 通过）口径
-    null_n = null_ok = 0                     # disaster/buoy 样本
+    """Evaluate a model serially, without template fallback; transport/timeouts count as failures."""
+    first_stages: Counter = Counter()  # Stage reached on first attempt.
+    final_stages: Counter = Counter()  # Final stage after retry.
+    option_n = option_agree = 0              # All Security samples with options form the denominator.
+    option_valid_n = option_agree_valid = 0  # Subset passing both ID and fact checks.
+    null_n = null_ok = 0                     # Disaster/buoy samples.
     total_latency = 0.0
     retried_ok = 0
     transport_errors = 0
@@ -163,7 +145,7 @@ async def eval_model(provider: LocalProvider, records: list[dict], *, timeout_s:
                     Router._retry_messages(user_content, raw, error),
                     timeout_s,
                 )
-            except Exception as exc:  # noqa: BLE001 - 传输失败=未生成，计入分母不计成功
+            except Exception as exc:  # noqa: BLE001 - Transport failures remain in denominator and never count as success.
                 transport_errors += 1
                 last_error = f"{type(exc).__name__}: {str(exc)[:160]}"
                 stage = "transport"
@@ -229,17 +211,17 @@ async def eval_model(provider: LocalProvider, records: list[dict], *, timeout_s:
 
 def _fmt(model_name: str, m: dict) -> str:
     return (
-        f"{model_name}: 结构合法(首/重试后) {m['struct_valid_raw']:.0%}/{m['struct_valid']:.0%}、"
-        f"ID+事实(首/重试后) {m['id_fact_valid_raw']:.0%}/{m['id_fact_valid']:.0%}、"
-        f"方案一致 {m['option_agree']:.0%} (n={m['option_agree_n']}，仅双合格 "
-        f"{m['option_agree_given_valid']:.0%}, n={m['option_agree_valid_n']})、"
-        f"null正确 {m['null_recommend_correct']:.0%} (n={m['null_recommend_n']})、"
-        f"{m['latency_s']}s/条"
+        f"{model_name}: Structure (first/after retry) {m['struct_valid_raw']:.0%}/{m['struct_valid']:.0%} ; "
+        f"IDs+facts (first/after retry) {m['id_fact_valid_raw']:.0%}/{m['id_fact_valid']:.0%} ; "
+        f"Option agreement {m['option_agree']:.0%} (n={m['option_agree_n']}, valid IDs+facts only "
+        f"{m['option_agree_given_valid']:.0%}, n={m['option_agree_valid_n']}) ; "
+        f"Null correctness {m['null_recommend_correct']:.0%} (n={m['null_recommend_n']}) ; "
+        f"{m['latency_s']}s/sample"
     )
 
 
 def _public(m: dict) -> dict:
-    """metrics.json 不收 _diag（诊断只在 stdout）。"""
+    """Exclude _diag from metrics.json; diagnostics are stdout-only."""
     return {k: v for k, v in m.items() if not k.startswith("_")}
 
 
@@ -254,16 +236,16 @@ async def _eval_local(settings, model_name: str, records: list[dict], timeout_s:
 async def run_eval(args: argparse.Namespace) -> int:
     settings = get_settings()
     if not args.test_path.exists():
-        print(f"错误：缺少 {args.test_path}；先运行 python -m ml.lora.distill 生成 train/test 划分")
+        print(f"Error: missing {args.test_path}; run python -m ml.lora.distill to create train/test splits.")
         return 2
     records = load_test_records(args.test_path, args.limit)
     if not records:
-        print(f"错误：{args.test_path} 无有效样本")
+        print(f"Error: no valid samples in {args.test_path}.")
         return 2
     if args.skip_lora and args.skip_baseline:
-        print("错误：--skip-lora 与 --skip-baseline 不能同时使用")
+        print("Error: --skip-lora and --skip-baseline cannot both be used.")
         return 2
-    print(f"评测样本 {len(records)} 条（串行；分阶段校验 = C3 同一套，含一次重试；无模板兜底）")
+    print(f"Evaluating {len(records)} samples serially (C3 validation stages, one retry, no template fallback)")
 
     results: dict = {}
     if not args.skip_baseline:
@@ -271,24 +253,24 @@ async def run_eval(args: argparse.Namespace) -> int:
             results["system_baseline"] = await _eval_local(
                 settings, args.baseline_model, records, args.timeout_s
             )
-        except Exception as exc:  # noqa: BLE001 - 基线缺失不阻塞配对对比
+        except Exception as exc:  # noqa: BLE001 - An absent system baseline does not block paired evaluation.
             results["system_baseline"] = None
-            print(f"警告：系统基线 {args.baseline_model} 评测失败（{type(exc).__name__}: {str(exc)[:160]}）")
+            print(f"Warning: system baseline {args.baseline_model} failed ({type(exc).__name__}: {str(exc)[:160]})")
         else:
-            print(_fmt("系统基线", results["system_baseline"]))
+            print(_fmt("System baseline", results["system_baseline"]))
 
     if args.skip_lora:
-        print("未评测配对 base/LoRA：训练部署完成后运行 python -m ml.lora.eval 生成 metrics.json")
+        print("Paired base/LoRA not evaluated; after deployment, run python -m ml.lora.eval to generate metrics.json.")
         return 0
 
     for label, model_name in (("base", args.base_model), ("lora", args.lora_model)):
         try:
             results[label] = await _eval_local(settings, model_name, records, args.timeout_s)
         except Exception as exc:  # noqa: BLE001
-            print(f"错误：{label} 模型 {model_name} 评测失败：{type(exc).__name__}: {str(exc)[:200]}")
-            print("请先按 ml/lora/README.md 部署（ollama create harborguard-lora/-base）。")
+            print(f"Error: {label} model {model_name} evaluation failed: {type(exc).__name__}: {str(exc)[:200]}")
+            print("Deploy first using ml/lora/README.md (ollama create harborguard-lora/-base).")
             return 3
-        print(_fmt({"base": "配对基座", "lora": "LoRA"}[label], results[label]))
+        print(_fmt({"base": "Paired base", "lora": "LoRA"}[label], results[label]))
 
     metrics = {
         "base": _public(results["base"]),
@@ -297,13 +279,13 @@ async def run_eval(args: argparse.Namespace) -> int:
         "n_test": len(records),
         "teacher": teacher_name(DEFAULT_DISTILLED, settings.openrouter_model),
         "pairing_note": (
-            "base=与 lora 同一基座的未微调 GGUF（同量化/同模板/同推理参数）；"
-            "system_baseline=当前系统本地兜底（规模不同，差异不能全归因微调）"
+            "base=untuned GGUF paired with lora (same quantization/template/inference parameters); "
+            "system_baseline=current local fallback; model-size differences cannot all be attributed to tuning"
         ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"已写入 {args.out}（后端 GET /api/metrics 的 lora 字段即此文件）")
+    print(f"Wrote {args.out} (source of backend GET /api/metrics lora field)")
 
     lora = metrics["lora"]
     base = metrics["base"]
@@ -313,25 +295,25 @@ async def run_eval(args: argparse.Namespace) -> int:
         and lora["option_agree"] >= base["option_agree"]
         and (lora["option_agree"] > base["option_agree"] or lora["id_fact_valid"] > base["id_fact_valid"])
     )
-    print(f"验收线: LoRA 结构合法≥0.90 且 方案一致≥0.80 -> {'通过' if ok else '未达标'}")
-    print(f"明显好于配对基座: {'是' if better else '否（指标卡如实显示）'}")
+    print(f"Acceptance: LoRA structure>=0.90 and option agreement>=0.80 -> {'PASS' if ok else 'FAIL'}")
+    print(f"Better than paired base: {'yes' if better else 'no (reported as measured)'}")
     for label in ("base", "lora"):
         diag = results[label]["_diag"]
         if diag["transport_errors"] or diag["last_error"]:
-            print(f"诊断[{label}]: {diag}")
+            print(f"Diagnostics [{label}]: {diag}")
     return 0
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="配对基座 vs LoRA vs 系统基线（Ollama，测试集）")
+    parser = argparse.ArgumentParser(description="Paired base vs LoRA vs system baseline (Ollama, test set)")
     parser.add_argument("--test-path", type=Path, default=DEFAULT_TEST)
-    parser.add_argument("--limit", type=int, default=None, help="只评前 N 条（冒烟）")
-    parser.add_argument("--base-model", default="harborguard-base", help="配对未微调基座（Ollama 模型名）")
+    parser.add_argument("--limit", type=int, default=None, help="Evaluate only the first N records (smoke)")
+    parser.add_argument("--base-model", default="harborguard-base", help="Paired untuned base (Ollama model name)")
     parser.add_argument("--lora-model", default="harborguard-lora")
-    parser.add_argument("--baseline-model", default=None, help="当前系统基线（默认 OLLAMA_MODEL）")
-    parser.add_argument("--timeout-s", type=float, default=30.0, help="单次请求超时（契约：本地 30 秒）")
-    parser.add_argument("--skip-lora", action="store_true", help="不评配对 base/LoRA（不写 metrics.json）")
-    parser.add_argument("--skip-baseline", action="store_true", help="不评当前系统基线")
+    parser.add_argument("--baseline-model", default=None, help="System baseline (default OLLAMA_MODEL)")
+    parser.add_argument("--timeout-s", type=float, default=30.0, help="Per-request timeout (contract:30 seconds locally)")
+    parser.add_argument("--skip-lora", action="store_true", help="Skip paired base/LoRA; do not write metrics.json")
+    parser.add_argument("--skip-baseline", action="store_true", help="Skip system baseline")
     parser.add_argument("--out", type=Path, default=DEFAULT_METRICS)
     args = parser.parse_args()
     settings = get_settings()

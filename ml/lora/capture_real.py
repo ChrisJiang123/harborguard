@@ -1,28 +1,12 @@
-"""C4 真实上下文截取：B 后端跑场景时，按 C3 触发规则用 collect_* 截取真实上下文。
-
-任务书 C4：「B 的后端可用时，再加 50–100 个从真实场景运行中截取的上下文。」
-本脚本订阅 ws://localhost:8000/ws（复用 agent.backend_client.BackendClient 的
-重连与补齐逻辑），在 C3 的四类触发上用 agent.context.collect_* 拉齐真实上下文，
-按 key 去重后追加写入 JSONL——之后 ``python -m ml.lora.distill --contexts ...
-real_contexts.jsonl --append-train`` 会只蒸馏新增部分并追加进训练集
-（已合格样本绝不重复请求，测试集保持合成基准不重划）。
-
-触发规则与 C3 main.py 一致：
-- options_ready                -> collect_security(alert_id, options, ranked)
-- alert_changed 升到二级       -> collect_security(alert_id)（尚无方案）
-- reopen_plan                  -> collect_disaster(plan)
-- buoy_changed 且为 down       -> collect_buoy(buoy_id)
-
-与 C3 在线任务的差异：这是离线截取工具，不做 10 秒预算与「同警报只处理最新」
-的丢弃策略——同一警报的新触发替换待处理参数（新替旧），但已完成的上下文保留；
-security 在每个事件处理后立即冲刷，避免场景切换 reset 丢数据。
-
-用法（先启动后端与场景）::
-
-    make backend                                    # 或 python -m uvicorn backend.app.main:app
-    curl -X POST localhost:8000/api/scenario/a/start -H 'content-type: application/json' -d '{"speed": 10}'
-    python -m ml.lora.capture_real --seconds 180 --out ml/lora/datasets/real_contexts.jsonl
+"""Capture C3 contexts from a running B simulation for C4. Subscribe through BackendClient
+reconnect/compensation and collect_* using C3 triggers (options_ready, level-2 alert_changed,
+reopen_plan, down buoy_changed). Deduplicate and append JSONL; distill --append-train adds new
+records only to training, retaining the synthetic test benchmark. Unlike the online worker, offline
+capture has no 10-second deadline/latest-only dropping policy: newer triggers replace pending
+parameters while completed contexts remain. Real here means runtime simulation, not physical sonar
+observations.
 """
+
 
 from __future__ import annotations
 
@@ -41,7 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class RealContextCapture:
-    """按 C3 触发规则收集真实上下文；逐事件冲刷，key 去重，全事件计数。"""
+    """Collect actual runtime context by C3 triggers, flush each event and deduplicate keys."""
 
     def __init__(self):
         self.by_key: dict[str, dict] = {}
@@ -52,7 +36,7 @@ class RealContextCapture:
                                 options: list | None, ranked: list | None) -> None:
         try:
             context = await collect_security(client, alert_id, options, ranked)
-        except Exception as exc:  # noqa: BLE001 - 警报已被 reset/过期：记录后丢弃
+        except Exception as exc:  # noqa: BLE001 - Record and discard reset/expired alerts.
             self.counts[f"dropped:{type(exc).__name__}"] += 1
             return
         self.counts["security"] += 1
@@ -90,7 +74,7 @@ class RealContextCapture:
                     self.counts["buoy"] += 1
                     self.by_key[context_key(context)] = context
         elif event == "scenario_changed" and data.get("status") == "reset":
-            self.pending_security.clear()  # 尚未收集的警报已失效
+            self.pending_security.clear()  # An alert expired before context collection.
         await self.flush_security(client)
 
     async def run(self, *, seconds: float, stop: asyncio.Event) -> BackendClient:
@@ -114,7 +98,7 @@ class RealContextCapture:
 
 
 def write_contexts(contexts: dict[str, dict], out: Path) -> tuple[int, int]:
-    """追加写入尚未记录过的上下文；返回 (新增, 跳过已有)。"""
+    """Append contexts not already recorded; return (added, skipped)."""
     existing: set[str] = set()
     if out.exists():
         with out.open(encoding="utf-8") as stream:
@@ -130,31 +114,31 @@ def write_contexts(contexts: dict[str, dict], out: Path) -> tuple[int, int]:
 async def run_capture(args: argparse.Namespace) -> int:
     capture = RealContextCapture()
     stop = asyncio.Event()
-    # 预检：后端不可达时立即给出指引，而不是静默等满 --seconds。
+    # Preflight backend availability instead of silently waiting the full duration.
     probe = BackendClient()
     try:
         await probe.get_state()
     except Exception as exc:  # noqa: BLE001
         await probe.aclose()
-        print(f"错误：后端不可达（{type(exc).__name__}: {str(exc)[:160]}）。")
-        print("先启动后端并跑场景：make backend && curl -X POST localhost:8000/api/scenario/a/start "
+        print(f"Error: backend unavailable ({type(exc).__name__}: {str(exc)[:160]}).")
+        print("Start the backend and a scenario first: make backend && curl -X POST localhost:8000/api/scenario/a/start "
               "-H 'content-type: application/json' -d '{\"speed\": 10}'")
         return 2
     await probe.aclose()
     print(
-        f"订阅 {args.ws or 'BACKEND_WS_URL'}，截取 {args.seconds} 秒"
-        "（触发规则同 C3：options_ready / 升二级 / reopen_plan / buoy down）"
+        f"Subscribe to {args.ws or 'BACKEND_WS_URL'} for {args.seconds} seconds"
+        " (C3 triggers: options_ready / level2 / reopen_plan / buoy down)"
     )
     try:
         await capture.run(seconds=args.seconds, stop=stop)
     except Exception as exc:  # noqa: BLE001
-        print(f"错误：截取中断（{type(exc).__name__}: {str(exc)[:160]}）")
+        print(f"Error: capture interrupted ({type(exc).__name__}: {str(exc)[:160]})")
         return 2
 
     total = len(capture.by_key)
     if total == 0:
-        print("未截取到任何上下文：确认场景已产生警报/灾害/浮标事件。")
-        print("收到事件计数: " + (", ".join(f"{k}={v}" for k, v in sorted(capture.counts.items())) or "无"))
+        print("No contexts captured; check that the scenario emitted alert/disaster/buoy events.")
+        print("Received event counts: " + (", ".join(f"{k}={v}" for k, v in sorted(capture.counts.items())) or "none"))
         return 1
     added, skipped = write_contexts(capture.by_key, args.out)
     dropped = {k: v for k, v in capture.counts.items() if k.startswith("dropped:")}
@@ -162,20 +146,20 @@ async def run_capture(args: argparse.Namespace) -> int:
         f"{k}={v}" for k, v in sorted(capture.counts.items())
         if k in {"security", "disaster", "buoy"}
     )
-    print(f"截取 {total} 条唯一上下文（{summary}）；新增 {added}，跳过已有 {skipped} -> {args.out}")
+    print(f"Captured {total} unique contexts ({summary}); added {added}, skipped existing {skipped} -> {args.out}")
     if dropped:
-        print(f"丢弃（警报已过期等）: {dropped}")
-    print("下一步：python -m ml.lora.distill --contexts " + str(args.out) +
-          " --append-train   # 只蒸馏新增部分并追加进训练集")
+        print(f"Dropped (e.g. expired alerts): {dropped}")
+    print("Next: python -m ml.lora.distill --contexts " + str(args.out) +
+          " --append-train   # Distill new records only and append to training")
     return 0
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="从运行中的 B 后端截取真实上下文（C4 补充数据）")
-    parser.add_argument("--seconds", type=float, default=180.0, help="截取时长（秒，默认 180）")
+    parser = argparse.ArgumentParser(description="Capture running B simulation contexts (C4 supplements)")
+    parser.add_argument("--seconds", type=float, default=180.0, help="Capture duration in seconds (default180)")
     parser.add_argument("--out", type=Path,
                         default=REPO_ROOT / "ml/lora/datasets/real_contexts.jsonl")
-    parser.add_argument("--ws", default=None, help="WebSocket 地址（默认读 BACKEND_WS_URL）")
+    parser.add_argument("--ws", default=None, help="WebSocket URL (default BACKEND_WS_URL)")
     args = parser.parse_args()
     raise SystemExit(asyncio.run(run_capture(args)))
 

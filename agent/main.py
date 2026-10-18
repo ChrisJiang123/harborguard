@@ -1,13 +1,9 @@
-"""HarborGuard Agent 服务入口（C3：真实事件 → 云端/本地/模板建议 → 后端广播）。
-
-用法（仓库根目录）::
-
-    .venv/bin/python -m agent.main     # 读取 .env，监听 AGENT_HOST:AGENT_PORT（默认 8001）
-
-链路：WS 订阅 /ws → 四类任务触发 → REST 拉齐上下文 → 云端/本地/模板 →
-pydantic + 真实 ID + 确定性事实校验 → POST /api/recommendations。
-恒不改警报等级、绝不调用 /api/decision。
+"""HarborGuard Agent service: real events -> cloud/local/template recommendation -> backend broadcast.
+Run python -m agent.main from repository root; dotenv configures AGENT_HOST:AGENT_PORT (default
+8001). Flow: /ws triggers -> REST context -> generation -> Pydantic, actual IDs and deterministic
+facts -> POST /api/recommendations. Never changes alert levels or calls /api/decision.
 """
+
 
 from __future__ import annotations
 
@@ -31,18 +27,15 @@ from .router import AnswerResult, GenerationResult, Router
 from .schemas import Recommendation
 from .template import generate_answer
 
-MAX_SEEN_SEQS = 2000  # 事件去重窗口（seq 有界集合）
+MAX_SEEN_SEQS = 2000  # Bounded seq set for event deduplication.
 
 
 class TaskQueue:
-    """事件去重 + 同一对象仅保留最新任务 + 场景重置清空。
-
-    - seq 去重：重连补事件与实时推送重叠时不会重复入队；
-    - security 以 alert 为键，buoy 以 buoy 为键，disaster 为单例；
-    - reopen_plan 同计划不重复，且仿真时间最多每 20 秒接受一次；
-    - alert_cleared / buoy_up / scenario_changed(reset|started) 会使旧任务失效。
+    """Deduplicate events, retain only the newest job per object and clear on reset. seq deduplicates
+    replay/live overlap. Security keys by alert, buoy by buoy, disaster is a singleton. Identical
+    reopening plans are suppressed and accepted at most once per 20 simulation seconds. Cleared
+    alerts, restored buoys and scenario reset/start invalidate obsolete work.
     """
-
     def __init__(self) -> None:
         self._seen: set[int] = set()
         self._seen_order: deque[int] = deque()
@@ -166,7 +159,7 @@ class TaskQueue:
         )
 
     def take(self) -> dict | None:
-        """取最早入队的任务（串行处理）。"""
+        """Pop the earliest queued task for serial processing."""
         for key in list(self._tasks):
             return self._tasks.pop(key)
         return None
@@ -188,7 +181,7 @@ class TaskQueue:
         self._versions[key] = self._versions.get(key, 0) + 1
 
     def is_current(self, task: dict) -> bool:
-        """处理中任务只有在场景代际和对象版本均未变化时才可提交。"""
+        """Submit an in-flight task only if scene generation and object version still match."""
         return (
             task.get("generation") == self._generation
             and task.get("version") == self._versions.get(task.get("key"))
@@ -224,7 +217,7 @@ def handle_event(msg: dict) -> None:
 
 
 async def process_task(task: dict) -> tuple[Recommendation, GenerationResult] | None:
-    """沿用既有链路加入模型路由；返回 None 表示任务被安全丢弃。"""
+    """Add model routing to the existing chain; None means a safely discarded task."""
     alert_id = task.get("alert_id")
     started = float(task.get("queued_at", time.perf_counter()))
     deadline = started + settings.agent_event_budget_s
@@ -242,7 +235,7 @@ async def process_task(task: dict) -> tuple[Recommendation, GenerationResult] | 
                 context = await collect_buoy(client, task["buoy_id"])
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 404:
-            stats["dropped"] += 1  # 场景已重置/警报已清除：不得提交旧任务的建议
+            stats["dropped"] += 1  # Scene reset or cleared alert: never submit an obsolete recommendation.
             return None
         raise
 
@@ -275,7 +268,7 @@ async def process_task(task: dict) -> tuple[Recommendation, GenerationResult] | 
         return None
     post_remaining = deadline - time.perf_counter()
     if post_remaining <= 0:
-        raise TimeoutError("事件总预算在 POST 前已耗尽")
+        raise TimeoutError("Event budget exhausted before POST")
     async with asyncio.timeout(post_remaining):
         await client.post_recommendation(rec.model_dump())
     stats["submitted"] += 1
@@ -285,21 +278,21 @@ async def process_task(task: dict) -> tuple[Recommendation, GenerationResult] | 
 
 
 async def announce_model_switch(result: GenerationResult | AnswerResult) -> None:
-    """只在实际路由变化时写后端 agent 日志，不记录密钥或原始模型输出。"""
+    """Log only actual route changes to B, excluding credentials and raw model output."""
     global last_announced_model
     async with model_log_lock:
         if result.model == last_announced_model:
             return
         previous = last_announced_model or "none"
         text = (
-            f"Agent 模型路由 {previous} → {result.model}；provider={result.provider}；"
-            f"request_model={result.request_model or 'none'}；"
-            f"response_model={result.response_model or 'none'}；"
+            f"Agent model route {previous} → {result.model}; provider={result.provider} ; "
+            f"request_model={result.request_model or 'none'} ; "
+            f"response_model={result.response_model or 'none'} ; "
             f"upstream_provider={result.upstream_provider or 'unknown'}"
         )
         try:
             await client.post_log("info", text)
-        except Exception:  # 日志失败不影响主链路，也不提前更新状态以便下次重试
+        except Exception:  # Log failures do not block generation; retain prior state to allow retry.
             return
         last_announced_model = result.model
 
@@ -323,25 +316,25 @@ async def worker_loop() -> None:
                 try:
                     await client.post_log(
                         "info",
-                        f"已提交 {rec.model}/{rec.kind} 建议 {rec.id}（{rec.alert_id} → "
-                        f"{rec.recommended_option_id}，{rec.latency_ms:.0f} ms）",
+                        f"Submitted {rec.model}/{rec.kind} recommendation {rec.id}({rec.alert_id} -> "
+                        f"{rec.recommended_option_id}, {rec.latency_ms:.0f} ms)",
                     )
-                except Exception:  # noqa: BLE001 - 日志失败不影响建议链路
+                except Exception:  # noqa: BLE001 - Log failures must not block recommendations.
                     pass
         except httpx.HTTPStatusError as exc:
             stats["errors"] += 1
             detail = f"HTTP {exc.response.status_code}"
             if exc.response.status_code == 422:
-                detail += "（后端校验拒绝——场景可能已重置，建议已丢弃）"
+                detail += " (backend validation rejected the recommendation; scene may have reset, recommendation discarded)"
                 stats["dropped"] += 1
             try:
-                await client.post_log("warn", f"Agent 建议提交失败 {task['key']}: {detail}")
+                await client.post_log("warn", f"Agent recommendation submission failed {task['key']}: {detail}")
             except Exception:  # noqa: BLE001
                 pass
-        except Exception as exc:  # noqa: BLE001 - 单任务失败不拖垮服务
+        except Exception as exc:  # noqa: BLE001 - A failed job must not crash the service.
             stats["errors"] += 1
             try:
-                await client.post_log("warn", f"Agent 处理异常 {task['key']}: {exc}")
+                await client.post_log("warn", f"Agent processing failed {task['key']}: {exc}")
             except Exception:  # noqa: BLE001
                 pass
 
@@ -398,7 +391,7 @@ async def health() -> dict:
 
 @app.post("/ask")
 async def ask(body: AskBody) -> dict:
-    """事实型问答沿用云端 → 本地 → 模板路由，总预算保持 18 秒。"""
+    """Factual question answering follows cloud -> local -> template within the 18-second budget."""
     started = time.perf_counter()
     deadline = started + settings.agent_ask_budget_s
     track: dict | None = None
@@ -436,8 +429,8 @@ async def ask(body: AskBody) -> dict:
             )
             answer, model = result.answer, result.model
             await announce_model_switch(result)
-    except Exception:  # noqa: BLE001 - 任何失败都要在预算内给出模板答案
-        answer = "后端数据暂不可用，请稍后重试；最终判断由值班员作出。"
+    except Exception:  # noqa: BLE001 - Every failure must yield a template answer within budget.
+        answer = "Backend data is temporarily unavailable. Retry later; the duty officer makes the final decision."
         model = "template"
     return {"answer": answer, "model": model}
 

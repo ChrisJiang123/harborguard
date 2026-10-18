@@ -1,28 +1,12 @@
-"""C4 云端蒸馏：OpenRouter 教师 × C3 同一提示词、同一校验，产出 SFT JSONL。
-
-与 C3 在线路径严格共用（任务书 C4「同一份提示词 / 同一套校验」）：
-- agent.prompts.SYSTEM_PROMPT + agent.router.OpenRouterProvider（结构化 JSON schema，
-  require_parameters，禁 fallback）；
-- agent.schemas.parse_model_draft（结构 + ID 存在性）与
-  agent.factcheck.check_draft_facts（确定性事实校验）；
-- 不合格时附校验错误重试一次（Router._retry_messages 同格式）；仍不合格时做一次
-  教师侧引导重试（附 GUIDED_HINT，把 factcheck 的格式要求显式化）——引导提示只给教师，
-  入库样本恒为标准三段 messages，训练分布与运行时不漂移；三次全失败才记录、不入库。
-
-幂等：每条上下文以「与 router.generate 完全一致的序列化」的 SHA256 为键。
-distilled.jsonl 已有的合格样本、failures 已记录的失败样本都直接跳过，
-绝不重复请求（--retry-failed 才重试失败项）。后续补跑（如真实场景截取的上下文）
-只会增量请求新键。
-
-用法::
-
-    python -m ml.lora.distill --limit 5          # 冒烟
-    python -m ml.lora.distill                    # 全量蒸馏 + 450/50 划分
-    python -m ml.lora.distill --retry-failed     # 重试上轮失败项
-    python -m ml.lora.distill --split-only       # 只重写 train/test 划分
-
-批量任务没有在线 9.5 秒预算，故请求超时默认放宽到 60 秒（--timeout-s 可调）。
+"""C4 cloud-teacher distillation using the same C3 prompts, structured provider and structure/ID/fact
+validators. First failure gets one validation-guided retry; persistent failure gets a teacher-only
+formatting hint. Stored training messages always use the standard system/user/assistant shape,
+without hints. Three failures are recorded and excluded. Idempotency keys use the exact runtime
+sorted compact JSON SHA256; existing valid/failure records are skipped unless retry-failed is
+requested. Synthetic split is deterministic 450/50; runtime simulation captures append to training
+only, preserving test comparability.
 """
+
 
 from __future__ import annotations
 
@@ -48,12 +32,12 @@ DEFAULT_OUT = DATASETS / "distilled.jsonl"
 DEFAULT_FAILURES = DATASETS / "distill_failures.jsonl"
 DEFAULT_TRAIN = DATASETS / "train.jsonl"
 DEFAULT_TEST = DATASETS / "test.jsonl"
-MAX_ATTEMPTS = 2  # 与 C3 一致：首次 + 附错误重试一次
-GUIDED_ATTEMPT = 1  # 仍失败时，教师侧引导重试一次（提示只影响教师，不入训练样本）
+MAX_ATTEMPTS = 2  # Match C3: initial attempt plus one validation-guided retry.
+GUIDED_ATTEMPT = 1  # Then one teacher-only guided retry; hints never enter training examples.
 
-# 教师侧脚手架：把 agent.factcheck 的确定性要求转写成显式格式说明。
-# 只出现在给教师的重试消息里；入库样本的 messages 恒为标准三段（system/user/assistant），
-# 因此训练分布与 C3 在线路径完全一致。
+# Teacher scaffolding makes deterministic fact-check requirements explicit.
+# Only retry messages to the teacher include this hint; stored examples always
+# use standard system/user/assistant messages matching C3 runtime.
 GUIDED_HINT = """补充格式要求（必须全部满足，只输出修正后的完整 JSON 对象）：
 1. 有浮标离线时，uncertainties 必须含一条「浮标离线 N 个:ID1,ID2」，N 与 ID 列表和上下文 buoys.down 完全一致（按上下文顺序）。
 2. 覆盖浮标不超过 1 个时，uncertainties 必须含「仅 N 个浮标覆盖，定位证据不足」。
@@ -64,23 +48,25 @@ GUIDED_HINT = """补充格式要求（必须全部满足，只输出修正后的
 
 
 def context_key(context: dict) -> str:
-    """序列化与 router.generate 一致（sort_keys + 紧凑分隔符），SHA256 作幂等键。"""
+    """Serialize exactly as router.generate (sorted keys, compact separators); SHA256 is the
+    idempotency key.
+    """
     payload = json.dumps(context, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def user_message(context: dict) -> str:
-    """User 消息 = 上下文 JSON 字符串（与 C3 在线路径逐字节一致）。"""
+    """User message is the context JSON, byte-identical to the C3 runtime path."""
     return json.dumps(context, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
 
 def build_turn_messages(context_json: str, raw: str | None, error: str | None) -> list[dict]:
-    """重试消息格式复用 C3 Router 的实现（system 由 provider 统一前置）。"""
+    """Reuse C3 Router retry-message formatting; provider prepends the system message."""
     return Router._retry_messages(context_json, raw, error)
 
 
 def assistant_message(draft) -> str:
-    """Assistant 目标 = 截断归一后的 draft 紧凑 JSON（字段顺序 = pydantic 定义序）。"""
+    """Assistant target is normalized/truncated compact draft JSON in Pydantic field order."""
     return json.dumps(
         normalize_draft(draft).model_dump(), ensure_ascii=False, separators=(",", ":")
     )
@@ -94,7 +80,7 @@ def load_jsonl(path: Path) -> list[dict]:
 
 
 def record_key_from_messages(messages: list[dict]) -> str:
-    """交付文件（仅 messages）里的样本键 = user 消息（即序列化上下文）的 SHA256。"""
+    """Delivered messages-only sample key is the SHA256 of its serialized-context user message."""
     return hashlib.sha256(messages[1]["content"].encode("utf-8")).hexdigest()
 
 
@@ -106,11 +92,9 @@ def count_lines(path: Path) -> int:
 
 
 async def distill_one(provider, context: dict, *, timeout_s: float) -> dict:
-    """蒸馏单条上下文；返回 status=ok/invalid 及诊断信息。
-
-    前两次与 C3 在线路径一致（附校验错误重试一次）；仍不合格时做一次
-    教师侧引导重试（附 GUIDED_HINT）。任何一次合格即入库，且入库样本的
-    messages 不含引导内容。三次全部失败才记为 invalid。
+    """Distill one context and return ok/invalid plus diagnostics. First two attempts match the C3
+    retry route; the third adds teacher-only GUIDED_HINT. The first valid result is stored without
+    the hint. Only three failed attempts produce invalid.
     """
     known_ids = context_ids(context)
     option_ids = {o["id"] for o in context.get("options", [])}
@@ -168,7 +152,7 @@ async def distill_one(provider, context: dict, *, timeout_s: float) -> dict:
 
 
 async def distill_batch(contexts: list[dict], provider, *, concurrency: int, timeout_s: float) -> dict:
-    """8 路并发（任务书 C4）蒸馏一批上下文；provider 可注入以便测试。"""
+    """Distill contexts with eight-way concurrency; inject a provider for tests."""
     semaphore = asyncio.Semaphore(max(1, concurrency))
     done = 0
     total = len(contexts)
@@ -179,7 +163,7 @@ async def distill_batch(contexts: list[dict], provider, *, concurrency: int, tim
             result = await distill_one(provider, context, timeout_s=timeout_s)
         done += 1
         if done % 25 == 0 or done == total:
-            print(f"  进度 {done}/{total}", flush=True)
+            print(f"  Progress {done}/{total}", flush=True)
         return result
 
     results = await asyncio.gather(*(run(context) for context in contexts))
@@ -199,7 +183,7 @@ async def distill_batch(contexts: list[dict], provider, *, concurrency: int, tim
 
 
 def split_records(records: list[dict], *, test_size: int, train_size: int, seed: int) -> tuple[list, list]:
-    """按 key 排序后以固定 seed 洗牌，先取测试集再取训练集；确定性可重跑。"""
+    """Sort by key, shuffle with a fixed seed and take test before train deterministically."""
     ordered = sorted(records, key=lambda r: r["key"])
     random.Random(seed).shuffle(ordered)
     test = ordered[:test_size]
@@ -208,7 +192,7 @@ def split_records(records: list[dict], *, test_size: int, train_size: int, seed:
 
 
 def write_split(train: list[dict], test: list[dict], train_path: Path, test_path: Path) -> None:
-    """交付格式：每行仅 {"messages": [system, user, assistant]}。"""
+    """Delivery format: one object containing only messages=[system,user,assistant] per line."""
     for path, records in ((train_path, train), (test_path, test)):
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("w", encoding="utf-8") as stream:
@@ -218,7 +202,7 @@ def write_split(train: list[dict], test: list[dict], train_path: Path, test_path
 
 def _usage_line(usage: dict, cost: float) -> str:
     parts = [f"{key}={value}" for key, value in usage.items() if value]
-    text = ", ".join(parts) if parts else "usage 不可用"
+    text = ", ".join(parts) if parts else "usage unavailable"
     return f"{text}, cost≈${cost:.4f}" if cost else text
 
 
@@ -226,7 +210,7 @@ async def run_distill(args: argparse.Namespace) -> int:
     settings = get_settings()
     provider = OpenRouterProvider(settings)
     if not provider.enabled:
-        print("错误：OPENROUTER_API_KEY 未配置，无法蒸馏（.env 见 .env.example）")
+        print("Error: OPENROUTER_API_KEY is unset; cannot distill (see .env.example).")
         return 2
 
     contexts = []
@@ -234,9 +218,9 @@ async def run_distill(args: argparse.Namespace) -> int:
     for path in args.contexts:
         contexts.extend(load_jsonl(path))
     if not contexts:
-        print(f"错误：{args.contexts} 无上下文；先运行 python -m ml.lora.gen_contexts")
+        print(f"Error: no contexts in {args.contexts}; run python -m ml.lora.gen_contexts first.")
         return 2
-    contexts = list({context_key(c): c for c in contexts}.values())  # 按 key 去重
+    contexts = list({context_key(c): c for c in contexts}.values())  # Deduplicate by key.
 
     distilled = load_jsonl(args.out)
     done_keys = {r["key"] for r in distilled}
@@ -250,11 +234,11 @@ async def run_distill(args: argparse.Namespace) -> int:
     if args.limit:
         pending = pending[: args.limit]
     print(
-        f"上下文 {len(contexts)} 条：已蒸馏 {len(done_keys)}，"
-        f"已知失败 {len(failures_known)}（{'重试' if retry_failed else '跳过'}），本次请求 {len(pending)}"
+        f"Contexts {len(contexts)}: already distilled {len(done_keys)}, "
+        f"Known failures {len(failures_known)} ({'retry' if retry_failed else 'skip'}), requesting {len(pending)}"
     )
     if not pending:
-        print("无待蒸馏上下文。")
+        print("No pending contexts to distill.")
         new_records = []
     else:
         started = time.perf_counter()
@@ -264,7 +248,7 @@ async def run_distill(args: argparse.Namespace) -> int:
         await provider.aclose()
         new_records = batch["records"]
         for record in new_records:
-            if record["key"] in failures_known:  # 重试成功：移出失败清单
+            if record["key"] in failures_known:  # Successful retry removes the prior failure.
                 failures_known.pop(record["key"])
         for failure in batch["failures"]:
             failures_known[failure["key"]] = failure
@@ -278,19 +262,19 @@ async def run_distill(args: argparse.Namespace) -> int:
 
         retried_ok = sum(1 for r in batch["records"] if r["attempts"] > 1)
         print(
-            f"本次：合格 {len(batch['records'])}（重试后合格 {retried_ok}），不合格 {len(batch['failures'])}，"
-            f"耗时 {time.perf_counter() - started:.1f}s；{_usage_line(batch['usage'], batch['cost'])}"
+            f"This batch: valid {len(batch['records'])} (valid after retry {retried_ok}), invalid {len(batch['failures'])}, "
+            f"elapsed {time.perf_counter() - started:.1f}s; {_usage_line(batch['usage'], batch['cost'])}"
         )
         if batch["failures"]:
             sample = batch["failures"][0]["error"]
-            print(f"失败示例: {sample[:200]}")
+            print(f"Failure example: {sample[:200]}")
 
     all_records = load_jsonl(args.out)
-    print(f"累计合格样本 {len(all_records)} 条")
+    print(f"Total valid samples: {len(all_records)}")
 
     if getattr(args, "append_train", False):
-        # 真实场景补充数据：只追加进训练集，测试集保持既有基准不被重划
-        # （eval 的基座/LoRA 对比必须在同一测试集上可比）。
+        # Runtime-simulation supplements append to training only; retain the benchmark
+        # so base/LoRA evaluation remains comparable on the same test set.
         known_keys = {
             record_key_from_messages(r["messages"])
             for r in (json.loads(line) for line in args.train_path.open(encoding="utf-8") if line.strip())
@@ -299,8 +283,8 @@ async def run_distill(args: argparse.Namespace) -> int:
         with args.train_path.open("a", encoding="utf-8") as stream:
             for record in fresh:
                 stream.write(json.dumps({"messages": record["messages"]}, ensure_ascii=False) + "\n")
-        print(f"追加 {len(fresh)} 条新蒸馏样本到训练集（测试集不变）: {args.train_path}")
-        print(f"训练集合计 {count_lines(args.train_path)} 条；测试集 {count_lines(args.test_path)} 条")
+        print(f"Append {len(fresh)} newly distilled training samples (test set unchanged): {args.train_path}")
+        print(f"Training total {count_lines(args.train_path)}; test total {count_lines(args.test_path)}")
         return 0
 
     if not args.split_only and not all_records:
@@ -309,36 +293,36 @@ async def run_distill(args: argparse.Namespace) -> int:
         all_records, test_size=args.test, train_size=args.train, seed=args.seed
     )
     write_split(train, test, args.train_path, args.test_path)
-    print(f"划分: train {len(train)} -> {args.train_path}")
+    print(f"Split: train {len(train)} -> {args.train_path}")
     print(f"       test  {len(test)} -> {args.test_path}")
     if len(train) < args.min_train:
         print(
-            f"警告：训练样本 {len(train)} < 验收下限 {args.min_train}。"
-            "可 python -m ml.lora.gen_contexts --n 560 后重跑蒸馏（已合格样本不会重复请求）。"
+            f"Warning: training samples {len(train)} < required minimum {args.min_train}. "
+            "Run python -m ml.lora.gen_contexts --n 560 and repeat distillation; valid cached samples are never requested again."
         )
         return 1
     return 0
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="OpenRouter 云端蒸馏 -> SFT JSONL（C3 同提示词同校验）")
+    parser = argparse.ArgumentParser(description="OpenRouter distillation -> SFT JSONL (same C3 prompts/validation)")
     parser.add_argument("--contexts", type=Path, nargs="+", default=[DEFAULT_CONTEXTS],
-                        help="上下文 JSONL（可多个，按 key 去重合并）")
-    parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="全部合格样本（含元数据）")
+                        help="Context JSONL files, merged and deduplicated by key")
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="All valid samples, including metadata")
     parser.add_argument("--failures", type=Path, default=DEFAULT_FAILURES)
     parser.add_argument("--train-path", type=Path, default=DEFAULT_TRAIN)
     parser.add_argument("--test-path", type=Path, default=DEFAULT_TEST)
-    parser.add_argument("--concurrency", type=int, default=8, help="并发数（任务书：8）")
-    parser.add_argument("--timeout-s", type=float, default=60.0, help="单次请求超时（批量任务放宽）")
-    parser.add_argument("--train", type=int, default=450, help="训练集条数")
-    parser.add_argument("--test", type=int, default=50, help="测试集条数")
-    parser.add_argument("--min-train", type=int, default=400, help="验收下限：合格训练样本 ≥ 400")
-    parser.add_argument("--seed", type=int, default=0, help="划分洗牌种子")
-    parser.add_argument("--limit", type=int, default=None, help="只请求前 N 条待蒸馏（冒烟）")
-    parser.add_argument("--retry-failed", action="store_true", help="重试历史上不合格的上下文")
+    parser.add_argument("--concurrency", type=int, default=8, help="Concurrency (taskbook:8)")
+    parser.add_argument("--timeout-s", type=float, default=60.0, help="Per-request timeout (larger for batch jobs)")
+    parser.add_argument("--train", type=int, default=450, help="Training record count")
+    parser.add_argument("--test", type=int, default=50, help="Test record count")
+    parser.add_argument("--min-train", type=int, default=400, help="Acceptance minimum:400 valid training samples")
+    parser.add_argument("--seed", type=int, default=0, help="Split shuffle seed")
+    parser.add_argument("--limit", type=int, default=None, help="Request only the first N pending records (smoke)")
+    parser.add_argument("--retry-failed", action="store_true", help="Retry previously invalid contexts")
     parser.add_argument("--append-train", action="store_true",
-                        help="补充数据模式：新样本只追加进训练集，不重划测试集")
-    parser.add_argument("--split-only", action="store_true", help="跳过请求，只重写 train/test 划分")
+                        help="Supplement mode:append new samples to training without changing test split")
+    parser.add_argument("--split-only", action="store_true", help="Skip requests and rewrite train/test split only")
     args = parser.parse_args()
     raise SystemExit(asyncio.run(run_distill(args)))
 

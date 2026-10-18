@@ -1,0 +1,1781 @@
+{
+  "source_base": "07f42a21f30e9aad8a79369362abc5fe09f43744",
+  "capture_source_base": "d2d4c6fbdff72de5b2d2c02aab0c39723513f3a8",
+  "scope": "English documentation, comments and normal display/CLI text; original data preserved",
+  "changed_tracked_files": [
+    ".env.example",
+    ".gitignore",
+    "README.md",
+    "acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/FINAL_REPORT.en.md",
+    "acceptance_c4/candidate_json_20261017/FREEZE.en.md",
+    "acceptance_c4/data_provenance_20261017/README.md",
+    "agent/README.md",
+    "agent/__init__.py",
+    "agent/backend_client.py",
+    "agent/config.py",
+    "agent/context.py",
+    "agent/factcheck.py",
+    "agent/main.py",
+    "agent/prompts.py",
+    "agent/router.py",
+    "agent/schemas.py",
+    "agent/template.py",
+    "agent/tests/__init__.py",
+    "agent/tests/test_english_runtime_fallback.py",
+    "agent/tests/test_local_format_overrides.py",
+    "agent/tests/test_runtime_task_store.py",
+    "backend/README.md",
+    "backend/app/decision/__init__.py",
+    "backend/app/decision/alerts.py",
+    "backend/app/decision/disaster.py",
+    "backend/app/decision/optimizer.py",
+    "backend/app/decision/pinger.py",
+    "backend/app/engine.py",
+    "backend/app/main.py",
+    "backend/app/sim/world.py",
+    "backend/docs/A-final-recovery-handoff.md",
+    "backend/docs/B-final-acceptance.md",
+    "backend/docs/ab-integration-9850558.md",
+    "backend/docs/demo-stability-followup.md",
+    "backend/docs/history-handoff.md",
+    "backend/docs/history-verification.md",
+    "backend/docs/options-publication-fix.md",
+    "backend/docs/performance-followup.md",
+    "backend/docs/pr7-recovery-dc69ad2.md",
+    "backend/docs/sonar-safety-integration.md",
+    "backend/docs/survey-p0-audit.md",
+    "backend/tests/test_decision.py",
+    "backend/tests/test_survey_audit.py",
+    "backend/tools/history_smoke.py",
+    "backend/tools/integration_bundle.py",
+    "backend/tools/record.py",
+    "data/README.md",
+    "docs/C-acceptance-20261017-1743-retest-20261017-1911.md",
+    "docs/README.zh-CN.md",
+    "docs/acceptance.md",
+    "docs/archive/README.md",
+    "docs/archive/pr6-final-integration-report.md",
+    "docs/c4-handoff-closure-20261017.md",
+    "docs/c4-latest-integration-20261017.md",
+    "docs/contract-reading-guide-en.md",
+    "docs/demo-runbook.md",
+    "docs/devpost-story-en.md",
+    "docs/devpost-submission-draft.md",
+    "docs/english-translation-audit.json",
+    "docs/english-translation-scope.md",
+    "docs/files.md",
+    "docs/final-delivery-20261017.md",
+    "docs/final-integration-report.md",
+    "docs/frontend-integration.md",
+    "docs/mac-demo-runbook.md",
+    "docs/poster-live-capture.md",
+    "docs/poster-live/HarborGuard-Poster-A3-3D.pdf",
+    "docs/poster-live/evidence.json",
+    "docs/poster-live/security-3d.jpg",
+    "docs/twist-responses-en.md",
+    "docs/validation.md",
+    "docs/vercel-mac-deployment.md",
+    "frontend/B-HANDOFF.md",
+    "frontend/README.md",
+    "frontend/public/data/LA-COUNTY-BUILDINGS.md",
+    "frontend/public/data/OSM-SOURCE.md",
+    "frontend/public/data/README.md",
+    "ml/README.md",
+    "ml/__init__.py",
+    "ml/lora/Modelfile",
+    "ml/lora/Modelfile.base",
+    "ml/lora/README.md",
+    "ml/lora/__init__.py",
+    "ml/lora/capture_real.py",
+    "ml/lora/distill.py",
+    "ml/lora/eval.py",
+    "ml/lora/gen_contexts.py",
+    "ml/sonar/__init__.py",
+    "ml/sonar/gen_dataset.py",
+    "ml/sonar/preview.py",
+    "ml/sonar/render.py",
+    "ml/yolo/ACCEPTANCE-MAC.md",
+    "ml/yolo/__init__.py",
+    "ml/yolo/check_data.py",
+    "ml/yolo/eval.py",
+    "ml/yolo/infer.py",
+    "ml/yolo/sonar.yaml",
+    "ml/yolo/train.md",
+    "requirements-lora-train.txt",
+    "requirements-runtime.txt",
+    "requirements-yolo-train.txt",
+    "scripts/check_c0.py",
+    "scripts/setup_env_runtime.sh",
+    "scripts/setup_env_yolo_train.sh",
+    "tests/conftest.py",
+    "tests/test_agent_phase1.py",
+    "tests/test_agent_phase2.py",
+    "tests/test_agent_phase3.py",
+    "tests/test_lora_capture_real.py",
+    "tests/test_lora_distill.py",
+    "tests/test_lora_eval.py",
+    "tests/test_lora_gen_contexts.py",
+    "tests/test_sonar_render.py",
+    "tests/test_yolo_infer.py"
+  ],
+  "changed_tracked_count": 114,
+  "baseline_han_files": 149,
+  "remaining_han_files": 66,
+  "baseline_han_characters": 115903,
+  "remaining_han_characters": 39295,
+  "protected_originals_verified": 197,
+  "protected_originals": [
+    {
+      "file": "acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/FINAL_REPORT.md",
+      "checkout_sha256": "3c47659c16e05b19004712ba898c475f722c4bc95550ca3c4f7076da6f9c7374",
+      "repository_blob_sha256": "3c47659c16e05b19004712ba898c475f722c4bc95550ca3c4f7076da6f9c7374",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/training_meta.json",
+      "checkout_sha256": "f5461cc3441c55bf0643115b3dc2c40f31debb9a0dbe7fa5ab88e60745e325d3",
+      "repository_blob_sha256": "f5461cc3441c55bf0643115b3dc2c40f31debb9a0dbe7fa5ab88e60745e325d3",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/FREEZE.md",
+      "checkout_sha256": "baa01020d5dca07d9ecc39f7b75585eb266132b87e831656e24576a8cbd96cc5",
+      "repository_blob_sha256": "baa01020d5dca07d9ecc39f7b75585eb266132b87e831656e24576a8cbd96cc5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/archived_metrics/metrics.schema-mode-failure.20261017.json",
+      "checkout_sha256": "a6c4cfe69380ad12de5d0a0ba66aea0362850612d0ab33762dfe6e16fd427e1a",
+      "repository_blob_sha256": "a6c4cfe69380ad12de5d0a0ba66aea0362850612d0ab33762dfe6e16fd427e1a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/frozen_config.diff",
+      "checkout_sha256": "1d113cce091bd5a1c72408913d0b224c312a9726a518998c758e670992859ec1",
+      "repository_blob_sha256": "f48597df8e3d5f192340fd36f773b8fa59fe19812eca382d5220e35ba0749748",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/frozen_dev9_confirm.json",
+      "checkout_sha256": "a275cafa386979b9eb8cb56f3a411726472a7ce8938428c8020c180a749ec3ce",
+      "repository_blob_sha256": "a275cafa386979b9eb8cb56f3a411726472a7ce8938428c8020c180a749ec3ce",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/frozen_hashes.txt",
+      "checkout_sha256": "90efff5f922391ed9eee94a4102dc16ced45188917bd636dd87ffe9b7a04dc6c",
+      "repository_blob_sha256": "90efff5f922391ed9eee94a4102dc16ced45188917bd636dd87ffe9b7a04dc6c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/metrics_candidate_json.json",
+      "checkout_sha256": "1fc98c077c5ea0540400fedc092c3abc8054fa5ca1d9e4b6134476e43ac4d473",
+      "repository_blob_sha256": "1fc98c077c5ea0540400fedc092c3abc8054fa5ca1d9e4b6134476e43ac4d473",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/metrics_confirm60.json",
+      "checkout_sha256": "422db6a7d05d1dd09875daf8a4f0935ef277d88c1467eb521ddb130a38499c9e",
+      "repository_blob_sha256": "422db6a7d05d1dd09875daf8a4f0935ef277d88c1467eb521ddb130a38499c9e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/metrics_dev9_confirm.json",
+      "checkout_sha256": "a275cafa386979b9eb8cb56f3a411726472a7ce8938428c8020c180a749ec3ce",
+      "repository_blob_sha256": "a275cafa386979b9eb8cb56f3a411726472a7ce8938428c8020c180a749ec3ce",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/preswitch_events.json",
+      "checkout_sha256": "d0a06935b49a1386c3007f100dd8576e6013997c53ccb0b11f03244b23576ace",
+      "repository_blob_sha256": "d0a06935b49a1386c3007f100dd8576e6013997c53ccb0b11f03244b23576ace",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/preswitch_validation.py",
+      "checkout_sha256": "bc040a2a87dc9bafea63b37dfdc661b40a62c483b1650be0c9233f6e277fd273",
+      "repository_blob_sha256": "bc040a2a87dc9bafea63b37dfdc661b40a62c483b1650be0c9233f6e277fd273",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/test_format_overrides.py",
+      "checkout_sha256": "d413f5929a77be900583e604b4cfc4b36756fac8a892322068e66566fb8e56f9",
+      "repository_blob_sha256": "d413f5929a77be900583e604b4cfc4b36756fac8a892322068e66566fb8e56f9",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/test_runtime_events_part1.py",
+      "checkout_sha256": "0ae8e63b75a83172aec62e4aed9c980292c92858bb47eaa2d029b2d29e77e7c0",
+      "repository_blob_sha256": "0ae8e63b75a83172aec62e4aed9c980292c92858bb47eaa2d029b2d29e77e7c0",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/test_runtime_events_part2.py",
+      "checkout_sha256": "4f7ca6b00c92da14b21e2954e22026738914da5a90184c4c920c491b5666d958",
+      "repository_blob_sha256": "4f7ca6b00c92da14b21e2954e22026738914da5a90184c4c920c491b5666d958",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/write_official_metrics.py",
+      "checkout_sha256": "44c78816ee99d37fab9491b8b6a981f022c9489efcf9df9eb2a02cb0e2af2c89",
+      "repository_blob_sha256": "44c78816ee99d37fab9491b8b6a981f022c9489efcf9df9eb2a02cb0e2af2c89",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/audit.json",
+      "checkout_sha256": "1765f95804dfd93312d32d8aa9f030f8e366955a8ad691a75996210a28ea361e",
+      "repository_blob_sha256": "1765f95804dfd93312d32d8aa9f030f8e366955a8ad691a75996210a28ea361e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/audit_provenance.py",
+      "checkout_sha256": "661fea46639e9a73e6384c15b4f7a36a05881c0fc5a0cd76de4c2459f7633d13",
+      "repository_blob_sha256": "661fea46639e9a73e6384c15b4f7a36a05881c0fc5a0cd76de4c2459f7633d13",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/latest-integration.json",
+      "checkout_sha256": "bcb517ad28e826fe3fea0558ca040a9be84abbda10b7c1e43e60189e8d90b1b8",
+      "repository_blob_sha256": "bcb517ad28e826fe3fea0558ca040a9be84abbda10b7c1e43e60189e8d90b1b8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/remote-b-check.json",
+      "checkout_sha256": "0ee5a4e4cca644ea0adf9c852d2f489aa0e0dd5e385b1d9ce996d275188c9dd2",
+      "repository_blob_sha256": "0ee5a4e4cca644ea0adf9c852d2f489aa0e0dd5e385b1d9ce996d275188c9dd2",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/runtime-check.json",
+      "checkout_sha256": "4c9eccd54818254c58f269e1a6f4b55969af9e815503322a0ab61e624cb70282",
+      "repository_blob_sha256": "4c9eccd54818254c58f269e1a6f4b55969af9e815503322a0ab61e624cb70282",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/verification.json",
+      "checkout_sha256": "6df9b35903f5ed85ecef2b46b43d0db83ed730936597f573d183e72f3e15683d",
+      "repository_blob_sha256": "6df9b35903f5ed85ecef2b46b43d0db83ed730936597f573d183e72f3e15683d",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/verify_remote_b.py",
+      "checkout_sha256": "cd57c47605a488a3a1baea16faa4052bc6212514801a8f2e697c34cc39d540d4",
+      "repository_blob_sha256": "cd57c47605a488a3a1baea16faa4052bc6212514801a8f2e697c34cc39d540d4",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/B-final-acceptance-20261017.json",
+      "checkout_sha256": "34881203169587c60b74bdd09924b1fd24daf728295f0827eb279ec0130cd3cd",
+      "repository_blob_sha256": "34881203169587c60b74bdd09924b1fd24daf728295f0827eb279ec0130cd3cd",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/ab-integration-9850558.json",
+      "checkout_sha256": "5e4cb3823e7830e3ea8e07266ed603f4e251d7896a73c97c1fa0d528e27f24a6",
+      "repository_blob_sha256": "5e4cb3823e7830e3ea8e07266ed603f4e251d7896a73c97c1fa0d528e27f24a6",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/final-delivery-20261017.json",
+      "checkout_sha256": "721fdf4a3e105b7709fa2513225e0f721e1b0358df1918db804130fb62d99e8a",
+      "repository_blob_sha256": "721fdf4a3e105b7709fa2513225e0f721e1b0358df1918db804130fb62d99e8a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/final-maina841bf9-recovery.png",
+      "checkout_sha256": "baa5cefb77abaf5ec3345dab133e002da1422b31a9defe81cc63b296ab9b2cd1",
+      "repository_blob_sha256": "baa5cefb77abaf5ec3345dab133e002da1422b31a9defe81cc63b296ab9b2cd1",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/final-maina841bf9-sonar.png",
+      "checkout_sha256": "040738a8631122473a11bc17c9c0f5750e81adfed4ad167d6dade078950892f5",
+      "repository_blob_sha256": "040738a8631122473a11bc17c9c0f5750e81adfed4ad167d6dade078950892f5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/history-smoke-performance.json",
+      "checkout_sha256": "23aa5fefdd7cbb9b33536d34c84f24873c780addd42d01c7eafe097bdd2cf719",
+      "repository_blob_sha256": "23aa5fefdd7cbb9b33536d34c84f24873c780addd42d01c7eafe097bdd2cf719",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/options-publication-20261017.json",
+      "checkout_sha256": "1edcc4322b2b29dbedb261ad0ea5dab82431b7fdfe868c4247f80b0ec1b06545",
+      "repository_blob_sha256": "1edcc4322b2b29dbedb261ad0ea5dab82431b7fdfe868c4247f80b0ec1b06545",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/peak-analysis-20261017.json",
+      "checkout_sha256": "42105618f0646e25d001a9a75fba7be929f47e494c0073779d74bdc2265a0148",
+      "repository_blob_sha256": "42105618f0646e25d001a9a75fba7be929f47e494c0073779d74bdc2265a0148",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/pr7-recovery-dc69ad2.json",
+      "checkout_sha256": "c1cd9378baea55719bbb9bd544db4ab9226292419aec8c53de52e4a2666058e5",
+      "repository_blob_sha256": "c1cd9378baea55719bbb9bd544db4ab9226292419aec8c53de52e4a2666058e5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/soak-history.json",
+      "checkout_sha256": "1e78671f9aaceab8027306abdf3072b3ee5c7eb475cced4ab501812358cecde5",
+      "repository_blob_sha256": "1e78671f9aaceab8027306abdf3072b3ee5c7eb475cced4ab501812358cecde5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/sonar-safety-20261017.json",
+      "checkout_sha256": "fe14a16c9c3d86dfc037ecc160e840c7e93397e80b4c2a5f1b4b7d4a25c8c583",
+      "repository_blob_sha256": "fe14a16c9c3d86dfc037ecc160e840c7e93397e80b4c2a5f1b4b7d4a25c8c583",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/survey-p0-20261017.json",
+      "checkout_sha256": "c460acf390da6f09a7dabc821e35a333374c90699ea787c05413915a7441c130",
+      "repository_blob_sha256": "c460acf390da6f09a7dabc821e35a333374c90699ea787c05413915a7441c130",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/survey-p0-original-failure.json",
+      "checkout_sha256": "af60d388d68cc650668e53dc2a8d7ba1b6daca84f672bb0468c70faa401aa036",
+      "repository_blob_sha256": "af60d388d68cc650668e53dc2a8d7ba1b6daca84f672bb0468c70faa401aa036",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/ticks-after.json",
+      "checkout_sha256": "e9ec3e9958ad7d07b19a4bc85713d2760d3a0beb245491b05fe2c72597b0a202",
+      "repository_blob_sha256": "e9ec3e9958ad7d07b19a4bc85713d2760d3a0beb245491b05fe2c72597b0a202",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/docs/evidence/ticks-before.json",
+      "checkout_sha256": "d62423983edf48de16af5252b9f1ec344e9c6241f232e70f8edf764035b7abc8",
+      "repository_blob_sha256": "d62423983edf48de16af5252b9f1ec344e9c6241f232e70f8edf764035b7abc8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/history/decision-approve.json",
+      "checkout_sha256": "45620faf9b02c9c58226eaa41c4da34cd85566c5479b9524fe66aa35a2538ab5",
+      "repository_blob_sha256": "45620faf9b02c9c58226eaa41c4da34cd85566c5479b9524fe66aa35a2538ab5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/history/decision-reject.json",
+      "checkout_sha256": "224184bacb6afc8593a7b54c5e1898042a2a333b744b61e7ad226d94493e3e0d",
+      "repository_blob_sha256": "224184bacb6afc8593a7b54c5e1898042a2a333b744b61e7ad226d94493e3e0d",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/history/det-6.json",
+      "checkout_sha256": "f3462ffc1ddcdacaca43dd0e9e942e7e1ce78c4fbb70d0f72033cc4b0877aa9a",
+      "repository_blob_sha256": "f3462ffc1ddcdacaca43dd0e9e942e7e1ce78c4fbb70d0f72033cc4b0877aa9a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/history/events-before-overflow.json",
+      "checkout_sha256": "39c5dd14996aceaf4f93e837042f5bdb7db05ff5ecc42bc187c352b065c6f9ef",
+      "repository_blob_sha256": "39c5dd14996aceaf4f93e837042f5bdb7db05ff5ecc42bc187c352b065c6f9ef",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/history/recommendation.json",
+      "checkout_sha256": "dce754807af68f45f0617ded1d6ef588da3a05bbcc7eb1f1625a7b193f3d1938",
+      "repository_blob_sha256": "dce754807af68f45f0617ded1d6ef588da3a05bbcc7eb1f1625a7b193f3d1938",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/history/state-before-restart.json",
+      "checkout_sha256": "ad0e7c834fdcf877990cb41273ff3887d5199841fc665798d98a0c2ad2be2fef",
+      "repository_blob_sha256": "ad0e7c834fdcf877990cb41273ff3887d5199841fc665798d98a0c2ad2be2fef",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/integration/backend.json",
+      "checkout_sha256": "a1eea302b641062b5ae7910bc924bf8dc3e587177b91bd9f95135f064d262f73",
+      "repository_blob_sha256": "a1eea302b641062b5ae7910bc924bf8dc3e587177b91bd9f95135f064d262f73",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "backend/fixtures/integration/sonar/det-1.png",
+      "checkout_sha256": "2e8a6d54fca89034ae008b0bc939b06ef9ba9a3c25fa4c84e537ed971daf2443",
+      "repository_blob_sha256": "2e8a6d54fca89034ae008b0bc939b06ef9ba9a3c25fa4c84e537ed971daf2443",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/assets.json",
+      "checkout_sha256": "fe48ab17d4dca0a9c127fd5e363c4e48330c7e80f81b8875d509934f77e97613",
+      "repository_blob_sha256": "fe48ab17d4dca0a9c127fd5e363c4e48330c7e80f81b8875d509934f77e97613",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/build_demo_data.py",
+      "checkout_sha256": "711784b50da51acfe74e50e66752541aa2458572585f220673f6d01260f63442",
+      "repository_blob_sha256": "711784b50da51acfe74e50e66752541aa2458572585f220673f6d01260f63442",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/buoys.json",
+      "checkout_sha256": "a0dfa6a1a461a41924386818733c06c7923fbf595f23467cc149861e91d5419b",
+      "repository_blob_sha256": "a0dfa6a1a461a41924386818733c06c7923fbf595f23467cc149861e91d5419b",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/scenarios/scenario_a.yaml",
+      "checkout_sha256": "95d502ef66cebc6d20e455b8b3a56ae83f45433e34dc06b0ea83f7d94b73a396",
+      "repository_blob_sha256": "95d502ef66cebc6d20e455b8b3a56ae83f45433e34dc06b0ea83f7d94b73a396",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/scenarios/scenario_b.yaml",
+      "checkout_sha256": "94b60484b6d6002208db88b3bf6cccc73748ed9058aa9de37ec1d9642047a39c",
+      "repository_blob_sha256": "94b60484b6d6002208db88b3bf6cccc73748ed9058aa9de37ec1d9642047a39c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/vessels.json",
+      "checkout_sha256": "7c058d13182a5956cac84da477cecd8cede8e7ea56f8a334ec3d4116ba883bf8",
+      "repository_blob_sha256": "7c058d13182a5956cac84da477cecd8cede8e7ea56f8a334ec3d4116ba883bf8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "data/zones.geojson",
+      "checkout_sha256": "df6d5990dd76e1a6fb906d5719037e4fc562919e8e0c0d3c2d93c81519ea524c",
+      "repository_blob_sha256": "42c796848a11c5135efeb9d03ee8f9f724f4bdc6a381acc34e799de0bc396b92",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "docs/C-acceptance-20261017-1743-retest-20261017-1911.evidence.json",
+      "checkout_sha256": "d31e9037a4ab53652f3e2a93cec59651df8a99486c630469c9b8c05dd39c1e54",
+      "repository_blob_sha256": "d31e9037a4ab53652f3e2a93cec59651df8a99486c630469c9b8c05dd39c1e54",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "docs/evidence/vercel-mac-preparation-20261017.json",
+      "checkout_sha256": "60b90fb775f0ae1f12cb6bceee97dd1eb86a25a2cdd5d650284660892edebf4e",
+      "repository_blob_sha256": "60b90fb775f0ae1f12cb6bceee97dd1eb86a25a2cdd5d650284660892edebf4e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "docs/evidence/vercel-mac-preparation-20261017.png",
+      "checkout_sha256": "d89324a2001bc17f44bd59fb340edad15fe6b1883e03866e802aadc225495171",
+      "repository_blob_sha256": "d89324a2001bc17f44bd59fb340edad15fe6b1883e03866e802aadc225495171",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "docs/shared-contract-v1.md",
+      "checkout_sha256": "460179e129de895c8680346d839c8a62804ccae369eb12104b23f6cf8ad6b8a2",
+      "repository_blob_sha256": "460179e129de895c8680346d839c8a62804ccae369eb12104b23f6cf8ad6b8a2",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/assets.json",
+      "checkout_sha256": "fe48ab17d4dca0a9c127fd5e363c4e48330c7e80f81b8875d509934f77e97613",
+      "repository_blob_sha256": "fe48ab17d4dca0a9c127fd5e363c4e48330c7e80f81b8875d509934f77e97613",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/buoys.json",
+      "checkout_sha256": "5aa1b4eedada5bc245d6cea76b5effe9e562dafc1c16197a92d8b161d5fca674",
+      "repository_blob_sha256": "5aa1b4eedada5bc245d6cea76b5effe9e562dafc1c16197a92d8b161d5fca674",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/harbor-osm.geojson",
+      "checkout_sha256": "02bc5c8530e55c3ca9c7f9ec3e4fd659844d5f07c533b81d8d5dd4636d73056c",
+      "repository_blob_sha256": "02bc5c8530e55c3ca9c7f9ec3e4fd659844d5f07c533b81d8d5dd4636d73056c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/lacounty-port-buildings.geojson",
+      "checkout_sha256": "63749bd11e23f4e37cb1d1787e3fa8be9e08712d5875a77f28a9adbeaac5c074",
+      "repository_blob_sha256": "63749bd11e23f4e37cb1d1787e3fa8be9e08712d5875a77f28a9adbeaac5c074",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/seabed-dem.json",
+      "checkout_sha256": "1298e4e7f256ba2654639c139865edd49e9e0f4052834d31f269295886a22abf",
+      "repository_blob_sha256": "1298e4e7f256ba2654639c139865edd49e9e0f4052834d31f269295886a22abf",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/seabed-detail-mb.json",
+      "checkout_sha256": "873739693afb40bf2a8ad1f5e580cd22df0730bee4ba548942c37e018c1a0730",
+      "repository_blob_sha256": "873739693afb40bf2a8ad1f5e580cd22df0730bee4ba548942c37e018c1a0730",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/seabed-fill-regional.json",
+      "checkout_sha256": "39021b64a336a8167b5dd8d855d468410c463e95ce3b611b2961b775ece02508",
+      "repository_blob_sha256": "39021b64a336a8167b5dd8d855d468410c463e95ce3b611b2961b775ece02508",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/shore-dem-usgs-3dep.json",
+      "checkout_sha256": "ff2bc8b62706f78fc273b7761f6801e2cbcb169a98b4f25bd41053ccbbe5d938",
+      "repository_blob_sha256": "ff2bc8b62706f78fc273b7761f6801e2cbcb169a98b4f25bd41053ccbbe5d938",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/shore-ortho-usgs-naip.png",
+      "checkout_sha256": "15e44d12171990297da01447f5875990a089e528388aca8a39086bef704e6a0f",
+      "repository_blob_sha256": "15e44d12171990297da01447f5875990a089e528388aca8a39086bef704e6a0f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/sonar-stub.svg",
+      "checkout_sha256": "7118319760f2a046d2f3e0eb5a6243084d7b628f9b5948d62666a56fa25c096f",
+      "repository_blob_sha256": "7aa3ad7472e8e7676a7ec120a0a4f8be746441cf6d407216a313593c17666be5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/vessels.json",
+      "checkout_sha256": "7c058d13182a5956cac84da477cecd8cede8e7ea56f8a334ec3d4116ba883bf8",
+      "repository_blob_sha256": "7c058d13182a5956cac84da477cecd8cede8e7ea56f8a334ec3d4116ba883bf8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/data/zones.geojson",
+      "checkout_sha256": "df6d5990dd76e1a6fb906d5719037e4fc562919e8e0c0d3c2d93c81519ea524c",
+      "repository_blob_sha256": "42c796848a11c5135efeb9d03ee8f9f724f4bdc6a381acc34e799de0bc396b92",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/demo_a.jsonl",
+      "checkout_sha256": "93ab5b9112fc65e9bef6c1b6da043d22fa5bf494b976ddf0d2d0d1c4b93d3ee8",
+      "repository_blob_sha256": "93ab5b9112fc65e9bef6c1b6da043d22fa5bf494b976ddf0d2d0d1c4b93d3ee8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/demo_b.jsonl",
+      "checkout_sha256": "e6d1c94c3fd7cf1c0339fc835e7310273d8021056d1f244a6026e36616e1fa8a",
+      "repository_blob_sha256": "e6d1c94c3fd7cf1c0339fc835e7310273d8021056d1f244a6026e36616e1fa8a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/demo_full.jsonl",
+      "checkout_sha256": "a7485c0ad847ded573d21fed9fbe8ef1367984ee8e1df20ccfbeeaaca7611e57",
+      "repository_blob_sha256": "a7485c0ad847ded573d21fed9fbe8ef1367984ee8e1df20ccfbeeaaca7611e57",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/favicon.svg",
+      "checkout_sha256": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66",
+      "repository_blob_sha256": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/icons.svg",
+      "checkout_sha256": "7ca2d67c9c3aebf50cdc8709ee8aacf8cdb8cc7ea6325ea94939caef5da1c53d",
+      "repository_blob_sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_a.jsonl",
+      "checkout_sha256": "304758bb8371a99201c7fce067b49af80067467d264a2099b85a7d1791e41aa8",
+      "repository_blob_sha256": "304758bb8371a99201c7fce067b49af80067467d264a2099b85a7d1791e41aa8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-1.png",
+      "checkout_sha256": "afff6bfaefff994172c02b560095b83e1f5c9a4025328782d83956ff077fb214",
+      "repository_blob_sha256": "afff6bfaefff994172c02b560095b83e1f5c9a4025328782d83956ff077fb214",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-10.png",
+      "checkout_sha256": "16c7ca2fb84bfd623294d5e55b38a631ccdfeb30f0500842cc69959e9585a94a",
+      "repository_blob_sha256": "16c7ca2fb84bfd623294d5e55b38a631ccdfeb30f0500842cc69959e9585a94a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-11.png",
+      "checkout_sha256": "a8078ea3083d38f8009cd62207560318c40b0072b741f6ab002ddac71579060c",
+      "repository_blob_sha256": "a8078ea3083d38f8009cd62207560318c40b0072b741f6ab002ddac71579060c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-12.png",
+      "checkout_sha256": "512c7da45c3e6620f5e05d887a6976cc70e59f3febb68371965ac3acabd22a0c",
+      "repository_blob_sha256": "512c7da45c3e6620f5e05d887a6976cc70e59f3febb68371965ac3acabd22a0c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-13.png",
+      "checkout_sha256": "62c98e5bfb03407f8b562e2506126ebe55d9e2719c8309571c85200f330403f6",
+      "repository_blob_sha256": "62c98e5bfb03407f8b562e2506126ebe55d9e2719c8309571c85200f330403f6",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-14.png",
+      "checkout_sha256": "393a022c279af2492f1761bd9ce61e411c90588650d6c28ba3d4613e8a01f09a",
+      "repository_blob_sha256": "393a022c279af2492f1761bd9ce61e411c90588650d6c28ba3d4613e8a01f09a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-2.png",
+      "checkout_sha256": "59bfd134ccf8ecd19d6771f47ce238e7081ca96184223a0e679012afffb9705a",
+      "repository_blob_sha256": "59bfd134ccf8ecd19d6771f47ce238e7081ca96184223a0e679012afffb9705a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-3.png",
+      "checkout_sha256": "f4547ff181a23822282e04e83826e42748e6f29a32f8adcff1c2675ce7836da1",
+      "repository_blob_sha256": "f4547ff181a23822282e04e83826e42748e6f29a32f8adcff1c2675ce7836da1",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-4.png",
+      "checkout_sha256": "fa139459b7cd772677b936909bdb6869dbb2d55eb8507f80cee673823dcc6820",
+      "repository_blob_sha256": "fa139459b7cd772677b936909bdb6869dbb2d55eb8507f80cee673823dcc6820",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-5.png",
+      "checkout_sha256": "da0d145bb6984146e6ae8c9ed9292c0461ff6f38da6d77be07fd13ecfcf2379d",
+      "repository_blob_sha256": "da0d145bb6984146e6ae8c9ed9292c0461ff6f38da6d77be07fd13ecfcf2379d",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-6.png",
+      "checkout_sha256": "43381d4b5b1986cf355457d6a541aee6ea76a04f5491ad238eb05c27a1e1e37c",
+      "repository_blob_sha256": "43381d4b5b1986cf355457d6a541aee6ea76a04f5491ad238eb05c27a1e1e37c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-7.png",
+      "checkout_sha256": "8b16794d78b61257b1c33fc0d7c9ed102e8ceed263e00c7e7877837937210a90",
+      "repository_blob_sha256": "8b16794d78b61257b1c33fc0d7c9ed102e8ceed263e00c7e7877837937210a90",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-8.png",
+      "checkout_sha256": "3ba90126694254d9797205ad9dbb945f6ec1d782d1b4661b8f6b061c36842f03",
+      "repository_blob_sha256": "3ba90126694254d9797205ad9dbb945f6ec1d782d1b4661b8f6b061c36842f03",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/a/det-9.png",
+      "checkout_sha256": "f6ad0f560c2c07515bd79b5159999118fb1d223520a2ec5e7dd85e87e1daf520",
+      "repository_blob_sha256": "f6ad0f560c2c07515bd79b5159999118fb1d223520a2ec5e7dd85e87e1daf520",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/b/det-1.png",
+      "checkout_sha256": "88f9dae8ca47eef31eed8786825417ea55583aeaf3f99fe0d15ecdb6d28eff99",
+      "repository_blob_sha256": "88f9dae8ca47eef31eed8786825417ea55583aeaf3f99fe0d15ecdb6d28eff99",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/b/det-2.png",
+      "checkout_sha256": "d7e27f1b779343a79bd07d0731d51183e8d6db62315e378037f206f44cd0bf95",
+      "repository_blob_sha256": "d7e27f1b779343a79bd07d0731d51183e8d6db62315e378037f206f44cd0bf95",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/b/det-3.png",
+      "checkout_sha256": "87c4b5bbf9a31ea02ef51ce1cc0ce8876f809ef6ff79cf08daf1829ef06a24d4",
+      "repository_blob_sha256": "87c4b5bbf9a31ea02ef51ce1cc0ce8876f809ef6ff79cf08daf1829ef06a24d4",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_assets/b/det-4.png",
+      "checkout_sha256": "f741b5fccef50c680017547709c574f6be6d4ab8608f67bdb54b99dd8d4c6380",
+      "repository_blob_sha256": "f741b5fccef50c680017547709c574f6be6d4ab8608f67bdb54b99dd8d4c6380",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/public/replay_b.jsonl",
+      "checkout_sha256": "4386da565aac5b44bb76d127c5d33523f260f0ae14f8dd806eaf6c2294649ebc",
+      "repository_blob_sha256": "4386da565aac5b44bb76d127c5d33523f260f0ae14f8dd806eaf6c2294649ebc",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/scripts/fixtures/crm-socal-crop.json",
+      "checkout_sha256": "643b7a7d33fa8a33807a205a6a89179bcea9e23fea22adb3faf59e754239db78",
+      "repository_blob_sha256": "643b7a7d33fa8a33807a205a6a89179bcea9e23fea22adb3faf59e754239db78",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/scripts/fixtures/legacy-language.json",
+      "checkout_sha256": "5595a46d8e1b3656ae8d1f8618174430412817f9727db34308e27f1cd1e970b8",
+      "repository_blob_sha256": "5595a46d8e1b3656ae8d1f8618174430412817f9727db34308e27f1cd1e970b8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/App.css",
+      "checkout_sha256": "c2571ce7245629994b8adc84f6c48e1920f047a4e7e29c89a4aeb51eeb1b5433",
+      "repository_blob_sha256": "6e25a776d3e8102da5bacb3cb99f4a5fc662a2e01e6143140671a556d28c3d5c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/App.tsx",
+      "checkout_sha256": "9dd6127934c8c0e61c5117cc29ce4fef9e6eb19898546036b79b407d9add606f",
+      "repository_blob_sha256": "400887a550548a47aa166a6c7d8cb3f2c2b5d7424ccd1f2e58ec5051682f447c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/assets/hero.png",
+      "checkout_sha256": "881ffbcaafc212e49addad08846a5b82761355fa20624253af3477ba33262c5c",
+      "repository_blob_sha256": "881ffbcaafc212e49addad08846a5b82761355fa20624253af3477ba33262c5c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/assets/react.svg",
+      "checkout_sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5",
+      "repository_blob_sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/assets/vite.svg",
+      "checkout_sha256": "2f1f6c6f90a0ef7422cbb4cfafcd8ad329c507a18afdc34cc21fa72179b9c54a",
+      "repository_blob_sha256": "5be21acd42eb7b896e517f4e0f0f11eb5c5d9e54fbbcebe9453f033008fcca6f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/api.ts",
+      "checkout_sha256": "e141965c18e0e53e3552a801b2c667da628161e97b3ef278b21a2a88246e2c13",
+      "repository_blob_sha256": "d727760f1fd0850f3d3a87dea81ef719960985b6b3cf79050e66f401a6b84625",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/bathymetry.ts",
+      "checkout_sha256": "ec9aef0ef78c8ce5822f8766226175cd703da05a3bbc7f17d753277b85529b00",
+      "repository_blob_sha256": "d669713c219b7708b3d1fe28ef9362de1bc8974cbb2a69c20e07fe8f9b375f0e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/commands.ts",
+      "checkout_sha256": "a64629065025a378636d2e1142dd66717cfd39c57796fae9be032024bf8f17e1",
+      "repository_blob_sha256": "5a61dfefc0fea59da0fb1e6513bd4ef704b685fad9b57aa84b85acc564f4790f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/demoGeometry.ts",
+      "checkout_sha256": "7149efa46238e027e4d988613ce2a243c7d874e94ef32853c57ccc542e6ff429",
+      "repository_blob_sha256": "c38840cd43a24f2e2f43eeb6fe52287c0ec54c011b244dcffa5453f673e68f84",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/english.ts",
+      "checkout_sha256": "4f58a5ea163062707a5397833787840915050c581e20b2ccfebd1ae194fc8649",
+      "repository_blob_sha256": "8848ac1cb68d7c1943ecd6e77ebbaa2446e77139cac35acb008d823c4f5d061f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/http.ts",
+      "checkout_sha256": "b0dc4c5132f8a7ca1922d72399533ec979de2dc759746fc2f25da9139391d048",
+      "repository_blob_sha256": "e1218f2489dce31ad910aa9c19800e1986b2601c7ce6c793cbff07ddc556fbca",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/legacyEnglish.ts",
+      "checkout_sha256": "5c4ae0a2d0c0beee9b33ce8064e20be86cfab7c259bffbb5a59913305cfa8f8c",
+      "repository_blob_sha256": "051bbc19d34391c8d6a03c738a86ccaff5f4c5202fbe9d62dff4683b7eafce1f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/liveRecovery.ts",
+      "checkout_sha256": "2f95f71e2d3612d6f46f1a0425b2deeabf365ef8749071c62f4dfdc2e3740df8",
+      "repository_blob_sha256": "6ecb492445cb33b9dfde368fb03309e39e1bbcc8abcf4375d63686ef663c954e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/localBase.ts",
+      "checkout_sha256": "4e3e9368efcf73d462c63228debfe483e24d070a34caa6541bbe8eb5eba0364f",
+      "repository_blob_sha256": "87cec2cd93d409f1ab6e1db27326111daef41f04df66503f7bb70eafc4b364ca",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/mapGeometry.ts",
+      "checkout_sha256": "270482336f13ccae086a1ad14d1894ad0d8755bfdd3bc5ec848b395b963e78ed",
+      "repository_blob_sha256": "cfd3eb993cb702a3f7e71cb6e213349e8998eb901a04afe127ec760379771c7b",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/mock.ts",
+      "checkout_sha256": "9256309196f4e9fdeee47ae5c11c711456838a98bb3228ff1122200cdb137f69",
+      "repository_blob_sha256": "f563c4ffc5c37123258ca36204c4ffd6fb714fe23b8fff7f1fc4ddc69443a03e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/presentation.ts",
+      "checkout_sha256": "20e4784855e7acf06b1f2c039e0f9a6a9e6c44d204edc7a82518dafcbce1c8b6",
+      "repository_blob_sha256": "0795eca96cbad9e40264c09393f720bb0b34c63cfd203664c35c85b523015025",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/replay.ts",
+      "checkout_sha256": "86dd55f8ca55bd13041e6dc5d85ed78b5f626fbe96ad3152b7177021b1f822ad",
+      "repository_blob_sha256": "a150382328137db347e60231c2e3c52a16a0fa06c8bd8097c6fdb5ff04a10823",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/replayCore.ts",
+      "checkout_sha256": "50c17a8a113a8a371f8f048414d041e9b3bde1999329cafca7af98c3f208cde8",
+      "repository_blob_sha256": "207d3fbd65bfa83243f58cda51c79db0d1a838d09a120fc994923606bcd2fd7e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/shoreTerrain.ts",
+      "checkout_sha256": "bd58b742810732aeba4107cbf44ccf5863be6ebf6bcf147a7f4894f6b23e2b07",
+      "repository_blob_sha256": "0537c3d7dc3a22eee0546e615726e051a62fbac850f0ac2fa242d424dd1f0315",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/sonarDeployment.ts",
+      "checkout_sha256": "4062f9e6d5a7e02e671a0407d4d483597be5bc2e98200f76b09340e43f35b2cb",
+      "repository_blob_sha256": "485254738f7c7de483f13454b5d43532e2edac199739564efca2c267103e95cb",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/source.ts",
+      "checkout_sha256": "7ab1c4d37286a7f26cb5d801ee6f4b0f16ab15b921eb95ad394e527e311ca35e",
+      "repository_blob_sha256": "08b2000bf465473705a78d501f63da5998bb99838fe93aafa158d3336d5857ce",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/staticData.ts",
+      "checkout_sha256": "86bbd72bdb2f5e6bb11401af75fb93f5bfe6b403bfffc0d8da3091eee71bf498",
+      "repository_blob_sha256": "c7bd4b87beaa115901b4d434ce94f32d504cf433d501d889487c7dc17437214a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/vesselMotion.ts",
+      "checkout_sha256": "244d58bb4f8729e97876934447c8a298d2cc61d8f584fa2036db3b860ab0af19",
+      "repository_blob_sha256": "179c2dec79d6a0d6eceb707cb366fd2688fd74b246278d698764a838b15ddb93",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/data/ws.ts",
+      "checkout_sha256": "80a532c8534ce1340864e0ff34322faacf401407a7258aba40694806c9d34fbc",
+      "repository_blob_sha256": "5b6e9c8a961329c188974f284256f4f921e85ec15f66073ae8d7dca66602cf77",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/demo/recording.ts",
+      "checkout_sha256": "d21710d5893a44221e4487f84041da9fb766479227902f5f5d048659571c46ec",
+      "repository_blob_sha256": "de166f87af748253819b05c73af9c0fe1d7cefa2f2c346d5d6def85a582a37b2",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/demo/useRecording.ts",
+      "checkout_sha256": "5a5be897d7856eab0e3c947c9bf6e009eb2280102980224bc6268b978eab8615",
+      "repository_blob_sha256": "8e3d427219dd9c6f1c806972477c24534c1606d626c4e176167097c0ebcd38d4",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/index.css",
+      "checkout_sha256": "912cb0b5ebdd4179a663545e2da6d9ed8613f469188858b39014930ef7427db8",
+      "repository_blob_sha256": "e841e125ed3c4c82aed58b8587553ce3665296609c8506a7ba3dd1429b7d2806",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/layout/AppBoundary.tsx",
+      "checkout_sha256": "96c8f9e3ee3f8d3d749c20b5353c2eaa627197ecc053f77aa19f8310e75f8d72",
+      "repository_blob_sha256": "eb9345789a988ef097e5ce2aedf4682d51eef10348c880ca74e1fbbd75c340bc",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/layout/AppShell.tsx",
+      "checkout_sha256": "1caedf5a281bf17d4aff4d173aba5cfdc2afe93b2c9d853e8e2d1dd876d71870",
+      "repository_blob_sha256": "21a51895013915f01a0bbcae2d9ac1600c17022a58fe9403a677eaf15a511bbc",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/main.tsx",
+      "checkout_sha256": "176e88da288c1fff15de257cbd16bb940822fb430c582b8bc4540abf0afc9387",
+      "repository_blob_sha256": "c839fc49a01602da74f8eda5abc1982ecb5c71e55ecbab7040e8b03923983ed6",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/AssetRings.tsx",
+      "checkout_sha256": "53bee6088376079e010b8b6cb7ecca6c6ea05d2f231b01a2efa856251fb27762",
+      "repository_blob_sha256": "4d6f0ed8fa9fd047088d451c39667835624e6ee41db5c20b87636b1a6ff3a121",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/BlindAreas.tsx",
+      "checkout_sha256": "24742f19a1b469af3bcf7636fbc7283b03b571534aea9bf2ead0168f60ae2ea9",
+      "repository_blob_sha256": "25fbcbb9219d32cdd5c70683058fb39d7073b758fcda31803d796ff2259622c0",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/BuoyLayer.tsx",
+      "checkout_sha256": "655ffc10d522f1a68c1e4e0740029dc249497174089eeb7b20a81fdc74cd476f",
+      "repository_blob_sha256": "57919453f07454ec67016954b6780abb54b92fc034e7b267a80649f8858b49d3",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/LocalBaseLayer.tsx",
+      "checkout_sha256": "156ad970933ed4c09a8e2233ced395665db3ad449c8d4ea2d839fcd1b18b983a",
+      "repository_blob_sha256": "9619cdc92bf6e10c8b867044360f5522f500f82f8e263595e1f2a9078e6c7f4f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/MapView.tsx",
+      "checkout_sha256": "c4506e339cbc5505a7ca6bc613aab817465b8092e8e4bcc25ae249a17c1fa815",
+      "repository_blob_sha256": "ed58e2455b063c86228416255aeafbb3f09d4a34469d03e5f427656ff4a7d2be",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/TrackLayer.tsx",
+      "checkout_sha256": "c8d40e2bc92bd48c084327b71ce624dfd7967f97d348883c23d51f96d6622fff",
+      "repository_blob_sha256": "8ca242abc3f980d49873abd5becc446ad0d4cc3d91d3756a3b2599165010d857",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/ZoneLayer.tsx",
+      "checkout_sha256": "81caa6d22cd334fb511517cb2930ee43fac276266dc66d96bc910ca8d5f63759",
+      "repository_blob_sha256": "21786a7860fc95525473792f169b07cb97e7497c8e5de1911d185b7a515a0104",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/geo.ts",
+      "checkout_sha256": "6f3808bab69fd990c1c8355a0872270bb560b7b33478d3c9b846b8a711847a9c",
+      "repository_blob_sha256": "e5e3fc74c5d15c326c360c2bb2355377310dafbfd2ce5eaecc72e153689e09f0",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/map2d/styles.ts",
+      "checkout_sha256": "0fa539223765695e5ba37105dcddf43a7bf119dd48390fb23060222375b9c6f0",
+      "repository_blob_sha256": "edb93d4b1da36d30751c290827d8d1a630d7ace69db6dd601164a226424e581f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/AgentCard.tsx",
+      "checkout_sha256": "28ca1954a33dc85b3322c8516d2a1ee2e14c222efbc031631a76776aebda8cdc",
+      "repository_blob_sha256": "e2816a39a37ea60d7137152e172455c578e91e02cf767080a86e236843a5dd04",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/BuoyGrid.tsx",
+      "checkout_sha256": "079820290465df23c2f49d382472ac2704e8869ca0931468e00874565db1df54",
+      "repository_blob_sha256": "a8c2529cbadf0106c5e58606b2a86f64402671a4c3f80b6ce4c9cf8f87b0275d",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/DemoTools.tsx",
+      "checkout_sha256": "e677a84ea4e1f7fae9dfce4880d9fc02e827ee08c87eab1e11335021f8b99265",
+      "repository_blob_sha256": "8dc6a779ade652fb901f62b3b9806a85c065396a5ca4cba5993017742720b2be",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/DisasterLegend.tsx",
+      "checkout_sha256": "5e4bac5d18b222d9906cfd2965b7c5eeea8642545a710569ab31e946ad96f7ad",
+      "repository_blob_sha256": "2a3f373412928dea14f7abc0a935826e3995abe3912ce059b1c22d36c55f6d68",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/ImpactCard.tsx",
+      "checkout_sha256": "9240f65fa983990066ab1556d6da78ae36b1907aadc2da87ba3d887a81aaa7b8",
+      "repository_blob_sha256": "5524448029c029c3dc30170d2d3688ccd331b84e86aa109916641b5274e20bd3",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/LogPanel.tsx",
+      "checkout_sha256": "a63d5d533b9ce23f7efe5fccc56e4e923bf2233b6db725fe763e16c331bb0f45",
+      "repository_blob_sha256": "0ae117c06d3aad6171da90172f859577aa24077d561f457630b2bf26a3d6eb24",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/MetricsCard.tsx",
+      "checkout_sha256": "6bb73cc2319f161a3b6bf8b12efc9cbb57b0e370e1edc9220108041151240a68",
+      "repository_blob_sha256": "1d306c87adc126efbdfb28aa9561461b1afe5be570fce5f9f7245382df1df3fc",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/ReopenPanel.tsx",
+      "checkout_sha256": "e2d8d49f52bd492229863447afc9ce6ead5751792b4c935bcfb0fbbd2bff57de",
+      "repository_blob_sha256": "2b4a773e39892854209388734022fabca67f971f6285788729a6103702521048",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/ReplayControls.tsx",
+      "checkout_sha256": "d4161e7edc38cd5d2e24c603e15bd3496f9a40624dc0362b0b83249495984156",
+      "repository_blob_sha256": "80a412c9b5a7c1fe51684aa51ca1f3094b24abddf3c41aeb5027ca889b732f05",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/RiskBar.tsx",
+      "checkout_sha256": "a8498f1cd18e623b8d6fca29f87e9e7bebcebd412a2c71f63316c5381e89ff66",
+      "repository_blob_sha256": "60aad017abdffd7c117e2072f3fbb6b32ecadace7696024a9899bf8dafe96b2c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/SectionHeading.tsx",
+      "checkout_sha256": "b38bd9f0b8a9cb91c89523ba6496bd51f3c7f5432532603d0499af4b768f72d2",
+      "repository_blob_sha256": "1106f47886047b89067131c303c36c2edb1fb51eb3f3164886aa8e00ea96eb1a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/TargetList.tsx",
+      "checkout_sha256": "dfc7d06d1c8e49d4a7958e06a7ed164fc6cc54327beed668fda90a037a23a9e3",
+      "repository_blob_sha256": "ac9868ff9ea57ea6376b7d4c7f4d3cb718537e57a649c5a2dcd7cecdb2b3d7db",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/Timeline.tsx",
+      "checkout_sha256": "0c0ddde64047d3d801301c45874cf373c40181775434ac9c17f43545c3c59b71",
+      "repository_blob_sha256": "5df47ec03a532798e812d642a2cd2fa3a76517de149f083f853806ed5d6e5de9",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/ToastHost.tsx",
+      "checkout_sha256": "fc2d4de51841da426b9095986dfd7e383904e95a690a7d6b470608e31a79b9fe",
+      "repository_blob_sha256": "56ba4ad30b963afee04a6f1a4da2b4d92908cda3bd8db39a74ab6c11982a2bfb",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/TopBar.tsx",
+      "checkout_sha256": "19b95823e18d9e8e1bee5f422bacd069ea4f1d46687d2c5bd656d6cf282ad93e",
+      "repository_blob_sha256": "06000fc18b1bce87deb77abc46b083a57489193dd27f84136d17efc8922a502e",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/panels/selection.ts",
+      "checkout_sha256": "81d054aacef41d83dcb41797d7f5513fe5a7808c834d0c8346167bc49d0336f3",
+      "repository_blob_sha256": "1b1bca10c58af675b24471b6504a98a655c638fd7857ab3cd2b987b9c15e92b7",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/store/useBathymetry.ts",
+      "checkout_sha256": "e06f6181826ab586fc9458c4161cd598fe98be52ca038ee4e21f91e1954059ca",
+      "repository_blob_sha256": "864e74a8d2a6021e3355ddc4ed746828d84729a8fea1578a145131c1aec2aaf1",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/store/useHarbor.ts",
+      "checkout_sha256": "839d4c029ad94d92a1636e74df3477050413bc1f043f76ac14a699ed1507f51e",
+      "repository_blob_sha256": "e85f2b071407cb5b2c1b8fd418270a4bbc3d1f8917439873bf0810bd4979c3cc",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/store/useMapData.ts",
+      "checkout_sha256": "f62ae0f537a72020e32d6c81219c990b79c0f435c9d35ac146b0dfa588db4456",
+      "repository_blob_sha256": "4b7f136760062f46f80b04438e4c130d34f444a40d6bd1f12a3d91338cddb1c4",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/store/useOperations.ts",
+      "checkout_sha256": "5e704a16b6aeb12db0fca63d91b788b026aa58a4edb738be015f0dcfb02894a5",
+      "repository_blob_sha256": "4b2bc59414886c9f261e62c23e326da3f0fa1434a4f50c36ea8b958a8583a02a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/store/useReplay.ts",
+      "checkout_sha256": "307380d286b0993dcbfcae3e398faa7c6a65b72e263c0e9350a3e351a356ff7f",
+      "repository_blob_sha256": "c3d5a8f2060802155613a943c0f05608248d63fa093fed7ca620b34e122f1b0c",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/theme.ts",
+      "checkout_sha256": "6b27023c15e9cfb60e34c8a7d9f2257d2347ab385e48ba1d38339c3c659955f3",
+      "repository_blob_sha256": "ffd04aaa02c770ea41670da96e41602c289607919230a6331d0fdecdbe037140",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/types/contract.ts",
+      "checkout_sha256": "f46026fa261b4cbe6034522e221d7776b7f5e536bc00b46d9c70361fb5c1603a",
+      "repository_blob_sha256": "6b466951d31e47fd9de5902b3330b2397ec65765dae4e05f4a92136a8a1b88f8",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/AlertVolume.tsx",
+      "checkout_sha256": "de76a2dc89d6ebb93ad07f45b9ae99f87874d07e04947a5e5653ed5082171118",
+      "repository_blob_sha256": "d972a7f73fc303531f0c6fe0f5449ae379c3451325f33d85eadaecd1a1139ef3",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/BlindAreas3D.tsx",
+      "checkout_sha256": "b128e7e23e1d912baa86d4673033036ccaccf558c39557c198e79ebc65460aa7",
+      "repository_blob_sha256": "8273e8b254d3fe9d31bf02dd40e10e00eab7f63144957ad20e8f5cb09855624a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Buoy3D.tsx",
+      "checkout_sha256": "cb8ce07dc3e12c725076147d4c67fd72f880996bf9806de593294727237b247d",
+      "repository_blob_sha256": "53357a35936352ff487e8fd1ef378a229c30378e730ca02496b80995675b6098",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/CameraRig.tsx",
+      "checkout_sha256": "33d2dea51aef71ce186d1eb26ae50c6d75324fec032843a93c8daf05ab536883",
+      "repository_blob_sha256": "ec74958c69effbbfe0574072f7d162c20edd57fc4b69ce35784bd121e7798e41",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/CoastalTerrain3D.tsx",
+      "checkout_sha256": "185f853168d6697f16382ede26900727320fbbd82b0301b5f2821871191b3138",
+      "repository_blob_sha256": "e097945eb26cd2715aead20f1d18c77f30063ace544f195badbb593027b5aa41",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/HarborModels3D.tsx",
+      "checkout_sha256": "3d63e5dc8f3c7d8a54174d51ca47ee34994012869638b1c73be956ea5f46f94a",
+      "repository_blob_sha256": "a3bbc2a53b83cea60db71fe7325fece00776cee5fb40871465e4261ba70999c5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/NavigationRoute3D.tsx",
+      "checkout_sha256": "cf369fcfd0ffd036efb50fe584f5ba6709f5690cf3653ced2f4f8bb548ab514d",
+      "repository_blob_sha256": "1a921f5683011df6dd8a8d254fbf0f6952bf88373fbac85e73a624b8c2745d76",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/RegionalFill.tsx",
+      "checkout_sha256": "37b3ab060e9bee7aa1e1d9ac30d9c4334720a930c95fcc65e881b93bf52e0f41",
+      "repository_blob_sha256": "386c151f69380938d48e072b892056e40c21c178ae49f75489e3088f5e23e702",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/RenderEffects.tsx",
+      "checkout_sha256": "99d5b3aa541954cb975537792f7f702c37bb6fa9d4e35621f4103c3778aafdce",
+      "repository_blob_sha256": "d5e7f73cd63fcc8722184d392b3a65662c0e4b4b4d046d55e8828fad375e3d45",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Scene.tsx",
+      "checkout_sha256": "e6b9d67a1f28856234b8f504dcfb149b49d12f9f9b1c6ed2b899bad79f89d053",
+      "repository_blob_sha256": "0cb05192abed8ca9b9ffd6b25cdf7b86c8328208137f822bb97ea34062f034f1",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/SceneBoundary.tsx",
+      "checkout_sha256": "ed8a12637042d86ac8191d0988118265f0272343816be73f797107f3e3af1f45",
+      "repository_blob_sha256": "8a405f851d143ce25d8ddd922432e05f16ee9979134c8bb7b01c14c218633dd0",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/SceneLabel.tsx",
+      "checkout_sha256": "2927d8f0141164093df87eb6b18dadd381c52992669161e5a74fe77509cc1e1d",
+      "repository_blob_sha256": "43d3b3fbf3881be6e7306437000d3d23af70c6513249be383a82808dca5d5bdf",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/SceneLabelContext.ts",
+      "checkout_sha256": "0a10a98b0923748992d618d8f04d72b42dbe78111fd3ea3ecb380ce9acb23d45",
+      "repository_blob_sha256": "c7bff7de8e989f3b01759935b25874259e5ad6434d137a9c03d18640b1239af0",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/ScenePanel.tsx",
+      "checkout_sha256": "004948f2ddea04ce8c6a8e83b7f177e61fe227fad20c709adb343282135e17e4",
+      "repository_blob_sha256": "7af9c007c0d7a7e61223054e6ddb744e3b7511a1d5df7649f880971f0ca32db2",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Seabed.tsx",
+      "checkout_sha256": "a052eee11e1ed53c2b5604bcfc553b48637f40f16040ecf2f69b768207cd82a4",
+      "repository_blob_sha256": "265029468d75abbc1e02759bbfb7275e4fc93319f9505ab6faab183d45708a17",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Target3D.tsx",
+      "checkout_sha256": "16865aea6f7d5955b8cc689f350ccd7634833bbdc6ca009e272f849dfcb50fb5",
+      "repository_blob_sha256": "23120033c08725919ae085cc81945d3a858860e625620d13bfcf5a0874467cb9",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Track3D.tsx",
+      "checkout_sha256": "ae3ced0860ffa830cae728b494b798431b02a3f62a66365cdef191b86ca9ffdb",
+      "repository_blob_sha256": "62205d8ee8b96cac076c98f81369c5a6384160ea6b7df9c5296f283352f9f4e5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Water.tsx",
+      "checkout_sha256": "a4e4cc17884e0d7516c46cf441a584f81e9099694237b793a1adf26cd118f67d",
+      "repository_blob_sha256": "927ca619dfbe2539ff634265776dda5c3459e22528ab836698ba1e54b8917566",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/Zone3D.tsx",
+      "checkout_sha256": "03f60e10a0094b75bc8e092b0af14295130a73348aeb7f5a14ab8404b8e3f36d",
+      "repository_blob_sha256": "0c4a8e8b82bc6ef184f7a5c7472066b4091eb44e6a81eb3fde390f8c406790b0",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/coastalBoundary.ts",
+      "checkout_sha256": "05e5cd8a5ae07be13b71fb5c11fa326bceeb956636d32c68dd6fa6d8b1601192",
+      "repository_blob_sha256": "423a40b91556ca841e0fc4c1656745a9cb0bd2f1d34768f7c136348fb58b5fb5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/coordinates.ts",
+      "checkout_sha256": "b145dc5fec951cd2050f04bda3068313120d41b479f73b28ef23cc8d9a2c0a73",
+      "repository_blob_sha256": "fb57987197495b3edfd4664ce84fc760fcdc80eacbb2f29c9ff024f01ac982b7",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/heightfield.ts",
+      "checkout_sha256": "ced622430efbf423775bca2780d7b9ae47c02cdcab02c44690f8309f5da7f44b",
+      "repository_blob_sha256": "5e933357f30b979bdffe8464d67499e02af43bb4079bfb795af7cbf7ff1abe8a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/lineBuffers.ts",
+      "checkout_sha256": "212b9c709310cbf54c4668055904ebb693d2d7d7844ad4328b470fa8f371464f",
+      "repository_blob_sha256": "eae9c5df5a34b7d48cdd1b558f3b4ad322e82c116e31dbc1056bbeb07a9222b1",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/quayClosure.ts",
+      "checkout_sha256": "bca9608afc1912e13086f199c25b91dcd71bd1e864887bac0d5dd34c23c7eeb6",
+      "repository_blob_sha256": "b982a91fc9fd2655c45e359a78ff403fa0afd6077acf4ba1ea09de155e095e5b",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/regionalMesh.ts",
+      "checkout_sha256": "523919b52b48884a0eab5176202b60a70e87c01c46602819445b9ab20783bcce",
+      "repository_blob_sha256": "807d49e2906af30c0eef3d41462550fca9e69c7a72529ae5c79b90cb716e2628",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/seabedContours.ts",
+      "checkout_sha256": "2018ed893d38238207ce31ab0c34a0966a83b9930faa5d12e6431d04166ab53e",
+      "repository_blob_sha256": "7160d285e579cd49e82374ae12000a70638968a1abdbd89673af6a4721b2aadc",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/seabedMesh.ts",
+      "checkout_sha256": "a023f1be364f390f161bf19bb699df908117738a3f3083e17a86e50c9a3a73df",
+      "repository_blob_sha256": "54393bafb0c9788fb0bfa13b7697d7b5e89dc2d015ab0ce6e145b522a14f460a",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/stitchTerrain.ts",
+      "checkout_sha256": "6aa623533ddc4d5519d4c3257ef404506894100d13e9ee66a76222634e660417",
+      "repository_blob_sha256": "041a6ebb510de34d6bb2d4b909c3b44f09714d61fc94a833e7ed490b75def942",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/terrainMaterial.ts",
+      "checkout_sha256": "7a838819c3f097eeec114f61b46a096143018bc0163d5b5633e971d55a9442bb",
+      "repository_blob_sha256": "a0cddbda0c3c673638090672c1e8fa389c0a143cdaa3d8e29ff62ac1c8c582c3",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "frontend/src/view3d/waterMask.ts",
+      "checkout_sha256": "8513874fd8bf9053a5efdd4c5a3da9f28c291bc21754df40a9748916c15b1115",
+      "repository_blob_sha256": "f080fde88084f0da9a438c571d067d770f17967c4e9a8a6fa787e58c65d69503",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "ml/lora/metrics.json",
+      "checkout_sha256": "dc88452fad4605d3dd92d617200928076bac8b8c026c09e103ba3f36c77f2383",
+      "repository_blob_sha256": "dc88452fad4605d3dd92d617200928076bac8b8c026c09e103ba3f36c77f2383",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "ml/lora/train_lora.ipynb",
+      "checkout_sha256": "e44c00698bbd2dac540d973543bd4f12667bc1397732da1d0e31fb39e3fc2ff9",
+      "repository_blob_sha256": "d87b097aa1e2bc969396c9a1299e3016b8167da5bb8719dadb66d8e9dc1ac421",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "ml/yolo/metrics.json",
+      "checkout_sha256": "70f38ed4cab34c3ae12b977e7a318f4205f32b5f6a4f8275e6d203a8cb2b4c71",
+      "repository_blob_sha256": "70f38ed4cab34c3ae12b977e7a318f4205f32b5f6a4f8275e6d203a8cb2b4c71",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "ml/yolo/weights/best.pt",
+      "checkout_sha256": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839",
+      "repository_blob_sha256": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "shared/contract.md",
+      "checkout_sha256": "a929e761435800e944f29076d421847d95e463cf8992038b654527dd306bdb7f",
+      "repository_blob_sha256": "a929e761435800e944f29076d421847d95e463cf8992038b654527dd306bdb7f",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "shared/sample_events.json",
+      "checkout_sha256": "9b11bc91add9847f9bf1a13083dd74221e2db7601c971d849cd9c0bf8862d081",
+      "repository_blob_sha256": "9b11bc91add9847f9bf1a13083dd74221e2db7601c971d849cd9c0bf8862d081",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "shared/sample_state.json",
+      "checkout_sha256": "a354b7dc0139cbdc876e389a7ad4c217abf585e231442059e158ec3728feff09",
+      "repository_blob_sha256": "a354b7dc0139cbdc876e389a7ad4c217abf585e231442059e158ec3728feff09",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    },
+    {
+      "file": "shared/types.ts",
+      "checkout_sha256": "6cb243ba8bc736e419163f9532c7640b99d57b5e97a56a20b1decd2e5e02d28c",
+      "repository_blob_sha256": "cd06a69811766dbdd80b8bf722c0820e4ca051e3791772b1d5cc2c3ce69af9b5",
+      "comparison": "Exact baseline checkout bytes using unchanged .gitattributes/EOL filters"
+    }
+  ],
+  "remaining_original_chinese": [
+    {
+      "file": "acceptance_c4/HarborGuard_LoRA_Qwen3.5-0.8B_formal_e3_s93_Q4_K_M_20261017_053229_2957/FINAL_REPORT.md",
+      "han_characters": 364,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/FREEZE.md",
+      "han_characters": 269,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/archived_metrics/metrics.schema-mode-failure.20261017.json",
+      "han_characters": 41,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/frozen_config.diff",
+      "han_characters": 183,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/frozen_dev9_confirm.json",
+      "han_characters": 41,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/metrics_candidate_json.json",
+      "han_characters": 41,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/metrics_confirm60.json",
+      "han_characters": 41,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/metrics_dev9_confirm.json",
+      "han_characters": 41,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/preswitch_events.json",
+      "han_characters": 6,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/preswitch_validation.py",
+      "han_characters": 334,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/test_format_overrides.py",
+      "han_characters": 131,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/test_runtime_events_part1.py",
+      "han_characters": 263,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/test_runtime_events_part2.py",
+      "han_characters": 323,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/candidate_json_20261017/write_official_metrics.py",
+      "han_characters": 611,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "acceptance_c4/data_provenance_20261017/audit_provenance.py",
+      "han_characters": 83,
+      "reason": "Frozen experiment/reproduction evidence; English companion or provenance README provided."
+    },
+    {
+      "file": "agent/context.py",
+      "han_characters": 17,
+      "reason": "Preserved Chinese mode, prompts and internal deterministic validation/retry vocabulary."
+    },
+    {
+      "file": "agent/factcheck.py",
+      "han_characters": 806,
+      "reason": "Preserved Chinese mode, prompts and internal deterministic validation/retry vocabulary."
+    },
+    {
+      "file": "agent/prompts.py",
+      "han_characters": 312,
+      "reason": "Preserved Chinese mode, prompts and internal deterministic validation/retry vocabulary."
+    },
+    {
+      "file": "agent/router.py",
+      "han_characters": 59,
+      "reason": "Preserved Chinese mode, prompts and internal deterministic validation/retry vocabulary."
+    },
+    {
+      "file": "agent/schemas.py",
+      "han_characters": 51,
+      "reason": "Preserved Chinese mode, prompts and internal deterministic validation/retry vocabulary."
+    },
+    {
+      "file": "agent/template.py",
+      "han_characters": 568,
+      "reason": "Preserved Chinese mode, prompts and internal deterministic validation/retry vocabulary."
+    },
+    {
+      "file": "agent/tests/test_local_format_overrides.py",
+      "han_characters": 12,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "backend/docs/evidence/B-final-acceptance-20261017.json",
+      "han_characters": 3259,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/docs/evidence/ab-integration-9850558.json",
+      "han_characters": 12,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/docs/evidence/final-delivery-20261017.json",
+      "han_characters": 2037,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/docs/evidence/options-publication-20261017.json",
+      "han_characters": 34,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/docs/evidence/pr7-recovery-dc69ad2.json",
+      "han_characters": 93,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/docs/evidence/survey-p0-20261017.json",
+      "han_characters": 37,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/docs/evidence/survey-p0-original-failure.json",
+      "han_characters": 579,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "backend/fixtures/history/events-before-overflow.json",
+      "han_characters": 234,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "backend/fixtures/history/recommendation.json",
+      "han_characters": 34,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "backend/fixtures/integration/backend.json",
+      "han_characters": 890,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "backend/tests/test_contract.py",
+      "han_characters": 1,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "backend/tools/integration_bundle.py",
+      "han_characters": 108,
+      "reason": "Frozen fixture generator reproduces original Chinese records exactly."
+    },
+    {
+      "file": "backend/tools/make_samples.py",
+      "han_characters": 56,
+      "reason": "Frozen fixture generator reproduces original Chinese records exactly."
+    },
+    {
+      "file": "data/assets.json",
+      "han_characters": 36,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "data/build_demo_data.py",
+      "han_characters": 148,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "data/scenarios/scenario_a.yaml",
+      "han_characters": 15,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "data/scenarios/scenario_b.yaml",
+      "han_characters": 15,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "data/zones.geojson",
+      "han_characters": 82,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "docs/C-acceptance-20261017-1743-retest-20261017-1911.evidence.json",
+      "han_characters": 18636,
+      "reason": "Original historical evidence; no translation substituted for its measured data."
+    },
+    {
+      "file": "docs/shared-contract-v1.md",
+      "han_characters": 492,
+      "reason": "Frozen contract/types; non-authoritative English reading guide provided."
+    },
+    {
+      "file": "frontend/public/data/assets.json",
+      "han_characters": 36,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "frontend/public/data/zones.geojson",
+      "han_characters": 82,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "frontend/public/replay_a.jsonl",
+      "han_characters": 1173,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "frontend/public/replay_b.jsonl",
+      "han_characters": 75,
+      "reason": "Original synthetic data/replay and its reproducible generator; English presentation retained."
+    },
+    {
+      "file": "frontend/scripts/fixtures/legacy-language.json",
+      "han_characters": 1353,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "frontend/src/data/english.ts",
+      "han_characters": 473,
+      "reason": "Chinese source lookup keys required to display original/legacy records in English."
+    },
+    {
+      "file": "frontend/src/data/legacyEnglish.ts",
+      "han_characters": 1017,
+      "reason": "Chinese source lookup keys required to display original/legacy records in English."
+    },
+    {
+      "file": "frontend/src/types/contract.ts",
+      "han_characters": 17,
+      "reason": "Frozen contract/types; non-authoritative English reading guide provided."
+    },
+    {
+      "file": "ml/lora/distill.py",
+      "han_characters": 200,
+      "reason": "Original model evidence/training notebook/context/prompt/evaluation vocabulary."
+    },
+    {
+      "file": "ml/lora/eval.py",
+      "han_characters": 7,
+      "reason": "Original model evidence/training notebook/context/prompt/evaluation vocabulary."
+    },
+    {
+      "file": "ml/lora/gen_contexts.py",
+      "han_characters": 82,
+      "reason": "Original model evidence/training notebook/context/prompt/evaluation vocabulary."
+    },
+    {
+      "file": "ml/lora/metrics.json",
+      "han_characters": 444,
+      "reason": "Original model evidence/training notebook/context/prompt/evaluation vocabulary."
+    },
+    {
+      "file": "ml/lora/train_lora.ipynb",
+      "han_characters": 1237,
+      "reason": "Original model evidence/training notebook/context/prompt/evaluation vocabulary."
+    },
+    {
+      "file": "shared/contract.md",
+      "han_characters": 455,
+      "reason": "Frozen contract/types; non-authoritative English reading guide provided."
+    },
+    {
+      "file": "shared/sample_events.json",
+      "han_characters": 56,
+      "reason": "Frozen contract/types; non-authoritative English reading guide provided."
+    },
+    {
+      "file": "shared/types.ts",
+      "han_characters": 64,
+      "reason": "Frozen contract/types; non-authoritative English reading guide provided."
+    },
+    {
+      "file": "tests/test_agent_language.py",
+      "han_characters": 29,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_agent_phase1.py",
+      "han_characters": 256,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_agent_phase2.py",
+      "han_characters": 78,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_agent_phase3.py",
+      "han_characters": 372,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_lora_distill.py",
+      "han_characters": 116,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_lora_eval.py",
+      "han_characters": 47,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_lora_gen_contexts.py",
+      "han_characters": 59,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    },
+    {
+      "file": "tests/test_sonar_render.py",
+      "han_characters": 172,
+      "reason": "Original multilingual fixture/input/assertion vocabulary; test meaning retained."
+    }
+  ],
+  "display_only_ast_verified": [
+    "agent/__init__.py",
+    "agent/backend_client.py",
+    "agent/config.py",
+    "agent/context.py",
+    "agent/factcheck.py",
+    "agent/main.py",
+    "agent/prompts.py",
+    "agent/router.py",
+    "agent/schemas.py",
+    "agent/template.py",
+    "agent/tests/__init__.py",
+    "agent/tests/test_local_format_overrides.py",
+    "agent/tests/test_runtime_task_store.py",
+    "backend/app/decision/__init__.py",
+    "backend/app/decision/alerts.py",
+    "backend/app/decision/disaster.py",
+    "backend/app/decision/optimizer.py",
+    "backend/app/decision/pinger.py",
+    "backend/app/engine.py",
+    "backend/app/main.py",
+    "backend/app/sim/world.py",
+    "backend/tests/test_decision.py",
+    "backend/tests/test_survey_audit.py",
+    "backend/tools/history_smoke.py",
+    "backend/tools/record.py",
+    "ml/__init__.py",
+    "ml/lora/__init__.py",
+    "ml/lora/capture_real.py",
+    "ml/lora/distill.py",
+    "ml/lora/eval.py",
+    "ml/lora/gen_contexts.py",
+    "ml/sonar/__init__.py",
+    "ml/sonar/gen_dataset.py",
+    "ml/sonar/preview.py",
+    "ml/sonar/render.py",
+    "ml/yolo/__init__.py",
+    "ml/yolo/check_data.py",
+    "ml/yolo/eval.py",
+    "ml/yolo/infer.py",
+    "scripts/check_c0.py",
+    "tests/conftest.py",
+    "tests/test_agent_phase1.py",
+    "tests/test_agent_phase2.py",
+    "tests/test_agent_phase3.py",
+    "tests/test_lora_capture_real.py",
+    "tests/test_lora_distill.py",
+    "tests/test_lora_eval.py",
+    "tests/test_lora_gen_contexts.py",
+    "tests/test_sonar_render.py",
+    "tests/test_yolo_infer.py"
+  ],
+  "algorithm_or_api_changes": false,
+  "frontend_production_changed": false,
+  "fixture_exporter_note": "integration_bundle adds a local legacy display adapter solely to reproduce unchanged frozen fixtures.",
+  "tests": {
+    "tests": "261",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "2",
+    "time": "125.728",
+    "passed": 259,
+    "skip_reasons": [
+      "Missing optional cached COCO smoke weights .cache/yolo26n.pt",
+      "Missing optional cached COCO smoke weights .cache/yolo26n.pt"
+    ],
+    "console_seconds": 125.75
+  },
+  "frontend_checks": [
+    {
+      "check": "lint",
+      "exit": 0,
+      "seconds": 1.58
+    },
+    {
+      "check": "check:a1",
+      "exit": 0,
+      "seconds": 3.41
+    },
+    {
+      "check": "check:a2",
+      "exit": 0,
+      "seconds": 3.02
+    },
+    {
+      "check": "check:a3",
+      "exit": 0,
+      "seconds": 3.24
+    },
+    {
+      "check": "check:a4",
+      "exit": 0,
+      "seconds": 10.82
+    },
+    {
+      "check": "check:a5",
+      "exit": 0,
+      "seconds": 3.65
+    },
+    {
+      "check": "check:a6",
+      "exit": 0,
+      "seconds": 1.74
+    },
+    {
+      "check": "check:english",
+      "exit": 0,
+      "seconds": 2.69
+    },
+    {
+      "check": "check:recovery",
+      "exit": 0,
+      "seconds": 2.2
+    }
+  ],
+  "latest_main_frontend_build_lint_deployment": [
+    {
+      "check": "build",
+      "exit": 0,
+      "seconds": 9.18
+    },
+    {
+      "check": "lint",
+      "exit": 0,
+      "seconds": 0.85
+    },
+    {
+      "check": "check:deployment",
+      "exit": 0,
+      "seconds": 1.22
+    }
+  ],
+  "build": "PASS; existing ~1.04 MB lazy 3D chunk warning remains",
+  "ruff": "Backend and new test PASS; pre-existing C/test lint findings retained, no new findings in compared scope.",
+  "pip_check": "PASS",
+  "compileall": "PASS",
+  "runtime_limit": "Preserved Chinese validation/retry vocabulary and upstream text may remain inside diagnostic details.",
+  "github": "Local feature branch; no merge or force push by this task."
+}

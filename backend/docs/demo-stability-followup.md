@@ -1,79 +1,79 @@
-# 稳定 Demo 基线与 A 修复后的复测约定
+# Stable Demo Baseline and Retest Agreement After A Fixes
 
-更新：2026-10-17。依据本线程项目负责人的最新要求。
+Updated2026-10-17 under the project owner's latest thread instructions. Historical version-specific record.
 
-## 当前验收口径
+## Acceptance policy
 
-20ms 是尽力优化目标，不再作为必须达成的硬性验收门槛。原始耗时、超限计数、20 分钟耐久数据全部保留，不能通过改统计把超限改成达标。优先级为仿真正确性、持久化与审批一致性、5Hz 推送、现场演示稳定性。本次只改 B 文档/诊断证据，没有改生产代码、共享契约、数据库 schema、随机数、检测频率或 C 模板。
+20 ms is a best-effort optimization target, no longer a mandatory acceptance gate. Preserve original timings, exceedance counts, and20-minute data; never change statistics to turn failures into passes. Priorities: simulation correctness, durable approval consistency, 5Hz delivery, stable venue demo. This change added B documentation/diagnostics only, without production code, shared contract, DB schema, RNG, detection-frequency, or C-template changes.
 
-稳定 B 生产代码仍是 `04de0fe7abb9eb52ba7ae806beb30131d4b04a8e`，已测 C 模板仍是 `78d39574266b01a582b0626c17021181749271c8`。已有真实浏览器报告提交 `6b5e3eb`。保留原测试工作区、已运行服务和独立测试数据库；没有替换为未测试的新组合。
+Stable B production04de0fe7abb9eb52ba7ae806beb30131d4b04a8e; verified C template78d39574266b01a582b0626c17021181749271c8; prior browser-report commit6b5e3eb. Original test checkout/services/independent database were retained, not replaced by an untested combination.
 
-## A 更新检查
+## A update checks
 
-后续复测已完成：PR #7 的 `dc69ad28ac37e8d0592d9271f9d61e28c79ff27c` 修复了旧竞态，真实浏览器确认延迟历史期间新日志、真实模板建议和普通审批均保留，且不再假报序列回退。仍有 A 的两个身份去重边界失败：同刻合法重复日志刷新后变少；同刻另一操作员的新 decision 实时被忽略，刷新才恢复。详见 `pr7-recovery-dc69ad2.md` 及对应证据。**该 SHA 已测试，后续跟进不要重复跑同一提交；等待 R1/R2 修复后再复测。** 继续保留稳定 B/C，不自动 Push/更新 PR/Merge。
+PR#7 dc69ad28ac37e8d0592d9271f9d61e28c79ff27c fixed the old race. Actual browser verification preserved live logs, real-template advice, and ordinary decisions during delayed history, without false seq rollback. Two A identity edges still failed: same-time legitimate identical logs shrink after refresh; a second operator's same-time decision is ignored live until refresh. See pr7-recovery-dc69ad2.md/evidence. **That SHA is tested; do not repeat the same run. Wait for R1/R2 fixes.** Keep stable B/C; no automatic Push/PR update/Merge.
 
-该轮收尾再次核对到 `b549515337e0a50889d331ae397e4f381e4694ca`，为界面英文翻译，两处去重逻辑未变，未重复整轮验证；后续仅有此类无关更新时保持安静。
+Final read-only check found b549515337e0a50889d331ae397e4f381e4694ca, UI English translation only, unchanged deduplication. No full retest. Stay quiet on unrelated updates.
 
-此前通过 GitHub PR 元数据与实际 git fetch 双重核对，PR #7 当时 head 为 `17d440bf03f4db7dbf41d16c511fa8bd7325a7dd`，open、未 merged。相对已测试 `9850558`，该提交增加陆上 DEM、航拍底图及相关 3D 文件，**没有修改** `frontend/src/store/useHarbor.ts`、`frontend/src/data/liveRecovery.ts`、`frontend/src/data/ws.ts`。当时没有把 PR 的旧描述或一般构建通过当作恢复修复证据；后续 dc69ad2 的测试范围以上述新报告为准。
+Earlier GitHub metadata plus git fetch had confirmed head17d440bf03f4db7dbf41d16c511fa8bd7325a7dd, open/unmerged. Relative to tested9850558 it added land DEM, aerial imagery, and3D files but did not modify store/useHarbor.ts, data/liveRecovery.ts, data/ws.ts. An old PR description/build pass was not evidence of a recovery fix. dc69ad2 scope is in the later report.
 
-上轮交给 A 的要求是：首次连接的旧序列为空时，不得与 REST 等待期间已经前进的最新 state 比较并误判重启；恢复历史日志时，不得覆盖同一等待窗口内刚收到的结构化 log 事件。旧复现保留在 `ab-integration-9850558.md` 第 3 节，当前修复与剩余项见新报告。B 不修改 frontend/，不让前端解析自由文本伪造审批状态。
+A's original requirements: when there is no previous snapshot on first connection, do not compare the initial snapshot against a live seq that advanced during REST and falsely report restart. Historical logs must not overwrite structured logs received during that wait. Original reproduction remains in ab-integration-9850558.md§3; later report describes fixes/remaining edges. B does not modify frontend or invent approvals from log prose.
 
-已创建当前线程跟进任务 `harborguard-pr7`，每 15 分钟检查一次。恢复逻辑没有变化或只有无关更新时保持安静，不反复跑相同测试；出现修复后在独立测试 checkout 中验证。自动化不执行 Push、PR 修改或 Merge main。
+Thread heartbeat harborguard-pr7 checks every15minutes. Unchanged recovery/unrelated updates stay quiet, without repeating tests. New fixes use an independent checkout. Automation performs no Push, PR mutation, or Merge.
 
-## 峰值细分：实际做了什么
+## Peak diagnosis: actual scope
 
-新增一次隔离诊断：B `04de0fe` + 固定 C `78d3957` 的实际 renderer，DEBUG_TRUTH_TRACKS=0，真实独立 SQLite、FULL 同步，10× 离线推进 A 至 510 秒、B 至 120 秒。进程内临时包装计时函数，未修改磁盘源码或正在服务的进程；不把它当作新的长期耐久或网络 5Hz 测试。
+Isolated B04de0fe + fixed C78d3957 actual renderer, DEBUG_TRUTH_TRACKS=0, independent SQLite, FULL sync. Offline10× advances A to510s, B to120s. Temporary in-process timing wrappers changed neither on-disk production source nor running services. Not a new soak/network5Hz test.
 
-计时包装会增加开销，启动时缓存状态也有差异。因此下表用于找位置，不是优化前后收益比较。分项有嵌套关系，不能把 renderer、PNG、classifier、decision 再相加。A 有 510 个外层 tick、5100 次 Kalman/track/decision 调用、5 次识别；B 有 120 个外层 tick、1200 次上述调用、4 次识别。0.1 秒是仿真子步；10× 下一个 10Hz 外层 tick 推进 1 秒仿真并包含 10 个子步。没有把外层耗时除以 10 宣称子步达标，也没有测到所有完整子步的独立端到端耗时。
+Wrappers add overhead, and startup cache state differs; numbers locate costs rather than compare optimization benefit. Items nest—do not add renderer, PNG, classifier, decision as independent costs. A:510 outer ticks, 5100 Kalman/track/decision calls, 5 classifications. B:120 ticks, 1200 calls, 4 classifications.0.1s is a simulation substep; at10× each10Hz outer tick advances1s through10substeps. Outer time was not divided by10 to claim substep compliance; full end-to-end timing of every substep was not measured.
 
-| 分项 | A 平均 / 最大 ms | B 平均 / 最大 ms |
+| Component | A mean/max ms | B mean/max ms |
 | --- | ---: | ---: |
-| 外层 tick，含持久化 | 18.5822 / 66.2455 | 3.3026 / 119.6544 |
-| 单次 Kalman predict | 0.1158 / 0.4153 | 0.0014 / 0.0077 |
-| 单次关联/update | 0.3930 / 0.8098 | 0.0054 / 0.0086 |
-| 单次航迹实体化 | 0.3999 / 13.3393 | 0.0011 / 0.0100 |
-| 单次定位 | 1.9432 / 4.4686 | 0.0062 / 0.0105 |
-| C renderer，每张 | 21.9500 / 30.4034 | 21.0187 / 21.2880 |
-| PNG save，每张 | 7.5115 / 15.7172 | 5.1835 / 5.3318 |
-| classifier，含 renderer/PNG | 30.4884 / 46.8680 | 27.5733 / 27.9948 |
-| checkpoint capture（复制/借用两类合并） | 0.8595 / 16.8410 | 0.2358 / 0.7767 |
-| checkpoint JSON 序列化 + SQLite commit | 2.8080 / 6.4229 | 0.9574 / 4.4540 |
-| state 发布，含 seq 事务 | 1.5871 / 4.5780 | 0.7346 / 0.9721 |
+| Outer tick including persistence |18.5822/66.2455|3.3026/119.6544|
+| Kalman predict |0.1158/0.4153|0.0014/0.0077|
+| Association/update |0.3930/0.8098|0.0054/0.0086|
+| Track materialization |0.3999/13.3393|0.0011/0.0100|
+| Localization |1.9432/4.4686|0.0062/0.0105|
+| C renderer per image |21.9500/30.4034|21.0187/21.2880|
+| PNG save per image |7.5115/15.7172|5.1835/5.3318|
+| Classifier including renderer/PNG |30.4884/46.8680|27.5733/27.9948|
+| Checkpoint capture, copy/borrow combined |0.8595/16.8410|0.2358/0.7767|
+| Checkpoint JSON+SQLite commit |2.8080/6.4229|0.9574/4.4540|
+| State publication including seq transaction |1.5871/4.5780|0.7346/0.9721|
 
-A 最大外层 tick 在 t=151 秒结束，包含 t=150.7 的首次识别：classifier=46.8680ms，其中 renderer=30.4034ms、PNG save=15.7172ms；外层纯计算=60.3903ms，完整外层=66.2455ms。其他较大峰值也出现在主动 ping 附近。
+A's max tick ended t151 and included first classification t150.7:classifier46.8680ms, renderer30.4034, PNG15.7172, pure computation60.3903, full tick66.2455. Other peaks also clustered near active pings.
 
-B 最大外层 tick 在 t=1 秒结束，t=0.1 同一子步集中生成 4 张碎片图；四次 classifier 合计约 110.29ms，单次 decision=113.5851ms，完整外层=119.6544ms。普通后续 B tick 远小于这一启动峰值。
+B's max tick ended t1; t0.1 generated4debris images in one substep. Four classifications totaled~110.29ms, decision113.5851ms, full outer119.6544. Ordinary subsequent B ticks were much smaller.
 
-测量用对照和包装运行的公开消息 SHA256、最终 seq、A 的 5 张/B 的 4 张 PNG 字节哈希完全一致。这证明诊断未改变这些测试窗口的输出，不等于新算法已通过全场景回归。第一次诊断因向 tracker 实例挂计时函数进入 checkpoint allowlist 检查而中止；该独立失败样本弃用，改为类级包装后完成，生产服务一直健康。
+Control/wrapped runs had identical public-message SHA256, final seq, and A5/B4PNG byte hashes. This shows unchanged output in those windows, not full-scenario acceptance of a new algorithm. First diagnostic attached timers to tracker instances and failed checkpoint allowlist; that isolated failed sample was retained but excluded. Class-level wrapping completed; production stayed healthy.
 
-可提交的摘要是 `evidence/peak-analysis-20261017.json`。完整诊断产物在忽略目录 `artifacts/peak-analysis-20261017-v2/`；失败尝试保留在 `artifacts/peak-analysis-20261017/`，都没有覆盖演示数据库。
+Summary: evidence/peak-analysis-20261017.json. Full artifacts/peak-analysis-20261017-v2/; failed attempt artifacts/peak-analysis-20261017/. No demo DB overwrite.
 
-## 优化机会与收益/风险判断
+## Optimization benefit/risk assessment
 
-| 候选 | 预期收益与证据 | 风险/决定 |
+| Candidate | Evidence/potential benefit | Risk/decision |
 | --- | --- | --- |
-| 启动阶段预热图像编码器/固定资源 | A 首次 PNG save=15.7ms，后续约 5.4–5.6ms，存在初始化成本的迹象；可能只改善第一次图像延迟 | 没有单独冷/热对照证明因果或可消除的具体毫秒数；仍需测启动延迟、首图像素一致。暂不改稳定后端 |
-| 固定声呐几何映射表缓存 | renderer 约 21ms/张，是主要图像成本；可调查不依赖目标/随机数的网格构建 | 属于 C renderer，需 C 处理；必须按尺寸、FOV、量程等完整键缓存，验证像素一致及内存，不由 B 越界修改 |
-| 继续减少 checkpoint 的重复序列化/复制 | 可调查约 2.8ms 平均 JSON/commit 与偶发 capture 峰值 | 已有优化已保留 rollback 和 FULL 原子写入。进一步借用可变对象、异步落库或缓存过期状态会破坏失败回滚/重启一致性；收益不足以支持比赛前冒险，暂不实施 |
-| PNG 编码移出实时路径 | 理论上每次可移走约 5ms，首次可能更高；收益尚未经端到端验证 | 必须保持 detection 发布时 PNG 已可读、决策原子提交及重启恢复。提前广播可能导致图片 404/审批证据不完整；不是可直接实施的低风险补丁 |
-| 将整个识别异步化/拆散 B 的 4 次检测 | 有机会减小集中约 110ms 的计算段 | 会改变检测可用时序、风险更新、事件顺序、RNG/回放和待执行任务持久化；涉及算法/调度设计，**只提出，不实施，需先说明设计并获得负责人确认** |
-| 降低检测频率、跳过子步、减少真实检测、降低数据库持久性 | 不采用 | 会以正确性、一致性或功能换取性能，违反本次要求 |
+| Startup image-encoder/resource warmup |First A PNG15.7ms, later~5.4–5.6; possible first-image initialization benefit |No isolated cold/warm causality or proven saved milliseconds. Must check startup delay/pixel equality. Do not change stable B yet |
+| Cache fixed sonar geometry grids |Renderer~21ms/image; inspect target/RNG-independent grid work |C-owned renderer; complete size/FOV/range keys, pixel equality, memory validation required. B does not edit it |
+| Reduce repeated checkpoint serialization/copies |JSON/commit~2.8ms mean plus occasional capture peak |Current optimization preserves rollback/FULL atomicity. Borrowed mutable state, async durability, or stale caches threaten restart/failure consistency; insufficient benefit before contest |
+| Move PNG encoding out of real-time path |Theoretically~5ms/image, more first time; no end-to-end proof |PNG must exist when detection publishes; atomic decision/restart evidence must remain. Early broadcast risks404/incomplete evidence; not a ready low-risk patch |
+| Async whole detection/stagger B's4classifications |May reduce~110ms burst |Changes timing, risk, event order, RNG/replay, and pending-task durability. Proposal only; design and owner approval before implementation |
+| Lower detection frequency/skip substeps/disable real detection/weaken durability |Rejected |Trades correctness/consistency/features for timing, against instructions |
 
-当前没有证据表明 Kalman 预测或马氏距离关联是主要峰值来源，不建议修改这些算法。继续保留稳定后端；20ms 不再阻塞 Demo。以前 20 分钟真实 B 耐久的 5.000Hz、最大包 26618 bytes、无 HTTP/WS 错误数据仍作为已有证据，本次不将短离线诊断伪装成重新完成耐久或实时率验收。
+No evidence Kalman/Mahalanobis association causes the principal peaks; do not change those algorithms. Keep stable backend; 20ms does not block Demo. Prior20-minute B evidence remains5.000Hz, max26618B, no HTTP/WS errors. Short offline diagnosis is not a rerun of endurance or live-rate acceptance.
 
-诊断结束后另做真实 WS 短健康检查：8.18 秒，排除连接初始快照后收到 41 帧，5.001Hz、最大帧间隔 218.16ms、最大状态包 1810 bytes、seq 严格递增；B/C/前端健康请求均 200。此时是暂停的 Recovery 场景，只证明当前稳定服务的推送/健康，不代表 10× 全负荷或长期保证。数据附在同一摘要 JSON。
+Post-diagnostic real WS health sample:8.18s, 41states excluding initial snapshot, 5.001Hz, max interval218.16ms, max1810B, strictly increasing seq; B/C/frontend health200. Paused Recovery only, not10×load/long-term guarantee. Same summaryJSON.
 
-## A 修复到位后的复测清单
+## Retest after A fixes
 
-以新 A 精确 SHA 建立独立候选，固定 B/C，先比较变更范围，再运行必要构建、现有回归和真实浏览器测试；不覆盖稳定演示 checkout，不混入 C 的新路由。
+Create independent candidate with exact new A and fixed B/C. Inspect changes, run necessary build/regression/actual browser tests. Preserve stable checkout; do not mix new C routes.
 
-1. 首次连接、普通刷新、方案详情延迟 3 秒：等待期间实时 state/event 继续到达，不能误报后端序列回退或用旧快照覆盖新状态。
-2. 在历史 log GET 完成后、详情返回前注入唯一日志：恢复完成后日志仍存在，事件按 seq 合并，不重复；保留合法的重复文本日志，不从日志文字推断审批。
-3. 等待期间产生真实 C 模板建议：恢复后建议 ID、alert_id、option_id 与既有 details/events 一致，不能丢失或串场景。
-4. 批准和驳回：HTTP、结构化 decision、落库、页面确认、限制分区一致；注入写入失败应 503 且 UI 不报告成功，解除后可重试。
-5. 真正切断浏览器 WS（不使用 network_down 代替），B/C 继续运行；重连后补偿、去重、顺序及审批状态正确。
-6. 同库后端重启：seq 继续、状态暂停、建议/决策恢复；真正换库导致 seq 回退时才按新会话处理。
-7. 超过 500 条缓存：明确提示窗口限制，不能伪造完整历史或把旧审批写成待审批。现有冻结 API 没有更早分页查询，仍待负责人确认契约方案。
-8. Recovery 无 track_id 碎片 PNG、2D/3D、回放只读作基本回归；记录哪些是真实浏览器、哪些是 API/自动检查，未验证项保持 PENDING。
+1. First connect, ordinary refresh, 3s delayed options: live state/events continue; no false rollback or old snapshot overwrite.
+2. Add a unique log after history GET completes but before details return. Preserve it after recovery, merge byseq without duplicates; also preserve legitimate repeated text. No log-derived approval.
+3. Real C-template recommendation during recovery retains recommendation/alert/option IDs, without loss/cross-scene contamination.
+4. Approve/reject: HTTP, structured decision, disk, UI, and zone restrictions agree. Injected write failure503 must not show success; after repair retry is available.
+5. Actually disconnect browser WS while B/C run; network_down is not this test. Reconnect compensation/dedup/order/decisions agree.
+6. Same-DB restart continues seq, pauses state, restores advice/decisions. Only genuine replaced-database rollback is a new session.
+7. >500events honestly shows limit; never fabricates complete history or marks unknown old decisions pending. Earlier pagination requires owner contract approval.
+8. Empty-track Recovery PNG, 2D/3D, read-only Replay as regressions. Distinguish actual browser/API/automatic evidence; untested=PENDING.
 
-出现修复且这些关键用例通过后再报告最终集成候选；不自动 Merge main。本次新增/更新仅 B 报告和证据，未进行远程写操作。
+Report a final integration candidate only after new fixes/key checks. No automatic Merge main. This update changed B reports/evidence only and performed no remote mutation.

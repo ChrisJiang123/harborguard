@@ -1,12 +1,12 @@
-# 本次开发文件清单
+# Development File Inventory
 
-2026-10-17 后续交付：旧 #3/#6 缺失资料已按 main `782d04d` 更新迁移；当前范围见 [集成报告](final-integration-report.md)。新增 `backend/tools/integration_bundle.py`、对应4项测试、B的 `fixtures/integration/`、`docs/frontend-integration.md`、`docs/integration/openapi.json`、最终报告/JSON和五分钟操作单。旧#6原始JSON保存在docs/archive，未改A/C生产源码或冻结契约。
+2026-10-17 follow-up: missing #3/#6 handoff materials were migrated against main `782d04d`; see [integration scope](final-integration-report.md). Added backend/tools/integration_bundle.py, four corresponding tests, B fixtures/integration/, docs/frontend-integration.md, docs/integration/openapi.json, final report/JSON, and the five-minute runbook. Original #6 JSON is preserved in docs/archive. A/C production source and the frozen contract were not changed by that handoff.
 
-以下95文件统计为初始MVP历史清单，不是当前仓库或本次变更总数。
+The 95-file inventory below is the initial MVP's historical list, not the current repository or this translation's change count.
 
-本次新增或修改 95 个文件，覆盖 B 端实现、共享契约、演示数据、回放与验证记录。上游 C 源码保持原样；根 README 与 .gitignore 追加 B 的内容。原始任务书未修改。
+The initial MVP added or modified 95 files covering B implementation, shared contract, demo data, replay, and verification. Upstream C source stayed unchanged; B entries were appended to root README and .gitignore. The original taskbook was not modified.
 
-## 启动与依赖 共 7 个
+## Startup and Dependencies — 7 Files
 
 - [.gitattributes](../.gitattributes)
 - [.gitignore](../.gitignore)
@@ -16,7 +16,7 @@
 - [pyproject.toml](../pyproject.toml)
 - [requirements-lock.txt](../requirements-lock.txt)
 
-## 后端代码与测试 共 45 个
+## Backend Code and Tests — 45 Files
 
 - [backend/README.md](../backend/README.md)
 - [backend/__init__.py](../backend/__init__.py)
@@ -64,7 +64,7 @@
 - [backend/tools/record.py](../backend/tools/record.py)
 - [backend/tools/soak.py](../backend/tools/soak.py)
 
-## 静态数据与场景 共 8 个
+## Static Data and Scenarios — 8 Files
 
 - [data/README.md](../data/README.md)
 - [data/assets.json](../data/assets.json)
@@ -75,14 +75,14 @@
 - [data/vessels.json](../data/vessels.json)
 - [data/zones.geojson](../data/zones.geojson)
 
-## 共享契约与样例 共 4 个
+## Shared Contract and Samples — 4 Files
 
 - [shared/contract.md](../shared/contract.md)
 - [shared/sample_events.json](../shared/sample_events.json)
 - [shared/sample_state.json](../shared/sample_state.json)
 - [shared/types.ts](../shared/types.ts)
 
-## 前端使用的静态数据与回放 共 24 个
+## Frontend Static Data and Replay — 24 Files
 
 - [frontend/public/data/assets.json](../frontend/public/data/assets.json)
 - [frontend/public/data/buoys.json](../frontend/public/data/buoys.json)
@@ -109,7 +109,7 @@
 - [frontend/public/replay_assets/b/det-4.png](../frontend/public/replay_assets/b/det-4.png)
 - [frontend/public/replay_b.jsonl](../frontend/public/replay_b.jsonl)
 
-## 说明与验证 共 7 个
+## Documentation and Verification — 7 Files
 
 - [docs/acceptance.md](../docs/acceptance.md)
 - [docs/files.md](../docs/files.md)

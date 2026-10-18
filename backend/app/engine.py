@@ -156,9 +156,9 @@ class GameEngine:
         self._ended = False
         self.emit("scenario_changed", {"scenario": scenario_id, "status": "started"})
         self.emit("mode_changed", {"mode": self.world.mode})
-        self.log("info", "sim", f"场景 {scenario_id.upper()} 开始，speed={self.world.speed:g}")
+        self.log("info", "sim", f"Scenario {scenario_id.upper()} started, speed={self.world.speed:g}")
         if self.debug_truth:
-            self.log("warn", "perception", "DEBUG_TRUTH_TRACKS=1：当前为真值航迹演示兜底")
+            self.log("warn", "perception", "DEBUG_TRUTH_TRACKS=1: using truth-track demonstration fallback")
 
     @durable
     def reset(self):
@@ -215,7 +215,7 @@ class GameEngine:
             self.world.noise_up = kind == "noise_up"
         else:
             raise ValueError(f"Unknown fault: {kind}")
-        self.log("warn", "operator", f"故障注入 {kind}" + (f"：{target}" if target else ""))
+        self.log("warn", "operator", f"Fault injected: {kind}" + (f": {target}" if target else ""))
 
     def _truth_tracks(self):
         tracks = []

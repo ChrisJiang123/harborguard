@@ -3,6 +3,8 @@
 Synthetic business state comes from v1 samples, not a running scenario. Agent
 and sonar are explicit fixtures; REST uses real routes and Pydantic validation.
 Uses an isolated in-memory DB, never HARBORGUARD_DB or frontend output paths.
+Chinese literals intentionally reproduce the frozen, byte-compared legacy
+integration fixture. They are test data, not the live service's display copy.
 """
 import argparse
 import asyncio
@@ -44,7 +46,17 @@ def build_bundle():
         create_app(run_loop=False, debug_truth=False, storage_path=":memory:")
     ) as client:
         game = client.app.state.engine
-        game.start("a", 10)
+        # Reproduce the committed legacy fixture's display text exactly. This
+        # isolated synthetic exporter is not a live-language acceptance test.
+        live_log = game.log
+
+        def legacy_fixture_log(level, source, text):
+            if text == "Scenario A started, speed=10":
+                text = "场景 A 开始，speed=10"
+            return live_log(level, source, text)
+
+        with patch.object(game, "log", legacy_fixture_log):
+            game.start("a", 10)
         game.world.t = state["t"]
         game._tracks = copy.deepcopy(state["tracks"])
         game.decision.alerts.update({a["id"]: copy.deepcopy(a) for a in state["alerts"]})

@@ -1,4 +1,4 @@
-"""C4 distill 管线测试：C3 同一套校验、重试语义、幂等键、确定性划分。"""
+"""C4 distillation: C3 validation, retry semantics, idempotent keys and seeded splits."""
 import pytest
 pytestmark = pytest.mark.agent_language("zh")
 
@@ -24,7 +24,7 @@ from ml.lora.gen_contexts import generate_contexts
 
 
 class FakeProvider:
-    """按序返回预设响应的教师桩；记录调用以验证重试消息格式。"""
+    """Teacher stub returns preset responses in order and records retry-message calls."""
 
     provider = "fake"
     request_model = "fake-teacher"
@@ -108,7 +108,7 @@ def test_invalid_output_retries_once_with_error_feedback(security_contexts):
     assert len(batch["records"]) == 1 and batch["records"][0]["attempts"] == 2
     first, second = provider.calls
     assert len(first[1]) == 1
-    assert len(second[1]) == 3  # user + assistant(原输出) + user(校验错误)
+    assert len(second[1]) == 3  # User + assistant(original output) + user(validation error).
     assert second[1][2]["role"] == "user" and "校验错误" in second[1][2]["content"]
     assert "JSON" in second[1][2]["content"]
 
@@ -135,7 +135,7 @@ def test_factcheck_failure_triggers_retry(security_contexts):
 
     async def run():
         provider = FakeProvider([
-            # 结构与 ID 都合法，但「声称存在浮标离线」与上下文矛盾 -> 事实校验失败
+            # Structure/IDs pass, but the offline-buoy claim contradicts context: fact failure.
             _draft_json(
                 recommended_option_id=option_id,
                 evidence_ids=[context["alert"]["id"]],
@@ -157,7 +157,7 @@ def test_factcheck_failure_triggers_retry(security_contexts):
 
 
 def test_guided_retry_keeps_training_messages_clean(security_contexts):
-    """两次严格失败后，第三次带 GUIDED_HINT；入库样本不含引导内容。"""
+    """After two strict failures, third uses GUIDED_HINT; stored samples omit the hint."""
     from ml.lora.distill import GUIDED_HINT
 
     context = next(

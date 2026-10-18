@@ -1,4 +1,4 @@
-"""C4 capture_real 测试：事件路由、同警报新替旧、key 去重与追加写。"""
+"""C4 capture_real: event routing, latest-per-alert, key deduplication and append."""
 
 import asyncio
 import json
@@ -48,26 +48,26 @@ def test_event_routing_and_latest_alert_wins(patched_collectors):
         await capture.handle_event(client, {"event": "options_ready",
                                             "data": {"alert_id": "A1", "options": [], "ranked": []}})
         await capture.handle_event(client, {"event": "options_ready",
-                                            "data": {"alert_id": "A1"}})  # 新替旧
+                                            "data": {"alert_id": "A1"}})  # Replace older with newer.
         await capture.handle_event(client, {"event": "alert_changed",
-                                            "data": {"alert": {"id": "A1"}, "to_level": 1}})  # 非升二级：忽略
+                                            "data": {"alert": {"id": "A1"}, "to_level": 1}})  # Not rising to L2: ignore.
         await capture.handle_event(client, {"event": "buoy_changed",
-                                            "data": {"buoy_id": "B4", "status": "ok"}})  # 非 down：忽略
+                                            "data": {"buoy_id": "B4", "status": "ok"}})  # Not down: ignore.
         await capture.flush_security(client)
-        assert capture.counts["security"] == 2  # 同一警报两次触发各收集一次（真机仅在签名变化时触发）
+        assert capture.counts["security"] == 2  # Collect both triggers; live runtime triggers only on changed signature.
         security_keys = {k for k, ctx in capture.by_key.items() if ctx["kind"] == "security"}
-        assert len(security_keys) == 1  # 相同载荷按 key 去重为一份
+        assert len(security_keys) == 1  # Identical payloads deduplicate by key.
         await capture.handle_event(client, {"event": "options_ready", "data": {"alert_id": "A2"}})
         await capture.handle_event(client, {"event": "scenario_changed", "data": {"status": "reset"}})
         await capture.flush_security(client)
-        # 逐事件冲刷：A2 在 reset 前已被收集；已收集数据不受 reset 影响
+        # Flush each event: A2 was collected before reset; reset does not erase collected data.
         assert capture.counts["security"] == 3
         security_keys = {k for k, ctx in capture.by_key.items() if ctx["kind"] == "security"}
         assert len(security_keys) == 2
         await capture.handle_event(client, {"event": "reopen_plan", "data": {"route_zone_ids": ["z1"]}})
         await capture.handle_event(client, {"event": "buoy_changed",
                                             "data": {"buoy_id": "B4", "status": "down"}})
-        assert capture.counts["event:options_ready"] == 3  # 全事件诊断计数
+        assert capture.counts["event:options_ready"] == 3  # Diagnostic count of every event.
         return capture
 
     capture = asyncio.run(run())

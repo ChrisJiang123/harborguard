@@ -1,22 +1,18 @@
-# HarborGuard 后端与算法
+# HarborGuard Backend and Algorithms
 
-面向洛杉矶港水下安防与灾后分区复航的黑客松演示后端。一个 Python 进程完成可复现仿真、被动声学观测、定位跟踪、风险警报、声呐识别适配和方案计算。操作员审批后才改变安防限制状态。
+Hackathon backend for underwater security and post-disaster reopening at the Port of Los Angeles. One Python process provides deterministic simulation, passive acoustic observations, localization/tracking, risk alerts, sonar classification adapters, and response-option calculations. Restrictions change only after operator approval.
 
-开发依据是任务书 B。对外字段以 [共享契约 v1](../shared/contract.md) 为准；[TypeScript 类型原文](../shared/types.ts)、[状态样例](../shared/sample_state.json) 和 [全部事件样例](../shared/sample_events.json) 可直接交给 A、C 对接。
+Taskbook B is the development basis. Public fields follow the [frozen v1 contract](../shared/contract.md), [TypeScript types](../shared/types.ts), [state sample](../shared/sample_state.json), and [event samples](../shared/sample_events.json).
 
-2026-10-17 持久化更新：见 [给 A 的恢复交接](docs/history-handoff.md) 和 [B 验证记录](docs/history-verification.md)。下文保留初始 MVP 背景；关于重启、驳回和历史范围请以本次交接为准。
+The 2026-10-17 persistence update is documented in the [A recovery handoff](docs/history-handoff.md) and [B verification record](docs/history-verification.md); these take precedence over the initial MVP background for restart, rejection, and history limits. See [sonar safety integration](docs/sonar-safety-integration.md) for conservative survey handling and the newer C candidate. New algorithm parameters change the internal checkpoint fingerprint: preserve old demo databases and choose a separate `HARBORGUARD_DB`, for example `backend/runtime/sonar-safety.sqlite3`. Never delete an old database or force incompatible checkpoints to load. Branches without C use an explicit stub and must not claim real-model detection.
 
-声呐安全修复与新 C 候选验证见 [本轮验收及启动说明](docs/sonar-safety-integration.md)。新算法参数改变内部检查点指纹：保留原演示数据库，为新版设置独立的 `HARBORGUARD_DB`（例如 `backend/runtime/sonar-safety.sqlite3`）；不要删除旧库或强行加载旧配置检查点。没有引入 C 的分支仍明确使用 stub，不能按真实识别宣传。
+Later local optimization/endurance results are in [performance follow-up](docs/performance-followup.md). Strictly keeping every tick below 20 ms did not pass; a lower mean is not full acceptance. The owner subsequently made 20 ms a best-effort target, with correctness and 5 Hz delivery taking priority.
 
-后续本地性能改进与新版耐久结果见 [性能跟进报告](docs/performance-followup.md)。严格每 tick <20ms 尚未通过，不把平均耗时改善算作全部验收通过。
+Mainline [REST/WS/decision handoff](../docs/frontend-integration.md), [five-minute runbook](../docs/demo-runbook.md), and [PR #3/#6 migration report](../docs/final-integration-report.md) were updated for B #10, C #4, and A #11. `python -m backend.tools.integration_bundle` exports OpenAPI and explicit static mocks into docs/integration and backend/fixtures/integration without touching runtime databases or frontend/. See the [file list](../docs/files.md) and [acceptance scope](../docs/acceptance.md). Reports apply to their stated SHA, not every later commit.
 
-最新 main 的 [REST/WS/审批交接](../docs/frontend-integration.md)、[五分钟操作单](../docs/demo-runbook.md) 和 [PR #3/#6 迁移及集成报告](../docs/final-integration-report.md) 已按 B #10、C #4 与 A #11 更新。运行 `python -m backend.tools.integration_bundle` 将 OpenAPI 和显式静态 Mock 导出到 docs/integration 与 backend/fixtures/integration，不触碰运行库或 frontend/。
+## Install and start
 
-本次新增文件见 [文件清单](../docs/files.md)，逐项验收范围见 [任务书验收范围](../docs/acceptance.md)。
-
-## 安装与启动
-
-要求 Python 3.11 或更新版本，命令均在仓库根目录运行。
+Python >=3.11. Run from the repository root.
 
 ```bash
 python3.11 -m venv .venv
@@ -26,7 +22,7 @@ python -m pip install --no-deps -e .
 make backend
 ```
 
-Windows PowerShell：
+Windows PowerShell:
 
 ```powershell
 py -3.11 -m venv .venv
@@ -34,11 +30,11 @@ py -3.11 -m venv .venv
 ./dev.ps1 backend
 ```
 
-若 PowerShell 的脚本执行策略阻止本地脚本，可直接执行 `.venv/Scripts/python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`。若安装了 uv，也可用 `uv venv --seed --python 3.11 .venv` 建立环境。
+If script policy blocks startup, run `.venv/Scripts/python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`. With uv installed, `uv venv --seed --python 3.11 .venv` is another environment setup option.
 
-后端健康检查：`http://localhost:8000/api/health`；交互式接口文档：`http://localhost:8000/docs`；WebSocket：`ws://localhost:8000/ws`。首次启动为空闲；同库重启会恢复并暂停已有场景。默认数据库 `backend/runtime/harborguard.sqlite3`，可用 `HARBORGUARD_DB` 指定固定路径。自动迁移，无需外部数据库。使用单个 worker，同文件的第二写者会拒绝启动。
+Health: `http://localhost:8000/api/health`; API explorer: `http://localhost:8000/docs`; WS: `ws://localhost:8000/ws`. A new database starts idle. Restarting the same database restores the scenario paused. Default database: backend/runtime/harborguard.sqlite3; override with HARBORGUARD_DB. Migrations are automatic, with no external database server. Use one worker; a second writer to the same file is rejected.
 
-## 演示操作
+## Demo operations
 
 ```bash
 curl -X POST http://localhost:8000/api/scenario/a/start -H "Content-Type: application/json" -d '{"speed":10}'
@@ -48,68 +44,65 @@ curl -X POST http://localhost:8000/api/control -H "Content-Type: application/jso
 curl -X POST http://localhost:8000/api/control -H "Content-Type: application/json" -d '{"action":"speed","value":4}'
 ```
 
-PowerShell 可用 `Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/scenario/a/start -ContentType application/json -Body '{"speed":10}'`。
+PowerShell: `Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/scenario/a/start -ContentType application/json -Body '{"speed":10}'`.
 
-1. 启动场景 A，观察 unknown 航迹、三级警报、自动主动 ping 和带框声呐图。三级时会发 `options_ready`；通过 `GET /api/options/{alert_id}` 取得当前方案。
-2. 将真实返回的 `alert_id`、`option_id` 与 `action: "approve"`、`operator: "demo"` POST 到 `/api/decision`，对应分区才成为 `restricted`。`approve` 和 `reject` 都先持久化并发布原契约的 `decision` 事件，保留 operator 日志；写入失败返回 503。`reject` 不改变分区，批准的限制保持到重置。
-3. POST `/api/inject`，例如 `{"type":"buoy_down","target":"B4"}`、`{"type":"network_down"}`、`{"type":"noise_up"}`；分别用 `buoy_up`、`network_up`、`noise_down` 恢复。噪声注入是幂等开关，不会反复叠加。
-4. POST `/api/scenario/b/start`，观察灾害覆盖、`blocked`、`clear`、`unsurveyed` 和 `reopen_plan`。B4、B7 在仿真 60 秒失效。
-5. POST `/api/control`，内容 `{"action":"reset"}`，清除当前航迹、警报、识别、建议、限制、故障并回到空闲状态；已落库历史保留。消息 seq 和警报/识别 ID 在同一数据库中跨重启递增，避免旧审批误命中新场景。历史详情不是当前活跃对象，不能用于批准旧警报。
+1. Start A. Observe unknown tracks, level-3 alerts, automatic active pings, and annotated sonar images. Level 3 emits options_ready; GET /api/options/{alert_id} returns current options.
+2. POST actual alert_id/option_id with action approve and operator demo to /api/decision. Only then do affected zones become restricted. Approve and reject persist first, then publish the existing decision event and operator log; write failures return 503. Reject does not alter zones. Approved restrictions remain until reset.
+3. POST /api/inject with `{"type":"buoy_down","target":"B4"}`, `{"type":"network_down"}`, or `{"type":"noise_up"}`; restore with buoy_up/network_up/noise_down. Noise injection is an idempotent switch.
+4. Start B via POST /api/scenario/b/start. Observe coverage, blocked/clear/unsurveyed, and reopen_plan. B4/B7 fail at simulation second 60.
+5. POST /api/control with action reset. Current tracks, alerts, detections, recommendations, restrictions, and faults clear; persisted history remains. Same-database seq and alert/detection IDs increase across restart. Historical details are not active objects and cannot authorize old alerts.
 
-`DEBUG_TRUTH_TRACKS=1` 是明确标注的真值演示兜底；正常启动和回放录制均使用声学定位跟踪。没有 C 的模块/权重时自动使用声呐桩，`Detection.model` 始终显示 `stub`，不需要安装 YOLO 才能运行。
+DEBUG_TRUTH_TRACKS=1 is an explicitly labeled truth-track demonstration fallback. Normal runs/recordings use acoustic localization and tracking. Missing C modules/weights use a sonar stub, labeled Detection.model=stub; YOLO is not required merely to start B.
 
-## 验证与回放
+## Validation and replay
 
 ```bash
 make test
 make check
 make samples
 make record
-# 等价 PowerShell：./dev.ps1 test、check、samples、record
+# PowerShell: ./dev.ps1 test, check, samples, record
 ```
 
-`make record` 在不等待墙钟的情况下生成 `frontend/public/replay_a.jsonl`、`replay_b.jsonl`，每行含 `wall_ms` 与契约消息 `msg`。`wall_ms = 仿真秒 / speed × 1000`。声呐图另存 `frontend/public/replay_assets/{a,b}/`，回放消息里的 `image_url` 指向这些静态文件，使后端关闭后仍可加载图片。模板建议仅在离线录制时生成，并明确标记 `model: "template"`；在线建议由 C 提交。
+make record generates frontend/public/replay_a.jsonl and replay_b.jsonl without waiting in real time. Lines contain wall_ms and contract msg; wall_ms = simulation seconds / speed * 1000. Images are stored under frontend/public/replay_assets/{a,b}/ and referenced by static image_url, allowing offline playback. Only offline recording generates template recommendations, explicitly model=template; C submits online recommendations.
 
-A 的回放器按 `wall_ms` 依次分发完整 `state` 和 `event`，无需后端。部署时连同 `replay_assets/` 复制。回放格式与实时信封一致；main 已有 A 的回放 UI，与最新 PR #7 和本次 B 持久化的浏览器联合验收仍待执行。
-
-可运行真实服务耐久检查：
+A dispatches full state/events by wall_ms without B. Deploy replay_assets with JSONL. Replay and live envelopes match. At this historical handoff, joint browser acceptance of newer #7 with B persistence remained pending; later reports provide newer evidence.
 
 ```bash
 python -m backend.tools.soak --seconds 1200 --port 8000 --report artifacts/soak.json
 ```
 
-它启动独立 Uvicorn，循环 A/B、模拟故障、校验 WebSocket 和声呐 PNG，记录 RSS、单核 CPU 百分比、推送频率和消息大小；结束时关闭它启动的进程。端口必须空闲。检查结果见 [验证记录](../docs/validation.md)。
+This starts its own Uvicorn, cycles A/B, injects simulated faults, validates WS/PNGs, measures RSS, single-core-equivalent CPU, frequency, and packet size, then closes its own process. The port must be free. See [validation](../docs/validation.md).
 
-## 与 A 和 C 集成
+## A/C integration
 
-| 进程 | 负责人 | 地址 / 启动约定 |
+| Process | Owner | Startup/address |
 | --- | --- | --- |
-| 后端 | B | `make backend`，8000 |
-| 前端 | A | 在 A 的 `frontend/` 执行其 README 命令，开发端口 5173；生产构建由 A 提供 |
-| Agent | C | C 的 ASGI 服务监听 8001，必须实现 `POST /ask` |
-| Ollama | C | 不属于本次 B 持久化的启动依赖；本次不接入新模型路由 |
+| Backend | B | make backend; 8000 |
+| Frontend | A | frontend/README.md; development port 5173; A supplies production build |
+| Agent | C | ASGI on 8001 implementing POST /ask |
+| Ollama | C | Not required by this B persistence handoff; no new route enabled here |
 
-整套演示启动顺序：后端 → Agent → 前端。基线 main `782d04d` 已包含 A #7/#11 和 C #4，不能继续按“C0骨架未合入”判断。比赛使用操作单明确配置的模板降级路径；C的新云路由、最新A的真实浏览器验收与现场硬件仍需分别确认，不沿用旧#6全通过结论。
+Start B, Agent, then A. Historical main 782d04d already included A #7/#11 and C #4; C was no longer an unmerged skeleton. Use the runbook's explicit template fallback. New cloud routes, newer A browser behavior, and venue hardware need separate acceptance; old #6 conclusions do not automatically apply.
 
-- A：订阅 `/ws`。`state` 是 5 Hz 完整快照，`event` 实时发送。CORS 允许 localhost 和 127.0.0.1 的 5173。重连先缓冲实时消息，再用 `/api/events?since_seq=N` 补事件并按 seq 去重；接口仍只查最近 500 条，不能全历史分页。同库重启序列继续增长且仿真安全暂停；若换库/回退导致 seq 小于旧值，应清理游标并提示历史不确定。详细恢复顺序及尚未批准的分页提案见本次交接。后端主动断开过慢客户端，避免堵塞仿真。
-- C 声呐：提供 `ml/sonar/render.py:render_ping` 和 `ml/yolo/infer.py:SonarDetector`，返回任务书约定的灰度图和像素角点框，权重 `ml/yolo/weights/best.pt`。从仓库根目录启动，模块可直接导入。
-- 灾害碎片本身不发声，没有被动航迹时，其 Detection 的 `track_id` 为契约允许的空字符串；前端按 Detection ID 展示声呐图，不查询空航迹 ID。
-- 实时 Detection 的 image_url 是后端相对路径，前端按 `http://localhost:8000` 解析；离线回放里的静态图片路径按前端自身站点解析。
-- C Agent：订阅警报和方案；从 REST 获取细节，将完整 Recommendation POST 到 `/api/recommendations`。结构或引用 ID 非法返回 422。后端校验、保存最新建议并广播，不代为审批。
-- BACKEND_BASE_URL 为后端根地址，REST 客户端补 `/api`，WS 使用 `/ws`。B代理超时20秒，C问答总预算18秒，内部模型调用由其截止时间控制；本轮不改变共享接口或超时。
-- C 与 B 的依赖声明范围兼容；当前锁文件覆盖 B 运行与测试，不含 C 的 ultralytics、matplotlib、anthropic、openai。完整联调时还需安装 C 的 requirements-runtime.txt，并重新检查依赖和模型加载。B 所需 Shapely/Pillow 已在 B 的依赖中。
-- C 的环境脚本会创建 `.venv`；整合时先执行 C 的环境准备，再在同一环境安装 B 的依赖，确保 Shapely/Pillow 等后端依赖保留。
-- `/api/agent/ask` 转发到 `http://localhost:8001/ask`，Agent 不可达返回 502，20 秒超时返回 504，后端继续运行。
-- C 指标：读取 `ml/yolo/metrics.json`、`ml/lora/metrics.json`；缺失或无效时对应返回 null。
+- A subscribes to /ws: complete state at 5 Hz and immediate events. CORS allows localhost/127.0.0.1:5173. Buffer live messages before /api/events?since_seq=N compensation, then deduplicate by seq. Only the latest 500 events are queryable, with no all-history pagination. Same-database restart keeps seq increasing and pauses simulation; replacement/rollback requires cursor reset and an uncertainty notice. Slow clients are disconnected to protect simulation.
+- C sonar exposes ml/sonar/render.py:render_ping and ml/yolo/infer.py:SonarDetector, using grayscale images and pixel-corner boxes; weights are ml/yolo/weights/best.pt. Start at repository root for imports.
+- Silent disaster debris may have empty Detection.track_id. Open images by Detection ID rather than requesting an empty track.
+- Live image_url resolves against the backend root; replay images resolve against the frontend origin.
+- C subscribes to alerts/options, obtains REST evidence, and POSTs complete Recommendation to /api/recommendations. Invalid structure/references return 422. B validates, persists, and broadcasts; it never approves for the operator.
+- BACKEND_BASE_URL is the root; clients append /api; WS uses /ws. B proxy timeout is 20 s; C total budget is 18 s. This handoff changes neither.
+- B/C dependency ranges are compatible. B lockfile alone omits C dependencies including ultralytics, matplotlib, anthropic, and openai. Full integration also installs requirements-runtime.txt and rechecks dependency/model loading. B includes Shapely/Pillow. If combining setups, create C's .venv first and then install B dependencies there.
+- /api/agent/ask proxies to http://localhost:8001/ask; unreachable C returns 502 and a 20 s timeout returns 504. B continues running.
+- Metrics read ml/yolo/metrics.json and ml/lora/metrics.json; missing/invalid metrics return null.
 
-## 实现范围与假设
+## Implementation scope and assumptions
 
-`backend/app/config.py` 集中维护仿真、声学、风险、迟滞、主动 ping 和优化参数。10 Hz 墙钟循环按 speed 推进仿真，内部固定 0.1 秒子步；所有随机数来自场景 Generator 及其派生种子。测量不带目标真值 ID。跟踪采用正向方位交会、聚类、三维匀速 Kalman 和马氏距离最近邻关联；船舶 AIS 仅用于合作识别。方案按预测路径缓冲、泊位保留率、延误船时和残余风险排序。灾害覆盖按浮标扫描圆与分区交叠面积累积，通过 clear 航道图 BFS 计算可复航路线。
+backend/app/config.py holds simulation, acoustic, risk, hysteresis, ping, and optimization parameters. The 10 Hz wall-clock loop advances fixed 0.1 s substeps according to speed. Randomness derives from the scenario Generator and derived seeds. Measurements contain no truth ID. Tracking uses forward bearing intersections, clustering, a 3D constant-velocity Kalman filter, and Mahalanobis nearest-neighbor association. AIS is only for cooperative identification. Options rank predicted-path buffers, berth availability, vessel-hour delay, and residual risk. Disaster coverage accumulates scan-circle/zone intersections; BFS uses clear channels.
 
-业务几何和船期仍是演示示意，详见 [数据说明](../data/README.md)。A现有NOAA多波束数据与其建议浮标位置不自动改变B的LIVE业务位置；本轮不挪动坐标。YOLO对合成图、模板Agent的证据范围见最新报告，真实海况、最新浏览器和现场演示尚需验证。
+Business geometry/schedules are demonstration assumptions; see [data notes](../data/README.md). A's NOAA multibeam and proposed buoy locations do not automatically move B LIVE coordinates. YOLO evidence concerns synthetic sonar; real sea conditions, newer browsers, and venue demonstrations need separate verification.
 
-## Git 合入
+## Git handoff history
 
-当前交接迁移分支 `codex/harborguard-handoff-refresh` 基于 `origin/main@782d04d`，保留已经合入的 B #10、C #4 与 A #7/#11。旧 #3/#6 已 Push，但与最新 backend/README.md 冲突；本次迁移缺失的B交接工具/资料，更新过期描述，避免重新整合旧候选或覆盖A/C。
+The historical codex/harborguard-handoff-refresh branch was based on origin/main@782d04d and retained B #10, C #4, A #7/#11. Old #3/#6 were pushed but had README conflicts with newer main. Missing B tools/materials were migrated and stale descriptions corrected, without reintegrating old C or overwriting A/C.
 
-检查顺序：新交接样例/全量回归 → 新Draft审查 → 最新main的浏览器恢复、回放和现场彩排。新分页接口仍需契约确认。本次已获Push授权，不自动Merge main、Force Push或关闭旧PR。
+Review fixtures/regression, then the new Draft, then browser recovery/replay and venue rehearsal on the chosen main SHA. Pagination requires contract approval. Historical Push permission did not authorize merging main, force-pushing, or closing teammates' PRs.

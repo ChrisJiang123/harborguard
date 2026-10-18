@@ -1,4 +1,4 @@
-"""C4 gen_contexts 契约测试：与 C3 上下文同构、内部一致、同 seed 确定性。"""
+"""C4 gen_contexts contract: C3 structure, internal consistency and seeded determinism."""
 import pytest
 pytestmark = pytest.mark.agent_language("zh")
 
@@ -122,7 +122,7 @@ def test_security_buoys_consistent(contexts, world):
         assert set(buoys) == {"ok", "down", "covering_track"}
         assert not (set(buoys["covering_track"]) & set(buoys["down"]))
         assert buoys["ok"] == len(world["buoy_ids"]) - len(buoys["down"])
-        # 无方案样本用于训练 recommended_option_id = null 的分支
+        # No-options samples train the recommended_option_id = null branch.
     no_options = [c for c in _by_kind(contexts)["security"] if not c["options"]]
     assert no_options, "必须包含 options_ready 之前的无方案样本"
 

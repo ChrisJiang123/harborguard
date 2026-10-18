@@ -1,4 +1,4 @@
-"""C4 eval 管线测试：记录加载、教师名推断、分阶段校验与指标聚合。"""
+"""C4 evaluation: record loading, teacher inference, staged checks and metrics."""
 import pytest
 pytestmark = pytest.mark.agent_language("zh")
 
@@ -15,7 +15,7 @@ from ml.lora.gen_contexts import generate_contexts
 
 
 class FakeProvider:
-    """按序返回预设响应的教师桩；第一个响应被 warmup 消耗。"""
+    """Teacher stub returns preset responses in order; warmup consumes the first."""
 
     provider = "fake"
     request_model = "fake-model"
@@ -55,7 +55,7 @@ def _draft(context, option_id) -> str:
 
 
 def _record(context) -> dict:
-    # assistant 内容只是占位：eval 只读取 user（上下文），输出由被测 provider 给出
+    # Assistant is a placeholder: eval reads user context; the provider supplies output.
     placeholder = (_draft(context, context["ranked"][0]) if context.get("ranked")
                    else json.dumps({"summary": "占位"}, ensure_ascii=False))
     return {"messages": [
@@ -97,7 +97,7 @@ def test_stage_of_boxes_each_failure_stage(contexts):
     stage, draft = stage_of(_draft(context, context["ranked"][0]).replace(
         f'"{context["alert"]["id"]}"', '"T-ghost"'), context, known, options)
     assert stage == "id" and draft is not None
-    # 推荐与任务书规则（=ranked[0]）不符 -> 事实阶段拦截
+    # Recommendation conflicts with the taskbook rule (=ranked[0]); fact stage rejects it.
     stage, draft = stage_of(_draft(context, context["ranked"][-1]), context, known, options)
     assert stage == "fact" and draft is not None
     assert stage_of(_draft(context, context["ranked"][0]), context, known, options)[0] == "ok"
@@ -107,26 +107,26 @@ def test_eval_model_counts_stages_agree_and_retry(contexts):
     responses = ["warmup"]
     for index, context in enumerate(contexts):
         if index == 0:
-            responses.append("不是 JSON")                      # 首次 json 失败
-            responses.append(_draft(context, context["ranked"][0]))  # 重试后 ok，一致
+            responses.append("不是 JSON")                      # First attempt fails JSON parsing.
+            responses.append(_draft(context, context["ranked"][0]))  # Retry passes and agrees.
         elif index == 1:
-            responses.append(_draft(context, context["ranked"][-1]))  # id 过、事实拦截
-            responses.append(_draft(context, context["ranked"][-1]))  # 仍拦截 -> 最终 fact
+            responses.append(_draft(context, context["ranked"][-1]))  # IDs pass; facts reject.
+            responses.append(_draft(context, context["ranked"][-1]))  # Rejected again; final fact failure.
         elif index == 2:
-            responses.append("{{{")                            # 两次都 json 失败
+            responses.append("{{{")                            # Both attempts fail JSON parsing.
             responses.append("{{{")
         else:
-            responses.append(_draft(context, context["ranked"][0]))  # ok，一致
+            responses.append(_draft(context, context["ranked"][0]))  # Passes and agrees.
 
     provider = FakeProvider(responses)
     result = asyncio.run(eval_model(provider, [_record(c) for c in contexts], timeout_s=5))
 
     assert result["model"] == "fake-model"
-    assert result["struct_valid_raw"] == 0.5        # 首次：c1(fact) + c3(ok)
-    assert result["struct_valid"] == 0.75           # 重试后：c0/c3(ok) + c1(fact)
-    assert result["id_fact_valid_raw"] == 0.25      # 仅 c3
+    assert result["struct_valid_raw"] == 0.5        # First: c1(fact) + c3(ok).
+    assert result["struct_valid"] == 0.75           # After retry: c0/c3(ok) + c1(fact).
+    assert result["id_fact_valid_raw"] == 0.25      # Only c3.
     assert result["id_fact_valid"] == 0.5           # c0 + c3
-    assert result["option_agree"] == 0.5            # c0 + c3；c1/fact 也计分母但不一致
+    assert result["option_agree"] == 0.5            # c0+c3; c1/fact counts in denominator but disagrees.
     assert result["option_agree_n"] == 4
     assert result["option_agree_given_valid"] == 1.0 and result["option_agree_valid_n"] == 2
     assert result["null_recommend_n"] == 0 and result["null_recommend_correct"] == 0.0
@@ -135,7 +135,7 @@ def test_eval_model_counts_stages_agree_and_retry(contexts):
     assert diag["retried_ok"] == 1 and diag["transport_errors"] == 0
     assert diag["first_stage"] == {"json": 2, "fact": 1, "ok": 1}
     assert diag["final_stage"] == {"json": 1, "fact": 1, "ok": 2}
-    assert provider.calls == 1 + 2 + 2 + 2 + 1      # warmup + 各条尝试数
+    assert provider.calls == 1 + 2 + 2 + 2 + 1      # Warmup + attempts for each record.
 
 
 def test_eval_model_null_recommendation_for_disaster_and_buoy(contexts):
@@ -148,8 +148,9 @@ def test_eval_model_null_recommendation_for_disaster_and_buoy(contexts):
             "evidence_ids": [], "uncertainties": [], "confidence": "high",
         }, ensure_ascii=False)
 
-    # 第一个响应被 warmup 消耗；第二条 null 正确；第三条违规推荐 opt-1（disaster 无 options，
-    # 先被 ID 校验拦下；重试时响应耗尽返回 "{}"，最终停在 struct 阶段）
+    # Warmup consumes the first response; second null is valid; third wrongly picks opt-1.
+    # Disaster has no options: IDs reject it, retry exhausts responses and returns "{}",
+    # leaving the final failure at the structural stage.
     provider = FakeProvider([disaster_draft(True), disaster_draft(True), disaster_draft(False)])
     result = asyncio.run(eval_model(provider, [_record(disaster)] * 2, timeout_s=5))
     assert result["null_recommend_correct"] == 0.5 and result["null_recommend_n"] == 2

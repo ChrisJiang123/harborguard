@@ -1,12 +1,12 @@
 # ============================================================
-# 环境三：LoRA 训练环境
-# 暂定 Colab。Unsloth 在 macOS 上不可用（训练不放 MacBook）。
-# 注意：Lenovo CUDA 环境已实测可用于 YOLO 训练（torch 2.14.1+cu130），
-# 但 Unsloth/LoRA 训练尚未在任何 GPU 上验证；Windows WSL 方案以后再修，不阻塞 C1。
-# 执行（装完重启 runtime / 激活环境）：
+# LoRA training environment.
+# Original setup planned Colab; Unsloth is unavailable on macOS.
+# Historical environment note: Lenovo CUDA was validated for YOLO (torch 2.14.1+cu130).
+# LoRA was not yet validated when this setup note was written; see ml/lora/README.md for later results.
+# Install, then restart the runtime or activate the environment:
 #   pip install -r requirements-lora-train.txt
-# 或使用 Unsloth 官方 notebook 的安装 cell（版本以 Unsloth 文档为准）
-# 对应 C4：ml/lora/train_lora.ipynb（Unsloth + TRL SFT，基座 Qwen3.5 0.8B / 兼容问题换 Qwen3 1.7B）
+# Alternatively use official Unsloth notebook installation cells and documented versions.
+# C4 notebook: ml/lora/train_lora.ipynb (Unsloth/TRL SFT; Qwen3.5 0.8B, fallback Qwen3 1.7B).
 # ============================================================
 unsloth
 trl>=0.9

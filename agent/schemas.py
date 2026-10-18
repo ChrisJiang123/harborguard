@@ -1,11 +1,9 @@
-"""Agent 模型与双重校验（C3）。
-
-- RecommendationDraft：生成侧草案（云端/本地/模板三处同构）。
-- Recommendation：契约 v1 的完整建议（POST /api/recommendations 请求体）。
-- normalize_draft：超长字段截断、去重。
-- validate_draft：**上下文真实 ID** 校验（evidence_ids / recommended_option_id），
-  与后端 422 校验形成双保险；禁改警报等级、禁调 /api/decision 由实现保证。
+"""C3 models and two-layer validation. RecommendationDraft has the same generation schema for
+cloud/local/template. Recommendation is the complete contract-v1 POST body. normalize_draft
+truncates allowed text and deduplicates. validate_draft checks actual context IDs, supplementing B's
+422 checks. Implementation forbids alert-level changes and /api/decision.
 """
+
 
 from __future__ import annotations
 
@@ -29,7 +27,7 @@ Trimmed = Annotated[str, StringConstraints(strip_whitespace=True)]
 
 
 class RecommendationDraft(StrictModel):
-    """模型必须显式给出全部六个字段；不提供任何默认值。"""
+    """Require all six model fields explicitly, with no defaults."""
 
     summary: Nonblank
     explanation: Nonblank
@@ -60,7 +58,7 @@ def clip(text: str, limit: int) -> str:
 
 
 def normalize_draft(draft: RecommendationDraft | dict) -> RecommendationDraft:
-    """只做契约允许的文本截断；不删除、替换或过滤任何模型输出 ID。"""
+    """Apply only contract-allowed text truncation; never remove, replace or filter model IDs."""
     d = draft if isinstance(draft, RecommendationDraft) else RecommendationDraft.model_validate(draft)
     return RecommendationDraft(
         summary=clip_field(d.summary, "summary"),
@@ -75,7 +73,7 @@ def normalize_draft(draft: RecommendationDraft | dict) -> RecommendationDraft:
 def validate_draft(
     draft: RecommendationDraft, known_ids: set[str], option_ids: set[str]
 ) -> list[str]:
-    """ID 存在性校验，返回错误列表（空列表 = 通过）。"""
+    """Check ID existence and return errors; an empty list means valid."""
     errors: list[str] = []
     unknown = [e for e in draft.evidence_ids if e not in known_ids]
     if unknown:
@@ -92,13 +90,12 @@ def validate_draft(
 
 
 class DraftOutputError(ValueError):
-    """模型原始输出不是合法、真实 ID 的 RecommendationDraft。"""
+    """Raw model output is not a valid RecommendationDraft with actual context IDs."""
 
 
 def parse_model_draft(raw: str, known_ids: set[str], option_ids: set[str]) -> RecommendationDraft:
-    """严格解析单个 JSON 对象，再截断合法长文本并校验全部 ID。
-
-    不尝试提取 Markdown 代码块或删除坏字段/坏 ID；模型必须自行在重试时修正。
+    """Strictly parse a single JSON object, truncate valid overlong text and validate all IDs. Do not
+    extract Markdown fences or delete invalid fields/IDs; the model must correct them on retry.
     """
     try:
         payload = json.loads(raw)

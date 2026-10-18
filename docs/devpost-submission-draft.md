@@ -1,34 +1,34 @@
-# Devpost 内容草稿（负责人核对后填写）
+# Historical Devpost Draft — Owner Review Required
 
-本轮验收main：a841bf9a70d8bf8237b9e03763852a34bed10368。B方案广播修复仍仅本地e1候选；不要把未合入代码写成官方已交付。
+Tested main: a841bf9a70d8bf8237b9e03763852a34bed10368. At this report's date the B options-broadcast fix existed only as local e1; do not describe unmerged code as an official delivery. For the later submission narrative, use [devpost-story-en.md](devpost-story-en.md) and verify the final SHA.
 
-## 简介
+## Introduction
 
-HarborGuard是港口安防与灾后勘测的数字孪生演示：将合成声学观测、模拟AIS、几何定位、Kalman跟踪、三级风险警报、声呐合成图上的YOLO检测、方案比较、Agent解释及人工审批连接起来。
+HarborGuard is a port security and disaster-survey digital-twin demo connecting synthetic acoustic observations, simulated AIS, geometric localization, Kalman tracking, three-level risk alerts, YOLO on synthetic sonar images, option comparison, Agent explanations, and human approval.
 
-Security展示风险到处置；Recovery将覆盖率与未决目标分离，漏检/错类/近场失败保留unsurveyed，BFS只使用确认clear航道。绿色和节省时间是仿真假设结果，不是实际复航许可。
+Security shows risk-to-response. Recovery separates coverage from unresolved observations: missed/misclassified/near-field failures remain unsurveyed, and BFS uses confirmed-clear channels only. Green areas and time savings are simulation assumptions, not real reopening permission.
 
-## 实际验证范围
+## Verified scope at the stated SHA
 
-最新main232 Python测试通过、2跳过；前端构建及A1–A6通过；真实交付YOLO权重在合成场景A/B各重复3次一致。模板Agent与真实B REST/WS及人工审批已运行。单机实际浏览器2D闭环286.008秒；当前内嵌浏览器3D不可用，A恢复R1–R4尚有缺陷。不要声称全面验收。
+232 Python tests passed, 2 skipped; frontend build and A1–A6 passed. Delivered YOLO weights produced repeatable synthetic A/B runs, three per scenario. Template Agent, real B REST/WS, and human approval ran. One actual single-computer 2D browser workflow took 286.008 seconds. The embedded browser could not render 3D, and A recovery issues R1–R4 remained. Do not claim full acceptance.
 
-仓库已有C团队的YOLO/LoRA合成评估与云端测试记录；应注明各自模型版本、机器、数据规模及样本类别。本轮Windows演示仅验证template运行时，没有验证cloud/local/LoRA在线运行，不将不同评估集的分数混成一个指标。
+C has separate synthetic YOLO/LoRA evaluations and cloud-test records. Report each model, machine, dataset size, and sample category. This Windows demo verified only the template runtime; it did not verify online cloud/local/LoRA service. Do not combine scores from different evaluation sets into one metric.
 
-## 视频建议（4–5分钟）
+## Suggested 4–5-minute video
 
-1. 说明LIVE数据为合成观测/模拟AIS；启动A10×。
-2. 展示三级警报、来源yolo26n的PNG、template建议；人工Approve之后才restricted。
-3. 启动B10×；展示燃料泊位100%仍unsurveyed、北锚地blocked、BFS确认clear路线及仿真假设9小时。
-4. 打开标注REPLAY的历史流，说明其版本及只读性质；最后披露局限。
+1. Disclose synthetic observations/simulated AIS; start A at 10×.
+2. Show level 3, yolo26n PNG, template recommendation, and Approve before restricted.
+3. Start B at 10×. Show fuel berth remaining unsurveyed at 100% coverage, blocked north anchorage, BFS clear routes, and the simulated 9-hour estimate.
+4. Open an explicitly labeled REPLAY, disclose version/read-only behavior, and finish with limits.
 
-若录制电脑尚未验证3D，采用2D成片；不现场安装/下载/训练，不以云服务能启动代替路由质量验收。
+Use 2D if 3D has not been verified on the recording machine. Do not install, download, or train on stage. Service startup is not model-route quality acceptance.
 
-## 尚待负责人完成
+## Owner checklist
 
-- [ ] 审阅并确定最终代码SHA（含是否合入B方案广播补丁）。
-- [ ] 录制、试播成片并提供评委可访问的视频URL；当前只有截图，没有视频。
-- [ ] 填写项目、成员、挑战/赛道、技术清单、仓库链接；核对该活动规则、参赛资格、视频长度与截止时区。
-- [ ] 核对第三方模型/地图/数据的来源与许可，不把合成或演示水位描述为实测。
-- [ ] 负责人在2026-10-17 22:00 America/Los_Angeles前完成提交并保留成功回执。
+- [ ] Review and freeze final SHA, including whether B broadcast fix is merged.
+- [ ] Record and play back a finished video; provide a judge-accessible URL. At this report's date only screenshots existed.
+- [ ] Complete project, members, challenge/track, stack, repository URL; verify event rules, eligibility, video length, and deadline timezone.
+- [ ] Check model/map/data provenance and licenses. Do not describe synthetic data or demonstration water level as measured.
+- [ ] Owner submits before 2026-10-17 22:00 America/Los_Angeles and retains the receipt.
 
-此文件不代表Devpost规则已核实或表单已提交；本次未登录、填写或提交Devpost。
+This draft does not establish rule compliance or completed submission. No Devpost form was logged into, completed, or submitted in the reported check.

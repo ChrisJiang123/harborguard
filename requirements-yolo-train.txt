@@ -1,16 +1,16 @@
 # ============================================================
-# 环境二：YOLO26 训练环境（与运行环境分开；MacBook 不训练）
+# YOLO26 training environment, separate from runtime; no training on the MacBook.
 #
-# Lenovo 本机实测版本（2026-10-16，负责人提供；CUDA 运算 / 反向传播 /
-# YOLO26 device=0 推理全部通过）——仅作实测记录，不代表"当前最新版本"：
+# Owner-recorded Lenovo versions (2026-10-16), CUDA operations/backprop and
+# YOLO26 device=0 inference passed. Historical record, not a newest-version claim:
 #   Windows · Python 3.12.10
 #   RTX 5060 Laptop GPU · 8151 MiB · sm_120
 #   torch 2.14.1+cu130 · torchvision 0.29.1+cu130 · ultralytics 8.4.178
 #
-# CUDA 安装源可配置：Lenovo 实测用 cu130；其他机器按本机驱动/系统选择
-# 对应 cuXX，不要把 cu130 当作所有机器的强制配置。
+# Select the CUDA index for the local driver/OS; Lenovo used cu130.
+# Do not force cu130 on other machines.
 #
-# ---- Windows PowerShell（Lenovo 实测路径：Scripts\python.exe）----
+# Windows PowerShell (validated Lenovo interpreter path: Scripts\python.exe).
 #   py -3.12 -m venv .venv-yolo-train
 #   .\.venv-yolo-train\Scripts\python.exe -m pip install --upgrade pip
 #   .\.venv-yolo-train\Scripts\python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
@@ -19,16 +19,16 @@
 #
 # ---- Linux / Colab ----
 #   python3.12 -m venv .venv-yolo-train && source .venv-yolo-train/bin/activate
-#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130  # 按本机驱动改 cuXX
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130  # Select local cuXX.
 #   pip install -r requirements-yolo-train.txt
-#   Colab 通常自带匹配 CUDA 的 torch：直接 pip install -r requirements-yolo-train.txt 即可
+#   Colab usually includes matching CUDA torch; install this requirements file directly.
 #
-# bash 脚本方式（Linux；未实测）：PYTHON_VERSION=3.12 YOLO_CUDA_INDEX=cu130 bash scripts/setup_env_yolo_train.sh
+# Linux bash helper (not executed in acceptance): PYTHON_VERSION=3.12 YOLO_CUDA_INDEX=cu130 bash scripts/setup_env_yolo_train.sh
 # ============================================================
 numpy>=1.26
 opencv-python-headless>=4.9
 pyyaml>=6.0
 matplotlib>=3.8
-# Lenovo 实测通过版本 ultralytics 8.4.178（torch 2.14.1+cu130）
+# Lenovo recorded ultralytics 8.4.178 with torch 2.14.1+cu130.
 ultralytics>=8.3
 pytest>=8.0

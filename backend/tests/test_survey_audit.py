@@ -43,7 +43,7 @@ def test_zero_range_has_persisted_reason_without_fabricated_thirty_metre_image()
     assert engine.zone_statuses["entrance"]["state"] == "unsurveyed"
     assert next(iter(engine.disaster.attempts.values()))["reason"] == "near_field"
     logs = [d["log"]["text"] for name, d in events if name == "log"]
-    assert sum("近场成像边界" in line for line in logs) == 1
+    assert sum("near-field imaging boundary" in line for line in logs) == 1
     assert not engine.reopen_plan["route_zone_ids"]
 
 

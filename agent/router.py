@@ -1,8 +1,8 @@
-"""C3 模型路由：云端兼容接口 → 本地 Ollama → 确定性模板。
-
-每次调用只运行一个受截止时间约束的 await 链，不创建迟到后仍可能提交的生成任务。
-SDK 隐式重试关闭；只有模型已经返回、但草案结构或 ID 不合法时才附错误重试一次。
+"""C3 routing: compatible cloud API -> local Ollama -> deterministic template. Each call has a single
+deadline-controlled await chain; no detached late submission tasks. SDK retries are disabled.
+Returned drafts with invalid structure or IDs get one error-guided retry.
 """
+
 
 from __future__ import annotations
 
@@ -255,10 +255,9 @@ CloudProvider = AnthropicCloudProvider
 
 
 def parse_format_overrides(raw: str | None) -> dict[str, str]:
-    """解析 OLLAMA_FORMAT_OVERRIDES："model:json,model2:schema"。空/未设 = 无覆盖。
-
-    只接受显式 model:format 对（format ∈ {json, schema}）；按模型名精确匹配，
-    不做名称模式猜测，也不提供全局开关。配置非法直接抛错——显式配置不允许静默降级。
+    """Parse explicit OLLAMA_FORMAT_OVERRIDES pairs, e.g. model:json,model2:schema. Empty means no
+    overrides. Formats are json or schema and names match exactly; no pattern inference or global
+    switch. Invalid explicit configuration raises instead of silently falling back.
     """
     overrides: dict[str, str] = {}
     for part in (raw or "").split(","):
@@ -304,8 +303,8 @@ class LocalProvider:
         }
         if system == SYSTEM_PROMPT:
             override = self.format_overrides.get(self.request_model)
-            # 默认完整 schema（C3 现状）；仅当该模型在 OLLAMA_FORMAT_OVERRIDES 中显式
-            # 配置为 json 时放宽为任意合法 JSON——候选验收用，回退=清空环境变量。
+            # Complete schema is the default; only explicit per-model
+            # JSON overrides relax it for candidate acceptance. Clear the variable to roll back.
             payload["format"] = "json" if override == "json" else RecommendationDraft.model_json_schema()
         response = await self._http.post(
             self._native_url("/api/chat"),
@@ -322,7 +321,7 @@ class LocalProvider:
         return urlunsplit((parsed.scheme, parsed.netloc, path, "", ""))
 
     async def warm(self) -> dict:
-        """先卸载再测一次冷加载，随后测热请求，并保持模型驻留。"""
+        """Unload, measure a cold request, then a warm request and keep the model resident."""
         url = self._native_url("/api/generate")
         timeout = min(max(self.timeout_s, 1.0), 20.0)
         result: dict = {"ok": False, "model": self.request_model, "cold_ms": None, "hot_ms": None}
@@ -332,7 +331,7 @@ class LocalProvider:
                     url,
                     json={"model": self.request_model, "prompt": "", "stream": False, "keep_alive": 0},
                 )
-            except Exception:  # 卸载失败不妨碍后续探测
+            except Exception:  # Failed unload does not block later probing.
                 pass
             for label in ("cold_ms", "hot_ms"):
                 started = time.perf_counter()
@@ -446,7 +445,7 @@ class Router:
             return
         try:
             self.warmup = {"status": "complete", **await warm()}
-        except Exception as exc:  # noqa: BLE001 - 本地失败不能阻止 Agent 启动
+        except Exception as exc:  # noqa: BLE001 - Local failure must not block Agent startup.
             self.warmup = {"ok": False, "status": "failed", "error": _safe_error(exc)}
 
     async def aclose(self) -> None:
@@ -502,7 +501,7 @@ class Router:
         context: dict,
         errors: list[str],
     ) -> None:
-        """追加脱敏 JSONL；只含校验事实，不含日志、坐标、凭证或完整原始响应。"""
+        """Append redacted JSONL facts only; exclude logs, coordinates, credentials and complete raw responses."""
         configured = self.settings.agent_failure_log.strip()
         if not configured:
             return
@@ -533,7 +532,7 @@ class Router:
             with path.open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
         except OSError:
-            pass  # 评估样例写入失败不得拖垮在线建议链路
+            pass  # Failure-record writes must not break online recommendations.
 
     def reset_cloud_circuit(self) -> None:
         self.cloud_retry_after = 0.0
@@ -591,7 +590,7 @@ class Router:
                 stat["timeouts"] += 1
                 stat["last_error"] = "TimeoutError: provider deadline exceeded"
                 return None
-            except Exception as exc:  # SDK 重试已关闭；认证等明确错误立即降级
+            except Exception as exc:  # SDK retries are disabled; explicit auth and similar errors fall back immediately.
                 stat["errors"] += 1
                 stat["last_error"] = _safe_error(exc)
                 return None
@@ -704,7 +703,7 @@ class Router:
                 self.stats["providers"]["cloud"]["errors"]
                 + self.stats["providers"]["cloud"]["timeouts"]
             )
-            # 结构/事实不合格只降级当前事件；云服务本身仍健康，不能因此阻断后续事件。
+            # Invalid structure/facts affect this event only, not cloud health for later events.
             if current_transport_failures > cloud_transport_failures:
                 self._trip_cloud_circuit()
 

@@ -78,7 +78,7 @@ class World:
         else:
             raise ValueError(f"Unknown injection: {event_type}")
         changes.append(("log", {"log": {"t": self.t, "level": "warn", "source": "sim",
-                                          "text": f"注入 {event_type}" + (f"：{target}" if target else "")}}))
+                                          "text": f"Injected {event_type}" + (f": {target}" if target else "")}}))
         return changes
 
     def _due_events(self) -> list[tuple[str, dict]]:

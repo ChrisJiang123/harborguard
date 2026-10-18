@@ -59,7 +59,7 @@ class DecisionEngine:
         self.reopen_plan = self.disaster.reopen(self.zone_statuses) if mode == "disaster" else None
         if self.reopen_plan is not None:
             events.append(("reopen_plan", self.reopen_plan.copy()))
-        events.append(AlertManager.log(t, f"切换至 {mode} 模式"))
+        events.append(AlertManager.log(t, f"Switched to {mode} mode"))
         return events
 
     def step(self, tracks, world, dt):
