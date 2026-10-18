@@ -1,0 +1,47 @@
+{
+  "base": {
+    "model": "harborguard-base",
+    "struct_valid_raw": 0.78,
+    "struct_valid": 0.78,
+    "id_fact_valid_raw": 0.12,
+    "id_fact_valid": 0.12,
+    "option_agree": 0.515,
+    "option_agree_n": 33,
+    "option_agree_given_valid": 1.0,
+    "option_agree_valid_n": 3,
+    "null_recommend_correct": 0.5,
+    "null_recommend_n": 14,
+    "latency_s": 9.58
+  },
+  "lora": {
+    "model": "harborguard-lora",
+    "struct_valid_raw": 0.2,
+    "struct_valid": 0.2,
+    "id_fact_valid_raw": 0.2,
+    "id_fact_valid": 0.2,
+    "option_agree": 0.303,
+    "option_agree_n": 33,
+    "option_agree_given_valid": 1.0,
+    "option_agree_valid_n": 10,
+    "null_recommend_correct": 0.0,
+    "null_recommend_n": 14,
+    "latency_s": 14.4
+  },
+  "system_baseline": {
+    "model": "qwen3:1.7b",
+    "struct_valid_raw": 1.0,
+    "struct_valid": 1.0,
+    "id_fact_valid_raw": 0.16,
+    "id_fact_valid": 0.16,
+    "option_agree": 0.455,
+    "option_agree_n": 33,
+    "option_agree_given_valid": 1.0,
+    "option_agree_valid_n": 1,
+    "null_recommend_correct": 1.0,
+    "null_recommend_n": 14,
+    "latency_s": 9.42
+  },
+  "n_test": 50,
+  "teacher": "google/gemini-2.5-flash",
+  "pairing_note": "base=与 lora 同一基座的未微调 GGUF（同量化/同模板/同推理参数）；system_baseline=当前系统本地兜底（规模不同，差异不能全归因微调）"
+}

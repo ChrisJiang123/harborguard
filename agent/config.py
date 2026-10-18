@@ -101,6 +101,7 @@ class Settings:
     ollama_model: str
     ollama_timeout_s: float            # 契约：本地超时 30 秒
     ollama_keep_alive: str
+    ollama_format_overrides: str       # 显式按模型覆盖输出格式："model:json,…";空 = 全部完整 schema（C3 现状，可回退）
 
 
 def load_settings() -> Settings:
@@ -134,6 +135,7 @@ def load_settings() -> Settings:
         ollama_model=_get_str("OLLAMA_MODEL", "qwen3:1.7b"),
         ollama_timeout_s=_get_float("OLLAMA_TIMEOUT_S", 30.0),
         ollama_keep_alive=_get_str("OLLAMA_KEEP_ALIVE", "30m"),
+        ollama_format_overrides=_get_str("OLLAMA_FORMAT_OVERRIDES", ""),
     )
 
 

@@ -20,7 +20,7 @@ build-backend = "setuptools.build_meta"
 include = ["backend*"]
 
 [tool.pytest.ini_options]
-testpaths = ["backend/tests"]
+testpaths = ["backend/tests", "agent/tests"]
 pythonpath = ["."]
 
 [tool.ruff]

@@ -71,6 +71,7 @@ class CompletionProvider(Protocol):
     provider: str
     request_model: str
     enabled: bool
+    base_url: str | None
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse: ...
 
@@ -90,6 +91,7 @@ class AnthropicCloudProvider:
     def __init__(self, settings: Settings):
         self.provider = _provider_label(settings.anthropic_base_url)
         self.request_model = settings.anthropic_model
+        self.base_url = settings.anthropic_base_url or "https://api.anthropic.com"
         self.enabled = bool(settings.anthropic_api_key or settings.anthropic_auth_token)
         self._client = (
             AsyncAnthropic(
@@ -142,6 +144,7 @@ class OpenRouterProvider:
     def __init__(self, settings: Settings):
         self.provider = "openrouter"
         self.request_model = settings.openrouter_model
+        self.base_url = settings.openrouter_base_url
         self.enabled = bool(settings.openrouter_api_key)
         self._client = (
             AsyncOpenAI(
@@ -223,6 +226,7 @@ class DisabledCloudProvider:
     provider = "disabled"
     request_model = "none"
     enabled = False
+    base_url = None
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
         raise RuntimeError("cloud provider is disabled")
@@ -249,6 +253,27 @@ def build_cloud_provider(settings: Settings) -> CompletionProvider:
 CloudProvider = AnthropicCloudProvider
 
 
+def parse_format_overrides(raw: str | None) -> dict[str, str]:
+    """解析 OLLAMA_FORMAT_OVERRIDES："model:json,model2:schema"。空/未设 = 无覆盖。
+
+    只接受显式 model:format 对（format ∈ {json, schema}）；按模型名精确匹配，
+    不做名称模式猜测，也不提供全局开关。配置非法直接抛错——显式配置不允许静默降级。
+    """
+    overrides: dict[str, str] = {}
+    for part in (raw or "").split(","):
+        entry = part.strip()
+        if not entry:
+            continue
+        model, sep, fmt = entry.partition(":")
+        model, fmt = model.strip(), fmt.strip().lower()
+        if not sep or not model or fmt not in ("json", "schema"):
+            raise ValueError(
+                f"OLLAMA_FORMAT_OVERRIDES 条目非法：{entry!r}（应为 model:json 或 model:schema）"
+            )
+        overrides[model] = fmt
+    return overrides
+
+
 class LocalProvider:
     def __init__(self, settings: Settings):
         self.provider = "ollama"
@@ -257,6 +282,10 @@ class LocalProvider:
         self.base_url = settings.ollama_base_url
         self.keep_alive = settings.ollama_keep_alive
         self.timeout_s = settings.ollama_timeout_s
+        self.format_overrides = parse_format_overrides(settings.ollama_format_overrides)
+        self.draft_output_format = (
+            "json" if self.format_overrides.get(self.request_model) == "json" else "json_schema"
+        )
         self._http = httpx.AsyncClient(timeout=settings.ollama_timeout_s)
 
     async def complete(self, system: str, messages: list[dict], timeout_s: float) -> RawResponse:
@@ -273,7 +302,10 @@ class LocalProvider:
             },
         }
         if system == SYSTEM_PROMPT:
-            payload["format"] = RecommendationDraft.model_json_schema()
+            override = self.format_overrides.get(self.request_model)
+            # 默认完整 schema（C3 现状）；仅当该模型在 OLLAMA_FORMAT_OVERRIDES 中显式
+            # 配置为 json 时放宽为任意合法 JSON——候选验收用，回退=清空环境变量。
+            payload["format"] = "json" if override == "json" else RecommendationDraft.model_json_schema()
         response = await self._http.post(
             self._native_url("/api/chat"),
             json=payload,
@@ -423,8 +455,13 @@ class Router:
         result = copy.deepcopy(self.stats)
         result["providers"]["cloud"]["provider"] = self.cloud.provider
         result["providers"]["cloud"]["configured"] = bool(self.cloud.enabled)
+        result["providers"]["cloud"]["base_url"] = getattr(self.cloud, "base_url", None)
         result["providers"]["local"]["provider"] = self.local.provider
         result["providers"]["local"]["configured"] = bool(self.local.enabled)
+        result["providers"]["local"]["base_url"] = getattr(self.local, "base_url", None)
+        result["providers"]["local"]["draft_output_format"] = getattr(
+            self.local, "draft_output_format", None
+        )
         result["warmup"] = copy.deepcopy(self.warmup)
         result["last_route"] = copy.deepcopy(self.last_route)
         result["cloud_circuit"] = {
