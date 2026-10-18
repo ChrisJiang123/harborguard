@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .schemas import RecommendationDraft
+from .language import language, text_errors
 
 FACT_CHECK_SCOPE = (
     "确定性检查仅覆盖浮标离线/覆盖数量、识别置信度、方案风险与延误、"
@@ -18,7 +19,7 @@ FACT_CHECK_SCOPE = (
     "未宣称验证全部自由文本事实。"
 )
 
-_CLAUSE_SPLIT = re.compile(r"[。；;！!？?\n]+")
+_CLAUSE_SPLIT = re.compile(r"[。；;！!？?\n]+|\.(?=\s|$)")
 _BUOY_ID = re.compile(r"(?<![A-Za-z0-9])B\d+(?![A-Za-z0-9])", re.IGNORECASE)
 _UNKNOWN = re.compile(r"未知|待核实|待确认|无法确认|数据缺失|未提供")
 
@@ -324,6 +325,15 @@ def _check_selection(draft: RecommendationDraft, context: dict, result: FactChec
 def check_draft_facts(draft: RecommendationDraft, context: dict) -> FactCheckResult:
     """检查能从结构化上下文明确判断的事实和任务规则。"""
     result = FactCheckResult()
+    result.errors.extend(text_errors(draft))
+    # Canonicalize only the checker's view; recommendation text/IDs stay untouched.
+    # English and Chinese assertions go through the same fact/selection rules.
+    if language() == "en":
+        draft = draft.model_copy(update={
+            "summary": _fact_terms(draft.summary),
+            "explanation": _fact_terms(draft.explanation),
+            "uncertainties": [_fact_terms(u) for u in draft.uncertainties],
+        })
     _check_selection(draft, context, result)
     _check_option_metrics(draft, context, result)
     weak = _check_offline(draft, context, result)
@@ -332,6 +342,38 @@ def check_draft_facts(draft: RecommendationDraft, context: dict) -> FactCheckRes
     if weak and draft.confidence != "low":
         result.errors.append("存在任务书定义的证据不足条件时 confidence 必须为 low")
     return result
+
+
+def _fact_terms(text: str) -> str:
+    replacements = (
+        (r"\bno\s+(?:buoys?\s+(?:are\s+)?offline|offline\s+buoys?)\b", "无浮标离线"),
+        (r"\ball\s+buoys?\s+(?:are\s+)?online\b", "所有浮标均在线"),
+        (r"\b(\d+)\s+(?:buoys?\s+(?:are\s+)?offline|down)\s*:", r"浮标离线 \1 个:"),
+        (r"\boffline\s+buoys?\s*:\s*(\d+)", r"浮标离线 \1 个"),
+        (r"\b(\d+)\s+buoys?\b", r"\1 个浮标"),
+        (r"\bnot\s+offline\b", "未离线"),
+        (r"\bnot\s+online\b", "离线"),
+        (r"\blow\s+(?:identification\s+)?confidence\b", "低置信度"),
+        (r"\bhigh\s+(?:identification\s+)?confidence\b", "置信度较高"),
+        (r"\bresidual\s+risk\b", "残余风险"),
+        (r"\b(?:identification\s+)?confidence\b", "置信度"),
+        (r"\bvessel[- ]hours?\b|\bhours?\b", "船时"),
+        (r"\bdelay\b", "延误"),
+        (r"\b(?:at\s+least|not\s+below)\b", "不低于"),
+        (r"\b(?:at\s+most|not\s+above)\b", "不高于"),
+        (r"\bbelow\b", "低于"), (r"\babove\b", "高于"),
+        (r"\b(?:is|equals)\b", "为"),
+        (r"\bbuoys?\b", "浮标"),
+        (r"\boffline\b|\bdown\b", "离线"), (r"\bonline\b", "在线"),
+        (r"\bcover(?:age|ing|s)?\b", "覆盖"),
+        (r"\b(?:unknown|unavailable|missing|unconfirmed)\b", "未知"),
+        (r"\b(?:only|limited|insufficient|weak|low)\b", "不足"),
+        (r"\bhigh\b", "较高"),
+        (r"\b(?:rules?|ranking|differ(?:ent)?|conflict)\b", "规则差异"),
+    )
+    for pattern, replacement in replacements:
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    return re.sub(r"浮标\s+覆盖", "浮标覆盖", text)
 
 
 def fact_snapshot(context: dict) -> dict:

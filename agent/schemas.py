@@ -13,6 +13,7 @@ import json
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
+from .language import CJK, clip_field, language, text_errors
 
 MAX_SUMMARY = 60
 MAX_EXPLANATION = 300
@@ -62,11 +63,11 @@ def normalize_draft(draft: RecommendationDraft | dict) -> RecommendationDraft:
     """只做契约允许的文本截断；不删除、替换或过滤任何模型输出 ID。"""
     d = draft if isinstance(draft, RecommendationDraft) else RecommendationDraft.model_validate(draft)
     return RecommendationDraft(
-        summary=clip(d.summary, MAX_SUMMARY),
-        explanation=clip(d.explanation, MAX_EXPLANATION),
+        summary=clip_field(d.summary, "summary"),
+        explanation=clip_field(d.explanation, "explanation"),
         recommended_option_id=d.recommended_option_id,
         evidence_ids=list(d.evidence_ids),
-        uncertainties=[clip(u, MAX_UNCERTAINTY) for u in d.uncertainties],
+        uncertainties=[clip_field(u, "uncertainties") for u in d.uncertainties],
         confidence=d.confidence,
     )
 
@@ -86,6 +87,7 @@ def validate_draft(
         errors.append("summary/explanation 超长（未正确截断）")
     if any(len(u) > MAX_UNCERTAINTY for u in draft.uncertainties):
         errors.append("uncertainties 存在超长条目")
+    errors.extend(text_errors(draft))
     return errors
 
 
@@ -105,7 +107,11 @@ def parse_model_draft(raw: str, known_ids: set[str], option_ids: set[str]) -> Re
     if not isinstance(payload, dict):
         raise DraftOutputError("JSON 顶层必须是对象")
     try:
-        draft = normalize_draft(RecommendationDraft.model_validate(payload))
+        original = RecommendationDraft.model_validate(payload)
+        if language() == "en" and any(CJK.search(t) for t in
+                                       [original.summary, original.explanation, *original.uncertainties]):
+            raise DraftOutputError("English output required; CJK output rejected before truncation")
+        draft = normalize_draft(original)
     except ValidationError as exc:
         details = "; ".join(
             f"{'.'.join(str(p) for p in item['loc'])}: {item['msg']}" for item in exc.errors()[:8]

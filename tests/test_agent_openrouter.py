@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
+pytestmark = pytest.mark.agent_language("zh")
+
 import asyncio
 from dataclasses import replace
 from types import SimpleNamespace

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import math
+from numbers import Integral
 
 import cv2
 import numpy as np
@@ -30,6 +31,59 @@ CLASS_NAMES: tuple[str, ...] = ("uuv", "fish_school", "debris", "marine_mammal")
 
 _MIN_AREA_PX = 16   # 标注框最小像素面积，低于则丢弃
 _BLUR_SIGMA = 0.7   # 任务书：高斯模糊 σ = 0.7
+
+
+def _sector_geometry(half_fov: float, size: int) -> tuple[float, float, float]:
+    """Shared apex and fitted radius for projection, remapping and annotations."""
+    return ((size - 1) / 2.0, float(size - 1),
+            min(float(size - 1), (size / 2 - 1) / math.sin(half_fov)))
+
+
+def _sector_pixel(rr: float, theta: float, half_fov: float, size: int) -> tuple[float, float]:
+    cx, cy, r_max_px = _sector_geometry(half_fov, size)
+    r_px = rr * r_max_px
+    return cx + r_px * math.sin(theta), cy - r_px * math.cos(theta)
+
+
+def range_bearing_to_pixel(
+    range_m: float,
+    bearing_deg: float,
+    *,
+    max_range_m: float = 150.0,
+    fov_deg: float = 120.0,
+    size: int = 640,
+) -> tuple[float, float] | None:
+    """Project a target center using the exact ``render_ping`` sector geometry.
+
+    Returns continuous (x, y) pixels: image origin at top left, x rightward,
+    y downward; sonar apex at ((size-1)/2, size-1). Bearing is relative to
+    sonar heading, in degrees, zero forward/up and positive right. Range and
+    max_range_m are metres; fov_deg is the full opening angle in (0, 180).
+    Pass the same size, fov_deg and max_range_m used for the rendered image.
+
+    Finite centers outside [0, max_range_m] or [-fov_deg/2, fov_deg/2]
+    return None, without clamping or angle wrapping; both edges are included.
+    Zero and positive near-field ranges are projected physically, without a
+    training-range floor. This is a center projection, not an echo/visibility
+    guarantee: background has a near 3% dark band, and footprints may be
+    clipped or annotations dropped below 16 pixels of area. render_ping's
+    legacy target range floor of 1e-3 m is unchanged; to match such an input
+    exactly, explicitly project max(range_m, 1e-3) at the caller.
+
+    Nonfinite inputs, invalid geometry, or a noninteger size / size < 16 raise
+    ValueError. Keep float pixels for box association; rounding an exact
+    sector-edge point may land on an outside (black) raster pixel.
+    """
+    if not all(math.isfinite(v) for v in (range_m, bearing_deg, max_range_m, fov_deg)):
+        raise ValueError("Range, bearing, max_range_m and fov_deg must be finite")
+    if max_range_m <= 0.0 or not 0.0 < fov_deg < 180.0:
+        raise ValueError("Require max_range_m > 0 and 0 < fov_deg < 180")
+    if isinstance(size, bool) or not isinstance(size, Integral) or size < 16:
+        raise ValueError("size must be an integer >= 16")
+    if not 0.0 <= range_m <= max_range_m or abs(bearing_deg) > fov_deg / 2.0:
+        return None
+    return _sector_pixel(range_m / max_range_m, math.radians(bearing_deg),
+                         math.radians(fov_deg) / 2.0, size)
 
 
 def render_ping(
@@ -274,10 +328,10 @@ def _polar_to_sector(
 ) -> np.ndarray:
     """极坐标 → 扇形：顶点在底部中央、向上张开；扇形外为黑。"""
     fov_rad = 2.0 * half_fov
-    r_max_px = min(float(size - 1), (size / 2 - 1) / math.sin(half_fov))
+    cx, cy, r_max_px = _sector_geometry(half_fov, size)
     ys, xs = np.mgrid[0:size, 0:size].astype(np.float32)
-    dx = xs - (size - 1) / 2.0
-    dy = (size - 1) - ys  # 图像 y 向下，取正后向上
+    dx = xs - cx
+    dy = cy - ys  # 图像 y 向下，取正后向上
     r_px = np.sqrt(dx * dx + dy * dy)
     theta = np.arctan2(dx, dy)  # 0 = 正上，右正
     inside = (r_px <= r_max_px) & (np.abs(theta) <= half_fov)
@@ -300,8 +354,6 @@ def _annotations(
 ) -> list[dict]:
     """回波极坐标外包四角 → 图像坐标最小外接矩形；裁到图内，面积 < 16 px 丢弃。"""
     fov_rad = 2.0 * half_fov
-    r_max_px = min(float(size - 1), (size / 2 - 1) / math.sin(half_fov))
-    cx = (size - 1) / 2.0
     out: list[dict] = []
     for cls, r0, r1, b0, b1 in echo_extents:
         if r0 >= RANGE_BINS or r1 < 0 or b0 >= BEAMS or b1 < 0:
@@ -312,9 +364,9 @@ def _annotations(
             for bb in (b0, b1):
                 rr = min(max(rb, 0.0), RANGE_BINS - 1.0) / (RANGE_BINS - 1)
                 th = min(max(bb, 0.0), BEAMS - 1.0) / (BEAMS - 1) * fov_rad - half_fov
-                r_px = rr * r_max_px
-                xs.append(cx + r_px * math.sin(th))
-                ys.append((size - 1) - r_px * math.cos(th))
+                x, y = _sector_pixel(rr, th, half_fov, size)
+                xs.append(x)
+                ys.append(y)
         x1 = int(max(0, math.floor(min(xs))))
         x2 = int(min(size - 1, math.ceil(max(xs))))
         y1 = int(max(0, math.floor(min(ys))))

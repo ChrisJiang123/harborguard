@@ -1,4 +1,7 @@
 """C4 gen_contexts 契约测试：与 C3 上下文同构、内部一致、同 seed 确定性。"""
+import pytest
+pytestmark = pytest.mark.agent_language("zh")
+
 
 import json
 

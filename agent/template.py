@@ -29,7 +29,7 @@ def _offline_uncertainty(buoys: dict) -> tuple[list[str], bool]:
     return [clip(f"浮标离线 {len(down)} 个:{','.join(down)}", 40)], True
 
 
-def generate_security(context: dict) -> RecommendationDraft:
+def _generate_security_zh(context: dict) -> RecommendationDraft:
     alert = context.get("alert") or {}
     track = context.get("track") or {}
     options = context.get("options", []) or []
@@ -135,7 +135,7 @@ def generate_security(context: dict) -> RecommendationDraft:
     )
 
 
-def generate_disaster(context: dict) -> RecommendationDraft:
+def _generate_disaster_zh(context: dict) -> RecommendationDraft:
     plan = context.get("reopen_plan") or {}
     route = list(plan.get("route_zone_ids", []))
     berths = list(plan.get("reopen_berth_zone_ids", []))
@@ -165,7 +165,7 @@ def generate_disaster(context: dict) -> RecommendationDraft:
     )
 
 
-def generate_buoy(context: dict) -> RecommendationDraft:
+def _generate_buoy_zh(context: dict) -> RecommendationDraft:
     buoy = context.get("buoy") or {}
     buoy_id = buoy.get("id")
     impact = context.get("coverage_impact") or {}
@@ -214,7 +214,7 @@ def _dominant_factor(breakdown: dict) -> tuple[str, float | None]:
     return (key, known[key])
 
 
-def generate_answer(question: str, *, track: dict | None, state: dict | None) -> str:
+def _generate_answer_zh(question: str, *, track: dict | None, state: dict | None) -> str:
     """/ask 的模板回答：只引用后端事实数字，≤150 字，model=template。"""
     parts: list[str] = []
     if track:
@@ -236,3 +236,29 @@ def generate_answer(question: str, *, track: dict | None, state: dict | None) ->
             parts.append(f"当前无警报（t={float(state.get('t', 0.0)):.0f} 秒）")
     parts.append("以上为后端实时事实，模板回答，最终判断由值班员作出")
     return clip("；".join(parts), 150)
+
+
+def generate_security(context: dict) -> RecommendationDraft:
+    from .language import language
+    from .template_en import security
+    return security(context) if language() == "en" else _generate_security_zh(context)
+
+
+def generate_disaster(context: dict) -> RecommendationDraft:
+    from .language import language
+    from .template_en import disaster
+    return disaster(context) if language() == "en" else _generate_disaster_zh(context)
+
+
+def generate_buoy(context: dict) -> RecommendationDraft:
+    from .language import language
+    from .template_en import buoy
+    return buoy(context) if language() == "en" else _generate_buoy_zh(context)
+
+
+def generate_answer(question: str, *, track: dict | None, state: dict | None) -> str:
+    from .language import language
+    from .template_en import answer
+    if language() == "en":
+        return answer(question, track=track, state=state)
+    return _generate_answer_zh(question, track=track, state=state)

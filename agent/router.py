@@ -27,6 +27,7 @@ from .factcheck import FACT_CHECK_SCOPE, check_draft_facts, fact_snapshot
 from .prompts import ASK_SYSTEM_PROMPT, SYSTEM_PROMPT
 from .schemas import DraftOutputError, RecommendationDraft, normalize_draft, parse_model_draft, validate_draft
 from .template import generate_recommendation
+from .language import CJK
 
 Route = Literal["cloud", "local", "template"]
 
@@ -785,6 +786,9 @@ class Router:
             stat["last_error"] = _safe_error(exc)
             return None
         answer = " ".join(response.text.strip().split())
+        if self.settings.agent_lang == "en" and CJK.search(answer):
+            stat["last_error"] = "English answer required; CJK output rejected"
+            return None
         if not answer:
             stat["last_error"] = "ask output was blank"
             return None
