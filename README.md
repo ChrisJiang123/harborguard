@@ -1,5 +1,7 @@
 # HarborGuard · C（AI 模型与 Agent）
 
+> 最终交付检查（2026-10-17，实测main `a841bf9`）：[结果与限制](docs/final-delivery-20261017.md)、[五分钟操作单](docs/demo-runbook.md)、[Devpost草稿](docs/devpost-submission-draft.md)。本轮Windows运行时为template，2D浏览器闭环4分46秒；恢复边界及3D仍有未通过项。下方C团队模型评估保留各自来源与范围，不等同本轮全系统验收。
+
 24h 黑客松：洛杉矶港水下安防数字孪生。本仓库现包含 A（前端 5173）、B（后端 8000）与 C（模型/Agent）三部分；本 README 前半保留 C 的环境说明，前端的完整启动、联调、3D 操作和验收状态见 [frontend/README.md](frontend/README.md)。
 
 Mac 演示机的四进程启动、端口占用保护、停止方式和四分钟实时演示流程见
