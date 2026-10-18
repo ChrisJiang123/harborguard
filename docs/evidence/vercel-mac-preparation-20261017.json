@@ -1,0 +1,807 @@
+{
+  "date": "2026-10-17 America/Los_Angeles",
+  "deployment_branch": "codex/vercel-mac-tunnel-20261017",
+  "selected_base": "e9ae07fbf1e233d83c983803b3992b165eae163c",
+  "application_commit": "e4d3f14e288acf5379edd86b6decc0d27db15d85",
+  "frontend_deployment_commit": "df6df167831ff589378dd4492f8b165a8332fa2c",
+  "remote_refs_after_fetch": [
+    {
+      "ref": "origin",
+      "sha": "d2d4c6fbdff72de5b2d2c02aab0c39723513f3a8",
+      "contained_in_selected_base": false
+    },
+    {
+      "ref": "origin/c/model-agent",
+      "sha": "6389b705bec35b8fc44018d1c14d770f2a82b364",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/c4-latest-integration",
+      "sha": "20f793792ff4a9c0068e78add8669e3169d15513",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-b-sonar-safety",
+      "sha": "4fb8941ff6f706721766f64160989a90d2c90372",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-backend-history",
+      "sha": "d223b15ec782c84130fde05bd618a2ef7de8c168",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-backend-tick-performance",
+      "sha": "28daf1974ad52eedadef27164ece4b25f7a55548",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-final-main-latest",
+      "sha": "a4d40277847519f614d54a7d2eae519cae1b1ff6",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-handoff-refresh",
+      "sha": "3aa8dd99781c91ea9c2a52a165c7046bc42b41ec",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-options-publication",
+      "sha": "390687ab227014201fc122fdab657f0569e3ecb6",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/codex/harborguard-submission-latest",
+      "sha": "51d69b3b9f6776b34993c09a40c93306ea76a426",
+      "contained_in_selected_base": false
+    },
+    {
+      "ref": "origin/codex/harborguard-survey-observation-audit",
+      "sha": "aed4b8fe10acd49367dacc185f790597c3bc8591",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/demo/mac-integration",
+      "sha": "a02eb049f85e3860eccb7c9323bb2059718300b8",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/feature/3d-vertical-relief",
+      "sha": "171dbab0f4c06be95afac1160d7d27dff873b7b0",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/feature/a6-3d-integration",
+      "sha": "39908ebc8ecf2994b886b92ae7da3d55c1a7c777",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/feature/frontend-refresh-recovery",
+      "sha": "b549515337e0a50889d331ae397e4f381e4694ca",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/fix/3d-shoreline-realism",
+      "sha": "94e9a4c8ba89dd30d5650a870d3ab27cad341791",
+      "contained_in_selected_base": true
+    },
+    {
+      "ref": "origin/main",
+      "sha": "d2d4c6fbdff72de5b2d2c02aab0c39723513f3a8",
+      "contained_in_selected_base": false
+    }
+  ],
+  "git_unmerged_remote_refs": [
+    "origin",
+    "origin/codex/harborguard-submission-latest",
+    "origin/main"
+  ],
+  "checks": {
+    "production_build": "PASS",
+    "lint": "PASS",
+    "check:deployment": "PASS",
+    "check:a3": "PASS",
+    "check:recovery": "PASS",
+    "python_final": "260 passed in 50.77s"
+  },
+  "build": {
+    "node": "v24.19.0",
+    "cases": [
+      {
+        "case": "missing_both",
+        "exit_code": 1,
+        "seconds": 1.5741080839943606
+      },
+      {
+        "case": "missing_ws",
+        "exit_code": 1,
+        "seconds": 0.11787233297945932
+      },
+      {
+        "case": "insecure_api",
+        "exit_code": 1,
+        "seconds": 0.11374779100879095
+      },
+      {
+        "case": "insecure_ws",
+        "exit_code": 1,
+        "seconds": 0.1193132080079522
+      },
+      {
+        "case": "loopback_api",
+        "exit_code": 1,
+        "seconds": 0.11816045799059793
+      },
+      {
+        "case": "loopback_ws",
+        "exit_code": 1,
+        "seconds": 0.12255041699972935
+      },
+      {
+        "case": "credential_url",
+        "exit_code": 1,
+        "seconds": 0.12921554199419916
+      },
+      {
+        "case": "query_url",
+        "exit_code": 1,
+        "seconds": 0.1354477079876233
+      },
+      {
+        "case": "public_https_wss",
+        "exit_code": 0,
+        "seconds": 3.8611624999903142
+      }
+    ],
+    "bundles": [
+      {
+        "path": "frontend/dist/assets/Scene-BPiMFcdW.js",
+        "sha256": "76f93c57ac482845e759103ce8d629277b235d0092b38135a3d01a3c48ed4ef2"
+      },
+      {
+        "path": "frontend/dist/assets/index-gz6t-g1K.js",
+        "sha256": "360ce82c954931d4547ed8659716547b64111e7a185916f62f8c976616a9e0a4"
+      }
+    ],
+    "built_loopback_endpoints": 0,
+    "configured_endpoints": {
+      "VITE_API_BASE": "https://harborguard-backend.invalid/api",
+      "VITE_WS_URL": "wss://harborguard-backend.invalid/ws"
+    }
+  },
+  "browser": {
+    "scope": "Production bundle in local preview; HTTPS/WSS transport fixtures, not a public tunnel or model acceptance",
+    "checks": [
+      {
+        "path": "/",
+        "status": 200,
+        "live": true,
+        "restored_recommendation": true,
+        "metrics_integer_counts": true,
+        "sonar_loaded": true
+      },
+      {
+        "path": "/",
+        "reload": true,
+        "live": true,
+        "restored_recommendation": true
+      },
+      {
+        "path": "/operations",
+        "status": 200,
+        "live": true,
+        "restored_recommendation": true,
+        "metrics_integer_counts": true,
+        "sonar_loaded": true
+      },
+      {
+        "path": "/operations",
+        "reload": true,
+        "live": true
+      }
+    ],
+    "requests": [
+      {
+        "url": "http://127.0.0.1:5187/",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-gz6t-g1K.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-Be54Hfl6.css",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/zones.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/assets.json",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/buoys.json",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/zones",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/assets",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/buoys",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/harbor-osm.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/favicon.svg",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/events?since_seq=0",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/log?limit=200",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/detections/det-1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/sonar/det-1.png",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-gz6t-g1K.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-Be54Hfl6.css",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/zones",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/assets",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/buoys",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/zones.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/assets.json",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/buoys.json",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/harbor-osm.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/favicon.svg",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/events?since_seq=0",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/log?limit=200",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/detections/det-1",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/operations",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-gz6t-g1K.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-Be54Hfl6.css",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/zones.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/assets.json",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/buoys.json",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/zones",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/assets",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/buoys",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/harbor-osm.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/favicon.svg",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/events?since_seq=0",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/log?limit=200",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/detections/det-1",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/sonar/det-1.png",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/operations",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-gz6t-g1K.js",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/assets/index-Be54Hfl6.css",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/zones.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/assets.json",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/buoys.json",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/zones",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/assets",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/buoys",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/data/harbor-osm.geojson",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2809/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2810/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6559.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6558.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2808/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "https://tile.openstreetmap.org/14/2811/6560.png",
+        "method": "GET"
+      },
+      {
+        "url": "http://127.0.0.1:5187/favicon.svg",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/events?since_seq=0",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/log?limit=200",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/metrics",
+        "method": "GET"
+      },
+      {
+        "url": "https://harborguard-backend.invalid/api/options/A1",
+        "method": "GET"
+      }
+    ],
+    "sockets": [
+      "wss://harborguard-backend.invalid/ws",
+      "wss://harborguard-backend.invalid/ws",
+      "wss://harborguard-backend.invalid/ws",
+      "wss://harborguard-backend.invalid/ws"
+    ],
+    "page_errors": [],
+    "external_requests_blocked": [
+      "https://tile.openstreetmap.org/14/2809/6559.png",
+      "https://tile.openstreetmap.org/14/2810/6559.png",
+      "https://tile.openstreetmap.org/14/2809/6558.png",
+      "https://tile.openstreetmap.org/14/2810/6558.png",
+      "https://tile.openstreetmap.org/14/2809/6560.png",
+      "https://tile.openstreetmap.org/14/2810/6560.png",
+      "https://tile.openstreetmap.org/14/2808/6559.png",
+      "https://tile.openstreetmap.org/14/2811/6559.png",
+      "https://tile.openstreetmap.org/14/2808/6558.png",
+      "https://tile.openstreetmap.org/14/2811/6558.png",
+      "https://tile.openstreetmap.org/14/2808/6560.png",
+      "https://tile.openstreetmap.org/14/2811/6560.png",
+      "https://tile.openstreetmap.org/14/2809/6559.png",
+      "https://tile.openstreetmap.org/14/2810/6559.png",
+      "https://tile.openstreetmap.org/14/2809/6558.png",
+      "https://tile.openstreetmap.org/14/2810/6558.png",
+      "https://tile.openstreetmap.org/14/2809/6560.png",
+      "https://tile.openstreetmap.org/14/2810/6560.png",
+      "https://tile.openstreetmap.org/14/2808/6559.png",
+      "https://tile.openstreetmap.org/14/2811/6559.png",
+      "https://tile.openstreetmap.org/14/2808/6558.png",
+      "https://tile.openstreetmap.org/14/2811/6558.png",
+      "https://tile.openstreetmap.org/14/2808/6560.png",
+      "https://tile.openstreetmap.org/14/2811/6560.png",
+      "https://tile.openstreetmap.org/14/2809/6559.png",
+      "https://tile.openstreetmap.org/14/2810/6559.png",
+      "https://tile.openstreetmap.org/14/2809/6558.png",
+      "https://tile.openstreetmap.org/14/2810/6558.png",
+      "https://tile.openstreetmap.org/14/2809/6560.png",
+      "https://tile.openstreetmap.org/14/2810/6560.png",
+      "https://tile.openstreetmap.org/14/2808/6559.png",
+      "https://tile.openstreetmap.org/14/2811/6559.png",
+      "https://tile.openstreetmap.org/14/2808/6558.png",
+      "https://tile.openstreetmap.org/14/2811/6558.png",
+      "https://tile.openstreetmap.org/14/2808/6560.png",
+      "https://tile.openstreetmap.org/14/2811/6560.png",
+      "https://tile.openstreetmap.org/14/2809/6559.png",
+      "https://tile.openstreetmap.org/14/2810/6559.png",
+      "https://tile.openstreetmap.org/14/2809/6558.png",
+      "https://tile.openstreetmap.org/14/2810/6558.png",
+      "https://tile.openstreetmap.org/14/2809/6560.png",
+      "https://tile.openstreetmap.org/14/2810/6560.png",
+      "https://tile.openstreetmap.org/14/2808/6559.png",
+      "https://tile.openstreetmap.org/14/2811/6559.png",
+      "https://tile.openstreetmap.org/14/2808/6558.png",
+      "https://tile.openstreetmap.org/14/2811/6558.png",
+      "https://tile.openstreetmap.org/14/2808/6560.png",
+      "https://tile.openstreetmap.org/14/2811/6560.png"
+    ],
+    "loopback_backend_requests": 0,
+    "paid_cloud_calls": 0
+  },
+  "source_files": [
+    {
+      "path": ".env.example",
+      "sha256": "cb8d14f994fe31452b2a0a4d3183c5cf4b1f0daf883b35c929c916874d1d4902"
+    },
+    {
+      "path": "backend/app/main.py",
+      "sha256": "2eb20f19689be7bbdb62dd5f5f71cca5aff757b45c80390b4da63cf58ff32a82"
+    },
+    {
+      "path": "backend/tests/test_deployment_cors.py",
+      "sha256": "dacdd3f89bec761f1da49dd402d5239686c2f918e6d194e3f204763b9fd83911"
+    },
+    {
+      "path": "frontend/.env.example",
+      "sha256": "548d45fc3a68b756af82d2bf46580847fe91c4cb72b45cc13cf1fa2c6b8ba39f"
+    },
+    {
+      "path": "frontend/package.json",
+      "sha256": "ac1da1c32b5e518e848d231896f3dc18ef42c2d273618d2a58f77e953a6aab06"
+    },
+    {
+      "path": "frontend/scripts/verify-deployment.cjs",
+      "sha256": "6f4cfe93f0d545cf5587f4dd45212f7b81f6e09cad4f4d0e049d7483896e67cc"
+    },
+    {
+      "path": "frontend/vercel.json",
+      "sha256": "52de9ee0c7f0e3e2ec29608dfd5b7c6d9820e47d56a0b248338655b6a587ecab"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "sha256": "574280e11d4e422a2fd62a2f560cf442f6014485267073ab3776e368fe88b6e6"
+    }
+  ],
+  "limits": [
+    "Public Vercel deployment and actual Mac HTTPS/WSS tunnel not started or validated.",
+    "Browser uses controlled contract fixtures; no model-quality or full P0 acceptance claim.",
+    "Cloudflared and Vercel CLI not installed; existing services not restarted."
+  ],
+  "logs": {
+    "production-build.log": {
+      "path": "/tmp/harborguard-vercel-prep-20261017/production-build.log",
+      "sha256": "974f984225410652194b3e19ffb708e0e5f3869d2cdcdd2a927b58e0acabc18e"
+    },
+    "pytest-final.log": {
+      "path": "/tmp/harborguard-vercel-prep-20261017/pytest-final.log",
+      "sha256": "a6d4e91394b24c691354edf6e3117ac26e57cd43f4d35283d59a67f726f4508d"
+    }
+  },
+  "final_remote_review": {
+    "origin_main": "d2d4c6fbdff72de5b2d2c02aab0c39723513f3a8",
+    "new_submission_branch": "51d69b3b9f6776b34993c09a40c93306ea76a426",
+    "changed_paths_after_base": [
+      "README.md",
+      "docs/README.zh-CN.md",
+      "docs/devpost-story-en.md",
+      "docs/twist-responses-en.md"
+    ],
+    "frontend_backend_agent_ml_equal_to_selected_base": true,
+    "selection": "Keep tested deployment application tree; later upstream differences are submission documents only."
+  },
+  "runbook_sha256": "390029d844770eb590306781de09836d18f0c5776fee6d2a25ee0b161b967e62"
+}

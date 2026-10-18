@@ -17,6 +17,13 @@ from .storage import HistoryStore, StorageError
 logger = logging.getLogger(__name__)
 
 
+def _cors_origins():
+    configured = os.getenv("ALLOWED_ORIGINS")
+    if configured is None:
+        return config.ALLOWED_ORIGINS
+    return [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()]
+
+
 def create_app(*, run_loop=True, debug_truth=None, storage_path=None):
     @asynccontextmanager
     async def lifespan(app):
@@ -80,7 +87,7 @@ def create_app(*, run_loop=True, debug_truth=None, storage_path=None):
         logger.error("Durable history failure: %s", exc, exc_info=exc)
         request.app.state.engine.persistence_error = str(exc)
         return JSONResponse(status_code=503, content={"detail": "Durable history unavailable; operation not confirmed. Inspect backend logs."})
-    app.add_middleware(CORSMiddleware, allow_origins=config.ALLOWED_ORIGINS,
+    app.add_middleware(CORSMiddleware, allow_origins=_cors_origins(),
                        allow_methods=["GET","POST","OPTIONS"], allow_headers=["*"])
     app.include_router(rest.router)
     app.include_router(ws.router)
