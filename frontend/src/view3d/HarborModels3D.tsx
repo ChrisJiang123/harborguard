@@ -65,7 +65,7 @@ function PortBuildings({ data, verticalScale, terrain }: { data: LocalBase; vert
   return <group scale={[1, verticalScale, 1]}><mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><meshStandardMaterial color="#e1e8ec" roughness={.9} metalness={.04} flatShading /></mesh></group>
 }
 
-export function HarborModels3D({ verticalScale, onStatus, quayWalls = true, smoothing = true, shoreline = true, floor, detailFloor }: { verticalScale: number; onStatus: (status: string) => void; quayWalls?: boolean; smoothing?: boolean; shoreline?: boolean; floor?: BathymetryGrid | null; detailFloor?: BathymetryGrid | null }) {
+export function HarborModels3D({ verticalScale, onStatus, quayWalls = true, smoothing = true, coastSmoothing = true, shoreline = true, floor, detailFloor }: { verticalScale: number; onStatus: (status: string) => void; quayWalls?: boolean; smoothing?: boolean; coastSmoothing?: boolean; shoreline?: boolean; floor?: BathymetryGrid | null; detailFloor?: BathymetryGrid | null }) {
   const [base, setBase] = useState<LocalBase | null>(null)
   const [buildings, setBuildings] = useState<LocalBase | null>(null)
   const [terrain, setTerrain] = useState<ShoreTerrainGrid | null>(null)
@@ -87,7 +87,7 @@ export function HarborModels3D({ verticalScale, onStatus, quayWalls = true, smoo
     {base && <PortLines data={base} terrain={terrain} verticalScale={verticalScale} />}
     {/* Local imagery may still be decoding. Keep the canvas, water and survey
         mounted rather than propagating its suspension to the entire 3D view. */}
-    {terrain && <Suspense fallback={null}><CoastalTerrain3D grid={terrain} verticalScale={verticalScale} quayWalls={quayWalls} smoothing={smoothing} shoreline={shoreline} floor={floor} detailFloor={detailFloor} /></Suspense>}
+    {terrain && <Suspense fallback={null}><CoastalTerrain3D grid={terrain} verticalScale={verticalScale} quayWalls={quayWalls} smoothing={smoothing} coastSmoothing={coastSmoothing} shoreline={shoreline} floor={floor} detailFloor={detailFloor} /></Suspense>}
     {buildings && <PortBuildings data={buildings} verticalScale={verticalScale} terrain={terrain} />}
   </group>
 }

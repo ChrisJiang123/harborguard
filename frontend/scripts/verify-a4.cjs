@@ -14,6 +14,7 @@ const { buildSeabedMeshData, surveyEdgeOpacity, surveyEdgeFade } = require(path.
 const { heightfieldNormals, smoothRegionalHeights } = require(path.join(root,'view3d/heightfield.js'))
 const { regionalMeshData, regionalDetailGrid } = require(path.join(root,'view3d/regionalMesh.js'))
 const { quayFloorSampler } = require(path.join(root,'view3d/quayClosure.js'))
+const { coastalBoundary } = require(path.join(root,'view3d/coastalBoundary.js'))
 const { stitchTerrainBoundary } = require(path.join(root,'view3d/stitchTerrain.js'))
 const { DEMO_ASSETS, DEMO_BUOYS, DEMO_ZONES } = require(path.join(root, 'data/demoGeometry.js'))
 const { createMockEngine } = require(path.join(root, 'data/mock.js'))
@@ -130,6 +131,46 @@ assert.ok(dem.values.some(value => value === dem.metadata.nodata_value))
 assert.ok(dem.values.some(value => value > 0 && value !== dem.metadata.nodata_value))
 const shoreTerrain = parseShoreTerrain(JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '../public/data/shore-dem-usgs-3dep.json'), 'utf8')))
 assert.ok(shoreTerrain)
+// Reconstruct the bundled mask, including narrow spits, islands and crop edges.
+// Check geometry rather than mirroring RDP: no elevation edits, inverted faces,
+// unbounded relocation, source-mask edits or movement of the outer crop edge.
+{
+  const {width,height,nodata_value,spacing_m_approx} = shoreTerrain.metadata
+  const mask = Uint8Array.from(shoreTerrain.values,v=>v!==nodata_value?1:0)
+  const positions = new Float32Array(mask.length*3)
+  for(let r=0;r<height;r++) for(let c=0;c<width;c++) {
+    const i=r*width+c
+    positions[i*3]=c*spacing_m_approx.east_west
+    positions[i*3+1]=mask[i]?shoreTerrain.values[i]:0
+    positions[i*3+2]=r*spacing_m_approx.north_south
+  }
+  const original=positions.slice(), originalMask=mask.slice()
+  const edges=coastalBoundary(positions,mask,width,height,10)
+  assert.deepEqual(mask,originalMask,'shoreline reconstruction must not fill missing elevation samples')
+  for(let i=0;i<mask.length;i++) {
+    assert.equal(positions[i*3+1],original[i*3+1],'height is unchanged by contour reconstruction')
+    const displacement=Math.hypot(positions[i*3]-original[i*3],positions[i*3+2]-original[i*3+2])
+    assert.ok(displacement<=10.002,'bounded horizontal display reconstruction')
+    if(!mask[i]||i%width===0||i%width===width-1||i<width||i>=width*(height-1)) assert.ok(displacement<.002,'NoData and outer crop coordinates stay pinned')
+  }
+  const area=(a,b,c)=>(positions[b*3]-positions[a*3])*(positions[c*3+2]-positions[a*3+2])-(positions[b*3+2]-positions[a*3+2])*(positions[c*3]-positions[a*3])
+  for(let r=0;r<height-1;r++) for(let c=0;c<width-1;c++) {
+    const a=r*width+c,b=a+1,e=a+width,d=e+1
+    if([a,b,e,d].every(i=>mask[i])) assert.ok(area(a,b,e)>=0 && area(b,d,e)>=0,'no inverted triangles or cracks from boundary displacement')
+  }
+  let beforeTurns=0,afterTurns=0
+  const next=new Map(edges.map(([a,b])=>[a,b]))
+  for(const [a,b] of edges) {
+    const c=next.get(b)
+    if(c===undefined) continue
+    for(const [p,isAfter] of [[original,false],[positions,true]]) {
+      const ux=p[b*3]-p[a*3],uz=p[b*3+2]-p[a*3+2],vx=p[c*3]-p[b*3],vz=p[c*3+2]-p[b*3+2],length=Math.hypot(ux,uz)*Math.hypot(vx,vz)
+      if(length>.001 && (ux*vx+uz*vz)/length<.5) { if(isAfter) afterTurns++;else beforeTurns++ }
+    }
+  }
+  assert.ok(afterTurns<beforeTurns*.2,'remove repeated raster right-angle teeth while preserving constrained corners')
+  console.log(`PASS bounded shoreline reconstruction: ${beforeTurns} -> ${afterTurns} sharp turns; no inverted faces, source heights or NoData edits.`)
+}
 assert.equal(shoreTerrain.metadata.vertical_datum, 'NAVD88')
 assert.equal(shoreTerrain.metadata.vertical_units, 'm')
 assert.equal(shoreTerrain.metadata.grid_registration,'pixel_centres')

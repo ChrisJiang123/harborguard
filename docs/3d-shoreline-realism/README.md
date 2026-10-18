@@ -4,6 +4,11 @@ Branch: `fix/3d-shoreline-realism`, based on `main` `99d7091`.
 Stack: React 19, strict TypeScript, React Three Fiber 9 / drei / Three.js.
 No new JavaScript runtime dependency; postprocessing uses Three.js add-ons.
 
+The later [raster-edge follow-up](coast-edge-followup/README.md) reconstructs
+the land outline and replaces the original fan-shaped quay closure. It includes
+same-camera off/on crops and separate short browser samples; those records
+supersede the quay description below for the current branch.
+
 Complete [changed-file list](changed-files.txt) and [data/provenance hashes](data-manifest.json) accompany this report.
 
 ## Scope and precedence

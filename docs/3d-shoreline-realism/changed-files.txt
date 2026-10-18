@@ -8,6 +8,10 @@ docs/3d-shoreline-realism/before-surface.png
 docs/3d-shoreline-realism/before-underwater.png
 docs/3d-shoreline-realism/browser-evidence.json
 docs/3d-shoreline-realism/changed-files.txt
+docs/3d-shoreline-realism/coast-edge-followup/README.md
+docs/3d-shoreline-realism/coast-edge-followup/browser-samples.json
+docs/3d-shoreline-realism/coast-edge-followup/contour-off.png
+docs/3d-shoreline-realism/coast-edge-followup/contour-on.png
 docs/3d-shoreline-realism/data-manifest.json
 frontend/3D-VALIDATION.md
 frontend/MULTIBEAM-VALIDATION.md
@@ -34,6 +38,7 @@ frontend/src/view3d/RenderEffects.tsx
 frontend/src/view3d/Scene.tsx
 frontend/src/view3d/Seabed.tsx
 frontend/src/view3d/Water.tsx
+frontend/src/view3d/coastalBoundary.ts
 frontend/src/view3d/heightfield.ts
 frontend/src/view3d/quayClosure.ts
 frontend/src/view3d/regionalMesh.ts
