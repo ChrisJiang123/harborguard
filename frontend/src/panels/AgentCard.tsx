@@ -1,4 +1,4 @@
-import { englishText } from '../data/english'
+import { englishText, hasHanText, ENGLISH_UNAVAILABLE } from '../data/english'
 import { useEffect, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { api } from '../data/api'
@@ -63,7 +63,7 @@ export function AgentCard() {
     })
   }
   return <section className="agent-section"><SectionHeading index="03" title="Agent Recommendation" note={alertId ?? 'Standby'} />
-    {rec ? <div className="agent-body"><div className="agent-meta"><span className={`model-badge ${rec.model}`}>{MODELS[rec.model]}</span><span>Confidence: {CONFIDENCE[rec.confidence]}</span></div><h3>{englishText(rec.summary)}</h3><details className="agent-explanation"><summary>View recommendation details</summary><p>{englishText(rec.explanation)}</p></details>
+    {rec ? <div className="agent-body"><div className="agent-meta"><span className={`model-badge ${rec.model}`}>{MODELS[rec.model]}</span><span>Confidence: {CONFIDENCE[rec.confidence]}</span></div><h3>{englishText(rec.summary)}</h3>{[rec.summary,rec.explanation,...rec.uncertainties].some(hasHanText) && <p className="muted">{[rec.summary,rec.explanation,...rec.uncertainties].some(text => englishText(text) === ENGLISH_UNAVAILABLE) ? 'Some source text has no English translation' : 'English display translation'} · Original source record retained</p>}<details className="agent-explanation"><summary>View recommendation details</summary><p>{englishText(rec.explanation)}</p></details>
       {rec.uncertainties.length > 0 && <ul className="uncertainty-list">{rec.uncertainties.map((text, index) => <li key={index}>{englishText(text)}</li>)}</ul>}
       <EvidenceChips recommendation={rec} />
       {alertId && <div className="decision-area"><label className="operator-label">Operator<input aria-label="Operator name" value={operator} maxLength={32} onChange={event => setOperator(event.target.value)} disabled={!!pending || !!confirmed || !!requested || !!uncertain} /></label>

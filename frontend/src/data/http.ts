@@ -1,3 +1,5 @@
+import { englishText } from './english'
+
 export class APIError extends Error {
   readonly status: number
   constructor(message: string, status = 0) { super(message); this.name = 'APIError'; this.status = status }
@@ -16,7 +18,7 @@ export async function requestJSON<T>(url: string, init: RequestInit = {}): Promi
         const payload: unknown = await response.json()
         if (payload && typeof payload === 'object' && 'detail' in payload && typeof payload.detail === 'string') detail = payload.detail.slice(0, 180)
       } catch { /* HTTP status remains actionable when there is no JSON body. */ }
-      throw new APIError(detail || `Backend returned HTTP ${response.status}.`, response.status)
+      throw new APIError(detail ? englishText(detail) : `Backend returned HTTP ${response.status}.`, response.status)
     }
     if (response.status === 204) return undefined as T
     try { return await response.json() as T } catch { throw new APIError('The backend response is not valid JSON.', response.status) }

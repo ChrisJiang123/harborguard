@@ -1,3 +1,4 @@
+import { englishText } from '../data/english'
 import { MapView } from '../map2d/MapView'
 import { useHarbor } from '../store/useHarbor'
 import { lazy, Suspense } from 'react'
@@ -29,7 +30,7 @@ function StatusNotice() {
   const error = useHarbor(s => s.error)
   const conn = useHarbor(s => s.conn)
   const recovery = useHarbor(s => s.recovery)
-  if (error) return <div className="status-notice error" role="alert">{error}<button onClick={() => useHarbor.getState().setError(null)} aria-label="Dismiss message">×</button></div>
+  if (error) return <div className="status-notice error" role="alert">{englishText(error)}<button onClick={() => useHarbor.getState().setError(null)} aria-label="Dismiss message">×</button></div>
   if (conn === 'disconnected' || conn === 'connecting') return <div className="status-notice">{conn === 'connecting' ? 'Connecting to backend…' : 'Backend disconnected. Reconnecting automatically.'} Select Local Demo in the top bar to continue.</div>
   if (conn === 'live' && recovery.phase === 'loading') return <div className="status-notice">Restoring history and joining live events…</div>
   if (conn === 'live' && recovery.message) return <div className="status-notice warning" role="status">{recovery.message} Approval status is never inferred from free-text logs.</div>
