@@ -178,8 +178,8 @@ def test_pending_retry_state_survives_same_database_restart_and_failed_commit(tm
     game.decision.pinger.classifier = Responses((None, 0))
     game.step(1)
     attempts = copy.deepcopy(game.decision.disaster.attempts)
-    assert {key: a["count"] for key, a in attempts.items()} == {
-        "debris1": 1, "debris2": 1, "debris3": 0, "debris4": 1}
+    assert {a["zone_id"]: a["count"] for a in attempts.values()} == {
+        "channel_main_n": 1, "channel_turning": 1, "berth_fuel": 0, "anchorage_north": 1}
     before = checkpoint.capture(game)
     seq = game.bus.seq
     store.connection.execute("CREATE TRIGGER fail_tick BEFORE UPDATE ON runtime BEGIN SELECT RAISE(ABORT,'injected failure'); END")
@@ -198,6 +198,6 @@ def test_pending_retry_state_survives_same_database_restart_and_failed_commit(tm
     restored.step(18)
     assert restored.decision.disaster.attempts == attempts
     restored.step(2)
-    assert {key: a["count"] for key, a in restored.decision.disaster.attempts.items()} == {
-        "debris1": 2, "debris2": 2, "debris3": 0, "debris4": 2}
+    assert {a["zone_id"]: a["count"] for a in restored.decision.disaster.attempts.values()} == {
+        "channel_main_n": 2, "channel_turning": 2, "berth_fuel": 0, "anchorage_north": 2}
     store.close()
