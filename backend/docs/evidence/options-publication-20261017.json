@@ -1,0 +1,101 @@
+{
+  "source_sha": "e1b33055883b6bef8e003fc61a2c9f43178cfac1",
+  "branch": "codex/harborguard-options-publication",
+  "base_main": "a841bf9a70d8bf8237b9e03763852a34bed10368",
+  "original_fix_commit": "fe0681e7be706ba33a39dfc8dd1e8b2589749de1",
+  "pytest": {
+    "total": 239,
+    "passed": 237,
+    "skipped": 2,
+    "failed": 0,
+    "skip_reasons": [
+      "无 .cache/yolo26n.pt",
+      "无 .cache/yolo26n.pt（先跑 check_c0 下载）"
+    ],
+    "wall_s": 152.24
+  },
+  "main_new_regressions": "5 FAIL (intentional RED check outside existing main suite)",
+  "stream": {
+    "frames": 251,
+    "mean_hz": 4.988394410612747,
+    "max_gap_ms": 349.019599998428,
+    "max_bytes": 25585,
+    "max_rss_mb": 430.73828125,
+    "cpu_percent_one_core": 48.76401966310014
+  },
+  "t": 632.0,
+  "rest_matches_last_options_event": true,
+  "recommendation_model": "template",
+  "recommendation_summary": "推荐 最小封闭：残余风险 0.10，延误 6.0 船时",
+  "browser_metrics": {
+    "source_sha": "e1b33055883b6bef8e003fc61a2c9f43178cfac1",
+    "base_main": "a841bf9a70d8bf8237b9e03763852a34bed10368",
+    "actual_sim_point": ">=630",
+    "expected_rest_and_ws_risk": 0.1,
+    "table": "Alert A1 source-provided option metrics. Hover a row to preview restricted zones\nOption\tBerths\n%\tVessels\tDelay\nh\tRisk\n%\n\n★ Minimum Closure\n\t75%\t3\t6.0\t10%\n\nExtended Buffer + Speed Limit\n\t75%\t3\t6.0\t10%\n\nAsset Perimeter Closure\n\t33%\t7\t14.0\t10%\n\nFull Port Closure\nBaseline\n\t0%\t27\t162.0\t10%",
+    "headings": [
+      "HarborGuard",
+      "Alert Targets",
+      "Buoy Array",
+      "Port Overview",
+      "Agent Recommendation",
+      "推荐 最小封闭：残余风险 0.10，延误 6.0 船时",
+      "Response Options",
+      "Activity Log",
+      "Event Timeline",
+      "Risk Breakdown · T3"
+    ],
+    "result": "PASS current-main candidate UI/REST/WS/Agent agree"
+  },
+  "decisions": {
+    "source_sha": "e1b33055883b6bef8e003fc61a2c9f43178cfac1",
+    "frontend_base": "a841bf9",
+    "decisions": [
+      {
+        "type": "event",
+        "seq": 1158,
+        "t": 632.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A1",
+          "option_id": "opt-1",
+          "action": "reject",
+          "operator": "Operator A"
+        }
+      },
+      {
+        "type": "event",
+        "seq": 1201,
+        "t": 632.0,
+        "event": "decision",
+        "data": {
+          "alert_id": "A1",
+          "option_id": "opt-1",
+          "action": "reject",
+          "operator": "QA_CURRENT_2"
+        }
+      }
+    ],
+    "restricted": false
+  },
+  "A_R2_still_fails": {
+    "source_sha": "e1b33055883b6bef8e003fc61a2c9f43178cfac1",
+    "frontend_base": "a841bf9",
+    "statuses": [
+      "Rejected · 10:32 · Operator A"
+    ],
+    "expected_latest_operator": "QA_CURRENT_2",
+    "result": "FAIL: UI still shows Operator A instead of newer QA_CURRENT_2"
+  },
+  "pushed": false,
+  "merged_to_main": false,
+  "main_broadcast_bug_reproduced": true,
+  "files": [
+    "backend/app/decision/__init__.py",
+    "backend/tests/test_option_publication.py"
+  ],
+  "scope": "B implementation/tests only; no A/C/shared/data changes",
+  "old_fe_browser_full_flow_wall_s": 304.626,
+  "old_fe_browser_scope": "Earlier 5a68-based fix, not current e1 complete browser acceptance",
+  "current_e1_full_browser_flow": "PENDING; actual current browser metrics and Reject checked"
+}
