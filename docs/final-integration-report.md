@@ -1,5 +1,7 @@
 # HarborGuard 主线交接资料最终集成检查
 
+后续业务P0补充：[未决观测、投影与真值依赖审计](../backend/docs/survey-p0-audit.md)。本报告的构建/接口/浏览器流程结论不证明实际复航安全；旧12小时结论不得继续展示为可靠结果。
+
 日期：2026-10-17，America/Los_Angeles。基线为官方仓库 main `782d04d61858cca4849f7ff39942394e5b56d1f3`。本次响应负责人“核查旧 #3/#6、整理并重新 Push”的要求，不自动 Merge main、Force Push、关闭旧 PR 或修改 A/C。
 
 **旧的两次 Push 均已在 GitHub，内容并未丢失；但没有进 main，且现在都有 README 冲突。** 后端实现已经由其他 PR 合入，无需重写。需要迁移的是仍缺失的 B 交接工具、OpenAPI、Mock 和操作文档。本分支以当前 main 为基线整理这些内容，避免重合旧候选或沿用过时结论。

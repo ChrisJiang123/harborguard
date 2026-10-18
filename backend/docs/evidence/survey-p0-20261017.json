@@ -1,0 +1,857 @@
+{
+  "date": "2026-10-17",
+  "timezone": "America/Los_Angeles",
+  "audit_base": "c7840813c6a98c32ada5b91da6e6221dc74b121d",
+  "code_sha": "97a8c751c8ba9a18a6e89ace79f27df99751f28f",
+  "C_sha": "6389b705bec35b8fc44018d1c14d770f2a82b364",
+  "weights_sha256": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839",
+  "original_failure_source": {
+    "commit": "3f237b87866592d43064c76a93083c0f67ac3bd0",
+    "B": "8613834e7430eee40d2f020e6277dbdec72ca1f5",
+    "Lenovo_exact_checkout_SHA": "NOT PROVIDED; do not infer exact identity",
+    "raw_sha256": "f484600cb8928e3b852b38d13ad6b4f6c52b779914782108215e4704ffa90ae7",
+    "archive_lf_sha256": "af60d388d68cc650668e53dc2a8d7ba1b6daca84f672bb0468c70faa401aa036",
+    "archive_note": "Original JSON values preserved; line endings normalized to LF for Git"
+  },
+  "original_bad_frames_retested": [
+    {
+      "targets": [
+        {
+          "cls": "debris",
+          "range_m": 249.99999989924544,
+          "bearing_deg": 0.0,
+          "length_m": 8.0,
+          "width_m": 3.0,
+          "aspect_deg": 0.0
+        }
+      ],
+      "seed": 2029167940,
+      "current_model": "yolo26n",
+      "current_detections": [
+        {
+          "cls": "uuv",
+          "conf": 0.5951961874961853,
+          "bbox": [
+            316.0,
+            326.0,
+            323.0,
+            338.0
+          ]
+        }
+      ],
+      "current_png_sha256": "580101e5352821721862c314c112ab1f319bac510f5b78bed7ccb6bf11ac562d"
+    },
+    {
+      "targets": [
+        {
+          "cls": "debris",
+          "range_m": 0.0,
+          "bearing_deg": 0.0,
+          "length_m": 8.0,
+          "width_m": 3.0,
+          "aspect_deg": 0.0
+        }
+      ],
+      "seed": 1926751965,
+      "current_model": "yolo26n",
+      "current_detections": [],
+      "current_png_sha256": "52310361d83a5dc284fc35f77111d7bc9d8b4e9b2703d2247048c4cbc00f9c4b"
+    }
+  ],
+  "controlled_cases": [
+    {
+      "injected_result": {
+        "cls": null,
+        "conf": 0
+      },
+      "timeline": [
+        {
+          "t": 0.1,
+          "coverage": 0.91,
+          "state": "unsurveyed",
+          "attempt_count": 1,
+          "reason": "no_detection"
+        },
+        {
+          "t": 20.1,
+          "coverage": 0.93,
+          "state": "unsurveyed",
+          "attempt_count": 2,
+          "reason": "no_detection"
+        },
+        {
+          "t": 30.7,
+          "coverage": 0.9500000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 2,
+          "reason": "no_detection"
+        },
+        {
+          "t": 40.1,
+          "coverage": 0.9700000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "no_detection"
+        },
+        {
+          "t": 40.2,
+          "coverage": 0.9900000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "no_detection"
+        },
+        {
+          "t": 1000,
+          "coverage": 1.0,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "no_detection"
+        }
+      ],
+      "physical_calls": 3,
+      "plan": {
+        "route_zone_ids": [],
+        "reopen_berth_zone_ids": [],
+        "unsurveyed_zone_ids": [
+          "berth",
+          "entrance",
+          "far",
+          "main",
+          "remote"
+        ],
+        "blocked_zone_ids": [],
+        "est_hours_saved": 0.0
+      }
+    },
+    {
+      "injected_result": {
+        "cls": "uuv",
+        "conf": 0.5951961875
+      },
+      "timeline": [
+        {
+          "t": 0.1,
+          "coverage": 0.91,
+          "state": "unsurveyed",
+          "attempt_count": 1,
+          "reason": "non_debris"
+        },
+        {
+          "t": 20.1,
+          "coverage": 0.93,
+          "state": "unsurveyed",
+          "attempt_count": 2,
+          "reason": "non_debris"
+        },
+        {
+          "t": 30.7,
+          "coverage": 0.9500000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 2,
+          "reason": "non_debris"
+        },
+        {
+          "t": 40.1,
+          "coverage": 0.9700000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "non_debris"
+        },
+        {
+          "t": 40.2,
+          "coverage": 0.9900000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "non_debris"
+        },
+        {
+          "t": 1000,
+          "coverage": 1.0,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "non_debris"
+        }
+      ],
+      "physical_calls": 3,
+      "plan": {
+        "route_zone_ids": [],
+        "reopen_berth_zone_ids": [],
+        "unsurveyed_zone_ids": [
+          "berth",
+          "entrance",
+          "far",
+          "main",
+          "remote"
+        ],
+        "blocked_zone_ids": [],
+        "est_hours_saved": 0.0
+      }
+    },
+    {
+      "injected_result": {
+        "cls": "debris",
+        "conf": 0.49
+      },
+      "timeline": [
+        {
+          "t": 0.1,
+          "coverage": 0.91,
+          "state": "unsurveyed",
+          "attempt_count": 1,
+          "reason": "low_confidence"
+        },
+        {
+          "t": 20.1,
+          "coverage": 0.93,
+          "state": "unsurveyed",
+          "attempt_count": 2,
+          "reason": "low_confidence"
+        },
+        {
+          "t": 30.7,
+          "coverage": 0.9500000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 2,
+          "reason": "low_confidence"
+        },
+        {
+          "t": 40.1,
+          "coverage": 0.9700000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "low_confidence"
+        },
+        {
+          "t": 40.2,
+          "coverage": 0.9900000000000001,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "low_confidence"
+        },
+        {
+          "t": 1000,
+          "coverage": 1.0,
+          "state": "unsurveyed",
+          "attempt_count": 3,
+          "reason": "low_confidence"
+        }
+      ],
+      "physical_calls": 3,
+      "plan": {
+        "route_zone_ids": [],
+        "reopen_berth_zone_ids": [],
+        "unsurveyed_zone_ids": [
+          "berth",
+          "entrance",
+          "far",
+          "main",
+          "remote"
+        ],
+        "blocked_zone_ids": [],
+        "est_hours_saved": 0.0
+      }
+    },
+    {
+      "name": "0m-only-geometry",
+      "coverage": 1.0,
+      "state": "unsurveyed",
+      "physical_calls": 0,
+      "attempts": {
+        "echo:0:0": {
+          "zone_id": "entrance",
+          "count": 0,
+          "zone_ids": [
+            "entrance"
+          ],
+          "last_t": null,
+          "buoy_ids": [],
+          "reason": "near_field",
+          "x": 0.0,
+          "y": 0.0,
+          "reported": [
+            "near_field",
+            0,
+            [
+              "entrance"
+            ]
+          ]
+        }
+      },
+      "logs": [
+        {
+          "t": 0.1,
+          "level": "warn",
+          "source": "decision",
+          "text": "分区 entrance：近场成像边界，缺少可靠观测位置；保持未勘测/待复核（已发射0/3，达到上限也不自动清除）"
+        }
+      ],
+      "plan": {
+        "route_zone_ids": [],
+        "reopen_berth_zone_ids": [],
+        "unsurveyed_zone_ids": [
+          "entrance",
+          "far"
+        ],
+        "blocked_zone_ids": [],
+        "est_hours_saved": 4.5
+      }
+    }
+  ],
+  "real_B_three_runs": [
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 5.259985899998355,
+      "max_state_bytes": 2035,
+      "first_levels": {},
+      "first_uuv_t": null,
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "tick_ms": {
+        "p50": 1.425750000635162,
+        "p95": 2.5353650010401907,
+        "p99": 2.8969459995460056,
+        "max": 2214.238900000055
+      },
+      "semantic_sha256": "d62b9d1ba6e35a6f07c41096cf0be114c18b3a3583a0822774ec3e29c7cc917d",
+      "model_calls": [
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 164.01219168436918,
+              "bearing_deg": -9.008023482692806e-07,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 127.56859190617996
+            }
+          ],
+          "seed": 2029167940,
+          "ms": 2024.1823999986082,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8238485455513,
+              "bbox": [
+                313.0,
+                433.0,
+                326.0,
+                443.0
+              ]
+            }
+          ]
+        },
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 99.99999998285303,
+              "bearing_deg": 3.0584398871269514e-06,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 90.00000305843989
+            }
+          ],
+          "seed": 1342382291,
+          "ms": 91.62829999877431,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8103097677230835,
+              "bbox": [
+                314.0,
+                513.0,
+                326.0,
+                520.0
+              ]
+            }
+          ]
+        },
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 249.99999989924544,
+              "bearing_deg": 7.130211088224314e-07,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 143.13010305647325
+            }
+          ],
+          "seed": 1469265225,
+          "ms": 92.926899998929,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8638888001441956,
+              "bbox": [
+                313.0,
+                327.0,
+                325.0,
+                338.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 1.4122178999987227,
+      "max_state_bytes": 2035,
+      "first_levels": {},
+      "first_uuv_t": null,
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "tick_ms": {
+        "p50": 1.428349998604972,
+        "p95": 2.4446799994620956,
+        "p99": 2.741515000398067,
+        "max": 370.10170000030485
+      },
+      "semantic_sha256": "d62b9d1ba6e35a6f07c41096cf0be114c18b3a3583a0822774ec3e29c7cc917d",
+      "model_calls": [
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 164.01219168436918,
+              "bearing_deg": -9.008023482692806e-07,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 127.56859190617996
+            }
+          ],
+          "seed": 2029167940,
+          "ms": 187.76419999994687,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8238485455513,
+              "bbox": [
+                313.0,
+                433.0,
+                326.0,
+                443.0
+              ]
+            }
+          ]
+        },
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 99.99999998285303,
+              "bearing_deg": 3.0584398871269514e-06,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 90.00000305843989
+            }
+          ],
+          "seed": 1342382291,
+          "ms": 93.01799999957439,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8103097677230835,
+              "bbox": [
+                314.0,
+                513.0,
+                326.0,
+                520.0
+              ]
+            }
+          ]
+        },
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 249.99999989924544,
+              "bearing_deg": 7.130211088224314e-07,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 143.13010305647325
+            }
+          ],
+          "seed": 1469265225,
+          "ms": 83.38089999961085,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8638888001441956,
+              "bbox": [
+                313.0,
+                327.0,
+                325.0,
+                338.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "b",
+      "simulated_s": 600.0,
+      "wall_s": 1.796965999999884,
+      "max_state_bytes": 2035,
+      "first_levels": {},
+      "first_uuv_t": null,
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "tick_ms": {
+        "p50": 2.0610999999917112,
+        "p95": 3.011399999286368,
+        "p99": 3.260116001310962,
+        "max": 450.5816999990202
+      },
+      "semantic_sha256": "d62b9d1ba6e35a6f07c41096cf0be114c18b3a3583a0822774ec3e29c7cc917d",
+      "model_calls": [
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 164.01219168436918,
+              "bearing_deg": -9.008023482692806e-07,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 127.56859190617996
+            }
+          ],
+          "seed": 2029167940,
+          "ms": 222.4487000003137,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8238485455513,
+              "bbox": [
+                313.0,
+                433.0,
+                326.0,
+                443.0
+              ]
+            }
+          ]
+        },
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 99.99999998285303,
+              "bearing_deg": 3.0584398871269514e-06,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 90.00000305843989
+            }
+          ],
+          "seed": 1342382291,
+          "ms": 108.64840000067488,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8103097677230835,
+              "bbox": [
+                314.0,
+                513.0,
+                326.0,
+                520.0
+              ]
+            }
+          ]
+        },
+        {
+          "t": 0.1,
+          "targets": [
+            {
+              "cls": "debris",
+              "range_m": 249.99999989924544,
+              "bearing_deg": 7.130211088224314e-07,
+              "length_m": 8.0,
+              "width_m": 3.0,
+              "aspect_deg": 143.13010305647325
+            }
+          ],
+          "seed": 1469265225,
+          "ms": 112.30539999996836,
+          "model": "yolo26n",
+          "detections": [
+            {
+              "cls": "debris",
+              "conf": 0.8638888001441956,
+              "bbox": [
+                313.0,
+                327.0,
+                325.0,
+                338.0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": {
+    "initial_full": {
+      "tests": "211",
+      "failures": "1",
+      "errors": "0",
+      "skipped": "2",
+      "time": "89.020"
+    },
+    "initial_failure": "Full stub positive generated six instead of four detections due undefined origin azimuth; fixed without weakening assertion.",
+    "before_moving_contact_budget_guard": {
+      "tests": "212",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "2",
+      "time": "89.260"
+    },
+    "targeted_final": {
+      "tests": "35",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "6.043"
+    },
+    "full_delivery": {
+      "tests": "213",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "2",
+      "time": "93.869"
+    },
+    "skip_reason": "Two optional COCO smoke weights absent; delivered sonar weights exercised."
+  },
+  "real_HTTP_WS": {
+    "kind": "HTTP/WS integration, not browser/field acceptance",
+    "directory": "C:\\Users\\Administrator\\.codex\\worktrees\\harborguard-b-sonar-safety\\marine\\artifacts\\survey-audit\\live-delivery",
+    "cold_start_to_health_s": 5.8983747999991465,
+    "restart_to_health_s": 5.784862099999373,
+    "restart_persistence": "PASS",
+    "stream": {
+      "frames": 294,
+      "mean_hz": 4.997329389522996,
+      "max_gap_ms": 363.5561000010057,
+      "p99_gap_ms": 267.6472419999834,
+      "max_bytes": 25381,
+      "max_rss_mb": 430.84765625,
+      "cpu_percent_one_core": 39.245599556613115,
+      "cpu_percent_machine": 2.4528499722883197
+    },
+    "runtime_health": {
+      "ok": true
+    },
+    "result": "PASS (HTTP/WS only)"
+  },
+  "real_decisions": [
+    {
+      "alert_id": "A1",
+      "option_id": "opt-1",
+      "action": "reject",
+      "operator": "B candidate QA"
+    },
+    {
+      "alert_id": "A1",
+      "option_id": "opt-1",
+      "action": "approve",
+      "operator": "B candidate QA"
+    }
+  ],
+  "truth_dependency_audit": {
+    "survey_class_filter": "REMOVED",
+    "truth_target_ID_association": "REMOVED",
+    "moving_anonymous_contact_budget": "PASS: spatial association, no budget reset across cells",
+    "physical_renderer_truth_labels": "Simulation generation only; not used as YOLO predictions",
+    "ideal_contact_geometry": "STILL SYNTHETIC; not raw-return extraction",
+    "AIS_world_vessel_lookup": "STILL COUPLED in tracker.py:87",
+    "stub_annotation_classes": "STILL TRUTH-BASED; explicit stub only",
+    "full_system_truth_independence": "NOT PASSED",
+    "real_operational_reopening": "NOT VALIDATED"
+  },
+  "protected_source_unchanged": {
+    "frontend": true,
+    "agent": true,
+    "ml": true,
+    "shared": true,
+    "tests": true,
+    "data": true,
+    "backend/migrations": true
+  },
+  "contracts": {
+    "new_public_routes": false,
+    "new_public_fields": false,
+    "new_public_enums": false,
+    "public_reason_field": false,
+    "reason_transport": "existing log event",
+    "event_window": 500
+  },
+  "hashes": {
+    "delivery-tests.xml": "daee6af62261f94f4aa495c2047ff76cbf38afcf9c0b2185790dc54f1e3243be",
+    "cases-final.xml": "a0fdcb33cc740c913d91579d7e0a92ef78886736ce5f4ec4d5589383968e0cf4",
+    "real-b-delivery.json": "d37aefeee0d593dd529615f4161bb3051b5f6dc2fdc24f4582f1d02f8431ad79",
+    "live-delivery/results.json": "4fe95318d25bba66368dc564c7d95d24548a261eff5b0351f0b3017645fd4d5c"
+  },
+  "deployment": {
+    "demo_5173_untouched": "1269f3e old workspace; not this P0 deployment",
+    "new_db_required": true
+  },
+  "checks": {
+    "ruff_backend": "PASS",
+    "compileall_backend": "PASS",
+    "pip_check": "PASS",
+    "diff_check": "PASS"
+  }
+}
