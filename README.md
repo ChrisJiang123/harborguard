@@ -1,234 +1,220 @@
-# HarborGuard · C（AI 模型与 Agent）
+# HarborGuard
 
-> 最终交付检查（2026-10-17，实测main `a841bf9`）：[结果与限制](docs/final-delivery-20261017.md)、[五分钟操作单](docs/demo-runbook.md)、[Devpost草稿](docs/devpost-submission-draft.md)。本轮Windows运行时为template，2D浏览器闭环4分46秒；恢复边界及3D仍有未通过项。下方C团队模型评估保留各自来源与范围，不等同本轮全系统验收。
+**See underwater risk. Keep people in control.**
 
-24h 黑客松：洛杉矶港水下安防数字孪生。本仓库现包含 A（前端 5173）、B（后端 8000）与 C（模型/Agent）三部分；本 README 前半保留 C 的环境说明，前端的完整启动、联调、3D 操作和验收状态见 [frontend/README.md](frontend/README.md)。
+A port-security and disaster-recovery digital-twin prototype built for the InnovateLA Dual-Use Hackathon, Ports & Logistics lens. HarborGuard connects acoustic simulation, tracking, explainable alerts, sonar-image detection, response comparison, Agent recommendations and human approval.
 
-Mac 演示机的四进程启动、端口占用保护、停止方式和四分钟实时演示流程见
-[docs/mac-demo-runbook.md](docs/mac-demo-runbook.md)。
+The current demonstration uses **synthetic acoustic observations and simulated AIS**. It is not certified for real-world navigation, underwater surveillance or port reopening.
 
-## C 负责的四个模块
+[Demo runbook](docs/demo-runbook.md) · [Acceptance evidence](docs/final-delivery-20261017.md) · [Project story](docs/devpost-story-en.md) · [Three twists](docs/twist-responses-en.md) · [Chinese documentation archive](docs/README.zh-CN.md)
 
-| 目录 | 内容 | 步骤 | 状态 |
-| --- | --- | --- | --- |
-| `ml/sonar/` | `render_ping` 声呐渲染器 + 合成数据集 | C1 | ✅ 代码 + 4000 张合成数据 + **后端真实调用联调通过** |
-| `ml/yolo/` | YOLO26 训练、`SonarDetector`、`metrics.json` | C2 | ✅ Lenovo 训练交付已通过 **Mac 验收**：mAP50=0.9771、CPU 49.7ms/张（600 张合成 val）；后端 detection.model=yolo26n，/api/metrics 已出数（见 ml/yolo/ACCEPTANCE-MAC.md） |
-| `agent/` | Agent 服务（端口 8001）：上下文/三级路由/问答 | C3 | ✅ 云端(OpenRouter)→本地→模板闭环，20/20 实测 `model=cloud` |
-| `ml/lora/` | 蒸馏数据、LoRA、GGUF、Ollama 部署 | C4 | ✅ Lenovo 训练/导出与 Mac 接入完成；本地 `harborguard-lora` 用 `format=json`，test50 事实 44/50、confirm60 事实 39/60（均为合成上下文） |
+## What it does
 
-共享接口（`render_ping` / `SonarDetector` / REST / Recommendation）严格按
-**`docs/shared-contract-v1.md`**（共享契约 v1，B 维护，H2 冻结），字段名一字不改。
+**Security:** localize and track simulated contacts, explain a three-level risk score, generate a sonar PNG and compare response options. The Agent recommends and explains; only an operator's approval applies security restrictions. Rejecting a suggestion does not automatically restrict a zone.
 
-## 三套环境（分开管理）
+**Recovery:** survey zones while keeping coverage separate from unresolved observations. Misses, wrong classes, low confidence and unreliable near-field imagery remain unresolved rather than becoming clear when coverage increases. Candidate routes use confirmed-clear channels only. Time-saved displays are scenario assumptions, not measured operational savings or clearance decisions.
 
-| 环境 | 位置 | 用途 | 机器与 Python |
-| --- | --- | --- | --- |
-| 运行环境 | `.venv`（仓库根） | Agent 服务、render_ping、SonarDetector CPU 推理、自检 | MacBook（开发/演示主机）· Python 3.11（实测） |
-| YOLO 训练 | `.venv-yolo-train` / Colab | `yolo detect train`（50 epoch） | ✅ Lenovo 已实测：Windows · Python 3.12.10 · cu130；Colab 备选 |
-| LoRA 训练 | Lenovo/Windows（已完成） | Unsloth + TRL SFT | 本机只接入与复验，不重建训练环境、不重训 |
+The frontend displays live state, detection images, recommendations, decisions and explicitly labeled, read-only JSONL replay. The 3D renderer is Three.js / React Three Fiber.
 
-```bash
-# 运行环境（MacBook，Python 3.11）
-bash scripts/setup_env_runtime.sh
-# YOLO 训练环境（Linux bash；CUDA 源与 Python 版本可配置，脚本本身未实测）
-PYTHON_VERSION=3.12 YOLO_CUDA_INDEX=cu130 bash scripts/setup_env_yolo_train.sh
-# Windows 训练环境：用 requirements-yolo-train.txt 头部的 PowerShell 说明（Lenovo 实测路径 Scripts\python.exe）
-# LoRA 训练：暂定 Colab，见 requirements-lora-train.txt 头部注释与 ml/lora/README.md
-```
+## Version and acceptance scope
 
-> 本 MacBook 注意：macOS 26 上 brew 版 Python 的 `platform.mac_ver()` 返回空串，
-> 导致 pip 的 truststore 崩溃。因此 `setup_env_runtime.sh` 优先用 **uv**（`brew install uv`）
-> 建环境；其他正常机器仍可用标准 `python3.11 -m venv`。
+| Evidence | Exact scope |
+| --- | --- |
+| Latest official main checked out for this README | `e9ae07fbf1e233d83c983803b3992b165eae163c`: includes B fix #16, report #17, A's 3D update #18, and C's subsequent #19 language/configuration fixes. These upstream changes were fetched into an isolated worktree; this documentation task did not merge them into main or rerun complete system acceptance on that SHA. |
+| Last complete Windows acceptance run | Main `a841bf9a70d8bf8237b9e03763852a34bed10368`: **232 Python tests passed, 2 skipped**; frontend build, lint and A1-A6 passed; approximately **4.98 Hz** state delivery. |
+| Actual browser demonstration | One real A/B/C **2D** flow in **4 minutes 46 seconds** on a841bf9. 3D was unavailable in that test browser. Screenshots were saved; this is not a recorded video. |
+| B options-publication fix | Tested source `e1b3305`, report commit `390687a`: **237 passed, 2 skipped**, with actual browser/Agent metric consistency and Reject checks. Subsequently merged in #16; this does not automatically validate every later frontend change. |
+| Recovery example | Three repeated real-weight runs on synthetic scenario B produced **6 clear / 3 blocked / 3 unsurveyed**. The fuel berth stayed unsurveyed at full coverage. Results are observed outputs, not hardcoded acceptance targets. |
 
-## 配置（.env）
+The two skipped tests lacked a separate COCO smoke-test weight; the delivered sonar weight was actually exercised. The original 500-simulation-second security deadline was missed at 505 seconds. Four frontend history/recovery boundaries remain open in the last audited recovery code. The 20 ms target is best effort; correctness and 5 Hz delivery take priority.
 
-所有模型名、API 地址、后端地址都走配置，`agent/config.py` 在导入时**显式** `load_dotenv()`：
+See the [full report](docs/final-delivery-20261017.md), [A recovery handoff](backend/docs/A-final-recovery-handoff.md), [B publication fix](backend/docs/options-publication-fix.md), [A's subsequent 3D evidence](docs/3d-shoreline-realism/README.md) and [C's isolated retest](docs/C-acceptance-20261017-1743-retest-20261017-1911.md). Earlier reports retain their original timestamps and scope.
 
-```bash
-cp .env.example .env   # 然后填写密钥；.env 已被 .gitignore 忽略，绝不提交
-```
+## Architecture and contracts
 
-当前配置：`CLOUD_PROVIDER=openrouter`、`OPENROUTER_MODEL=google/gemini-2.5-flash`、
-`OLLAMA_MODEL=harborguard-lora`、`OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json`。
-路由为 OpenRouter → 本地 LoRA → 确定性模板；未列出的本地模型继续完整 schema。
-Agent 只解释与推荐，操作员批准才调用决策接口。历史 C0/C3 记录不代表当前配置。
+| Component | Location | Default service |
+| --- | --- | --- |
+| A: React/TypeScript dashboard, 2D/3D and replay | `frontend/` | `http://127.0.0.1:5173` |
+| B: simulation, localization/Kalman tracking, risk, planning and SQLite persistence | `backend/`, `data/` | `http://127.0.0.1:8000` |
+| C: sonar renderer, YOLO adapter and Agent | `ml/`, `agent/` | `http://127.0.0.1:8001` |
 
-## C0 自检
+Public fields and event names are frozen by [shared/contract.md](shared/contract.md), with [TypeScript types](shared/types.ts), [sample state](shared/sample_state.json) and [sample events](shared/sample_events.json). C's interface reference is [docs/shared-contract-v1.md](docs/shared-contract-v1.md). Do not rename shared fields to work around integration issues.
 
-```bash
-.venv/bin/python scripts/check_c0.py
-```
+Backend REST is under `/api`; WebSocket is `/ws`, not `/api/ws`. Interactive API documentation is at `http://127.0.0.1:8000/docs`. C exposes its own `/health` and `/ask`; the frontend uses B's contracted Agent proxy.
 
-逐项打印 PASS / FAIL / PENDING。**无 API key / 无 GPU / 需要拔网线验证的项
-标 PENDING（待完成），不假报通过。**
+## Quick start
 
-## C0 状态（截至 2026-10-16）
+Use Python **3.11+** and Node **^20.19 or >=22.12**. Prepare dependencies and model files before the demonstration. Do not train or download models on stage. Inspect occupied ports before starting; never terminate an existing teammate's service just to reuse a port.
 
-**自动检查通过 ≠ 验收通过。** 下列"手动待验收"项目只有负责人本人明确提供结果后才算勾选，
-在此之前一律视为未完成。
+### Install once
 
-- ✅ 自动检查 10/10 PASS（`scripts/check_c0.py`）：Python 3.11、依赖、pydantic v2、
-  yolo26n.pt 加载、Ollama CLI/服务、qwen3:1.7b 本地真实对话、云端一次真实调用、.env 显式加载
-- ✅ 云端已验证配置（不含凭证）：服务地址 `https://api.z.ai/api/anthropic`（进程环境
-  `ANTHROPIC_BASE_URL` + `ANTHROPIC_AUTH_TOKEN`，Token 不入库不外显），响应
-  `model=claude-sonnet-5`，回复正常
-- ⏸ 手动待验收①：关闭 Wi-Fi 后 Ollama 仍能对话（`ollama run qwen3:1.7b`）——**未验证**
-- ✅ 手动验收②a：YOLO 训练 GPU（Lenovo）——负责人 2026-10-16 实测通过：
-  Windows · Python 3.12.10 · RTX 5060 Laptop GPU（8151 MiB，sm_120）·
-  torch 2.14.1+cu130 · torchvision 0.29.1+cu130 · ultralytics 8.4.178；
-  CUDA 运算、反向传播、YOLO26 `device=0` 推理全部通过。
-  以上为实测记录（不代表"当前最新版本"）；Lenovo 已验证环境不再重建
-- ⏸ 手动验收②b：LoRA 训练 GPU（Colab / Unsloth）——**未验证**，暂定 Colab
-- ℹ️ 思考型模型注意：Sonnet 5 与 qwen3 默认带推理块，小 `max_tokens` 会被耗尽返回空文本；
-  自检脚本已加预算，C3 调用时同样处理
-
-## C1 状态（2026-10-16）
-
-- ✅ 渲染器 / 数据生成器 / 预览完成；pytest 13/13 通过
-- ✅ **4000 张合成数据**已生成（`--seed 0`，实测 31 s）：train 3400 / val 600，
-  负样本 10.9%，类别占比偏差 ≤0.1pp，生成目标 8935 / 有标注 8926
-  （9 个 <16px² 被契约下限丢弃，小目标不另删除）。
-  **数据全部为合成数据**，指标仅代表仿真分布，不得当作真实声呐性能
-- ✅ **与真实后端联调通过（2026-10-17，三层验证）**：
-  ① B 的 `SonarClassifier` 直接调用 `render_ping`——640×640 扇形 PNG、同 seed 字节一致、
-  标注过 B 侧校验；② 合并后端代码后 73 项后端测试全过；③ 实时服务跑场景 A：
-  产生 5 条 detection 事件，`GET /api/sonar/det-5.png` 为渲染器产出的扇形图
-  （B 叠加检测框与 "uuv 0.83" 标签）。`model=stub` 为无权重时的契约预期
-- ✅ 契约对照：`shared/contract.md`（B 维护）与 `docs/shared-contract-v1.md` 逐行核对，
-  表格/类型/签名/ID 完全一致（仅标题编号与列表格式差异），接口无分歧
-- 样本预览：`ml/sonar/samples.png`（4×4，取自数据集）；数据集 321 MB 不入库，
-  由 `python -m ml.sonar.gen_dataset --n 4000 --seed 0` 一键重跑
-
-## C2 Mac 验收状态（2026-10-17，Lenovo 交付后）
-
-- ✅ `ml/yolo/infer.py::SonarDetector` 按契约实现：构造加载一次权重、强制 CPU、
-  灰度图内部转三通道、返回像素 bbox；权重缺失抛明确 `FileNotFoundError`（B 捕获后用桩）
-- ✅ `ml/yolo/check_data.py`：用 Ultralytics **实际数据加载器**验证 `sonar.yaml`
-  （非仅文本检查）→ train 3400 / val 600，负样本 435，类别 0–3 名称正确
-- ✅ `ml/yolo/train.md`（Lenovo PowerShell / Colab 可重跑命令，含数据打包步骤）、
-  `ml/yolo/eval.py`（mAP50 / mAP50-95 / 各类召回 / CPU 20 张均耗时 → metrics.json；
-  **权重缺失直接报错退出，不写占位数据**）
-- ✅ **Lenovo 训练交付已通过 Mac 验收**（`ml/yolo/ACCEPTANCE-MAC.md`）：ZIP 与 best.pt
-  SHA256 逐项核对、MANIFEST 全部复算、类别顺序三处（classes.json / portable_data.yaml /
-  checkpoint 内部 names）与契约逐字一致；600 张合成 val 实测
-  **mAP50=0.9771（≥0.8 ✅）、CPU 49.7 ms/张（首测 52.1，<100ms ✅）**，与 Lenovo 端报告吻合；
-  重启后端后 detection `model=yolo26n`（真实识别 det-5 uuv conf=0.72），
-  `GET /api/metrics` 的 yolo 字段为 Mac 实测值
-- ℹ️ 指标全部来自合成数据；真实声呐泛化与 UATD 迁移增益未做对照，不宣称
-
-## C3 Agent 闭环状态（2026-10-17）
-
-- ✅ `python -m agent.main` 启动 8001 服务，`GET /health` 与 `POST /ask` 可用；
-  `/ask` 使用云端→本地→模板路由，硬预算 18 秒
-- ✅ 订阅真实后端 `/ws`，首次连接和断线重连均用 `/api/events?since_seq=` 补事件；
-  修复 REST `/api` 与 WS `/ws` 地址语义，支持后端重启后的 seq 回退
-- ✅ `options_ready` 经确定性 REST 上下文收集（UTF-8 ≤ 3 KB）、pydantic 校验、
-  上下文真实 ID 校验后，POST `/api/recommendations` 并由后端实时广播 `recommendation`
-- ✅ 去重覆盖实时/补发重叠及已处理的相同方案载荷；方案指标变化时只保留最新任务；
-  `alert_cleared`、场景 reset/start 会使排队和处理中旧任务失效
-- ✅ `agent/prompts.py` 保存任务书原文系统提示词，云端和本地使用同一份上下文 JSON；
-  草案六字段必填，拒绝空 JSON、缺/多字段、错类型、空正文、非 JSON 和任何非法 ID，
-  只允许对合法长文本做契约截断；非法输出附错误重试一次
-- ✅ 路由为云端→本地 Ollama→模板；事件总预算 9.5 秒并预留 0.5 秒 POST，
-  SDK 隐式重试关闭，超时请求由协程取消；提交前继续检查场景代际和任务版本
-- ✅ 云端已切到 OpenRouter 结构化路由（`google/gemini-2.5-flash`，json_schema strict +
-  `require_parameters`，禁 fallback，SDK 不重试）；2026-10-17 隔离实测 20/20 次真实生成
-  与 POST 全部 `model=cloud` 且首次结构/事实双合格（详见 agent/README.md）
-- ✅ C3 切换前历史基线：`qwen3:1.7b`，显式关闭思考并用 JSON Schema。连续 20 次真实 POST：local 20、cloud 0、template 0，
-  当时记录的结构与 ID 合格率为 20/20，平均 5.153 秒、最大 8.650 秒，全部低于 10 秒；
-  该数字不再表述为自然语言事实合格率
-- ✅ 无效云端凭证 + 本地不可达的隔离配置在 398 ms 内返回合法模板；
-  不修改或输出真实凭证。不修改警报等级，不调用 `/api/decision`
-- ✅ 在结构与 ID 后增加确定性事实检查：浮标离线数量/ID、覆盖数量、置信度、方案风险与
-  延误、方案选择和证据不足；合法否定句不会因含“离线”误降级。健康状态分别统计结构
-  合格、事实合格、事实失败、重试成功、模型成功和模板兜底
-- ✅ 已补齐升到二级的 `alert_changed`、`reopen_plan`、down `buoy_changed`；计划按载荷去重并
-  最多每 20 秒仿真时间一次，reset/start 清理去重、节流和过期任务
-- ✅ 真实后端：场景 A 二级建议 `model=template`、9007.6 ms；浮标建议 `model=template`、
-  9002.6 ms；场景 B 灾害建议 `model=local`、5136.3 ms。灾害/浮标推荐 ID 均为 null，
-  evidence 全部为后端真实 ID；生成中 reset 后无迟到建议
-- ✅ 明确事实矛盾的脱敏失败样例写入被忽略的 `agent/runtime/`，不自动混入蒸馏集；
-  自由文本无法被规则完全验证，README 与 `/health` 均保留这一评估局限
-- ⏸ 旧 Z.ai 账户 429 的问题由切换 OpenRouter 解决；本轮未再对旧服务发送付费探测
-
-## C4 LoRA 蒸馏状态（2026-10-17）
-
-- ✅ `ml/lora/gen_contexts.py`：合成上下文 500 条（seed=0 一键重跑，另有 80 条 seed=1 补充）。
-  kind 70/20/10；risk = 加权和；ranked 符合「残余风险 ≤ 0.2 按延误升序在前」且与
-  `factcheck.security_selection` 零冲突；全部使用真实 B1–B10 / 分区 / 资产 ID；
-  每条经 `agent.context._trim` 压缩 ≤ 3 KB，与 C3 collect_* 输出同构；
-  浮标失效的 coverage_impact 用真实浮标/分区几何复算；pytest 逐条锁定一致性
-- ✅ `ml/lora/capture_real.py`：本机后端实跑场景 A/B 三轮（含一轮 `network_down` /
-  `noise_up` / `buoy_down` 故障注入），按 C3 四类触发规则截取 **51 条唯一真实上下文**
-  （security 23 / disaster 21 / buoy 7；offline 12 条）；旧会话失效警报计入 dropped 不入库
-- ✅ `ml/lora/distill.py`：OpenRouter（gemini-2.5-flash 结构化输出）× C3 同一系统提示词、
-  同一套校验（`parse_model_draft` + `check_draft_facts`），8 路并发；不合格附错误重试一次，
-  仍失败做一次教师侧格式引导（引导文本只给教师、不入库，训练分布与运行时一致）。
-  **合格率 95.2%**，实测总花费 ≈ $0.50；按「与路由器同序列化的 SHA256」幂等缓存，
-  补跑/重试绝不重复请求已合格样本。合成精确 450/50 划分（seed=0）；
-  51 条真实场景样本经 `--append-train` 只追加进训练集，测试集保持固定可比，
-  **最终训练集 501 条 / 测试集 50 条**；AI 抽查（脚本复核）30 条：方案全对、
-  无编造 ID、中文简洁（人工复核待负责人确认）
-- ✅ `ml/lora/train_lora.ipynb`：Colab Unsloth + TRL SFT，rank 16 / alpha 32 / lr 2e-4 /
-  3 epoch / max_len 4096 / bf16（不做 4-bit）；基座候选链 Qwen3.5-0.8B → Qwen3-1.7B → 0.6B
-  （模型名以 Unsloth 文档为准，兼容问题自动降级）；只对 assistant 段计损失；
-  导出 q4_k_m GGUF。`Modelfile`：`FROM ./harborguard.gguf`，temperature 0.2，
-  系统提示词仍由请求携带（与训练一致）
-- ✅ `ml/lora/eval.py`：50 条测试集串行评测，分模型分别报告：结构合法率（首次/重试后）、
-  ID+事实合格率、有方案 security 的方案一致率（含分母）、disaster/buoy 的 null 推荐正确率、
-  耗时；评测无模板兜底，失败计入分母不计成功。**配对原则**：`base` 是与 LoRA 同一基座的
-  未微调 GGUF（`train_lora.ipynb` 成对导出，同量化/同模板/同参数），差异才能归因微调；
-  qwen3:1.7b 单列为 system_baseline（当前系统兜底，规模不同）。配对两者齐才写
-  `ml/lora/metrics.json`（后端 /api/metrics 读取）。
-  系统基线实测（qwen3:1.7b，2026-10-17）：结构合法 100%/100%（首/重试后）、
-  **ID+事实合格 16%**、方案一致 45.5%（n=33）、≈9.9 s/条 —— 结构满分主要来自
-  Ollama schema 约束，事实层面缺口大，正是 LoRA 要补的（详见 ml/lora/README.md）
-- ✅ `train_lora.ipynb` 训练前检查：基座只在「模型不存在」时按候选链降级且每次醒目留痕
-  （写入 `training_meta.json`，含实际模型 ID/revision/精度/超参/token 审计），其他异常直接
-  终止不静默换模型；GPU 支持 bf16 用 bf16、否则兼容 fp16（互斥、不硬编码，Qwen3.5 非 4-bit）；
-  训练前审计 token 长度并断言 4096 不截断 assistant 答案；训练集尾部留 8 条验证切片，
-  **test.jsonl 不进笔记本**；依赖按当前官方 Unsloth 指南（pip install unsloth）
-- ✅ Lenovo 正式训练、GGUF 导出和 Mac 切换已完成；完整 schema 的历史失败证据保留。
-  当前 `format=json` 的 test50：结构 50/50、事实 44/50、方案 31/33、null 14/14、平均 3.75 s；
-  confirm60：结构 60/60、事实 39/60、方案 35/36、null 18/18、平均 4.71 s。
-  **两组都是合成上下文评估**；test50 可从合格合成蒸馏记录同序重建，原“实采测试集”标签错误。
-  501 条训练输入按原顺序分为 493 条训练（450 合成 + 43 后端实跑截取）与 8 条内部验证。
-  来源、哈希与重复检查见 [C4 来源审计](acceptance_c4/data_provenance_20261017/README.md)。
-  这里的“真实上下文”指本机仿真后端运行截取，**不是物理声呐或真实海域采集**。
-- ⏸ qwen3 → LoRA 的实际往返回退演练未做；真实关闭 Wi-Fi、投影与跨设备试播待负责人确认。
-  远端 B 的 P0 修复已做独立真实权重三轮复验，但未接入当前演示；两项历史集成时序失败仍未豁免，等待 B/A 接入与最终组合验收。
-
-## 不入库的内容（.gitignore）
-
-`.env`、`.venv*/`、`ml/datasets/`（数据集，脚本可重跑）、`agent/runtime/`（脱敏失败样例）、
-`runs/`、`*.log`（训练日志）、
-`*.pt` / `*.pth` / `*.gguf` 等模型文件。
-唯一例外：`ml/yolo/weights/best.pt` 为最终交付的 nano 权重（几 MB），已放行入库。
-
-
-## A 前端与 B 后端已加入
-
-前端源码位于 `frontend/`，后端源码、场景、测试位于 `backend/`、`data/`。完整说明分别见 [前端说明](frontend/README.md) 与 [后端说明](backend/README.md)。上方 C 的原有工作说明保留，C 的后续进度由其负责人更新。
+From the repository root on macOS/Linux:
 
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements-lock.txt
-python -m pip install --no-deps -e .
-make backend
-# 测试 make test；录制回放 make record
+python -m pip install -r requirements-runtime.txt
+python -m pip install -e '.[dev]'
+python -m pip check
+cd frontend
+npm ci --no-audit --no-fund
+VITE_API_BASE=http://127.0.0.1:8000/api VITE_WS_URL=ws://127.0.0.1:8000/ws npm run build
+cd ..
 ```
 
-Windows 已建好环境时执行 `./dev.ps1 backend`；安装依赖可用 `./dev.ps1 setup`。后端端口 8000，WebSocket 为 `ws://localhost:8000/ws`，接口文档为 `http://localhost:8000/docs`。
-
-另开 PowerShell 启动前端：
+On Windows PowerShell:
 
 ```powershell
-cd frontend
-npm.cmd install
-npm.cmd run dev
+py -3.11 -m venv .venv
+.venv/Scripts/python.exe -m pip install -r requirements-runtime.txt
+.venv/Scripts/python.exe -m pip install -e '.[dev]'
+.venv/Scripts/python.exe -m pip check
+Push-Location frontend
+npm.cmd ci --no-audit --no-fund
+$env:VITE_API_BASE = 'http://127.0.0.1:8000/api'
+$env:VITE_WS_URL = 'ws://127.0.0.1:8000/ws'
+npm.cmd run build
+Pop-Location
 ```
 
-实时页面为 `http://localhost:5173/`，后端不可用时可用 `?mock=1` 或 `?replay=demo_full.jsonl`。当前 A6 仍未标记完成，真实投影、断网刷新和录屏跨设备试播仍待人工验收。
+An existing prepared environment need not be rebuilt. First-from-zero installation time was not accepted as a five-minute setup. B-only lock files are not a replacement for C's full CPU/runtime dependencies.
 
-共享契约字段维持 v1；B 的模型与样例在 `shared/`，并与 C 原有的 `docs/shared-contract-v1.md` 对照。A 的前端读取后端 REST / WS；C 的声呐与 Agent 实现完成后按冻结接口接入。回放在 `frontend/public/replay_a.jsonl`、`replay_b.jsonl`，配套图片在 `replay_assets/`。
+### Start B: one worker and a separate database
+
+In terminal 1, repository root, macOS/Linux:
+
+```bash
+source .venv/bin/activate
+mkdir -p backend/runtime
+export HARBORGUARD_DB="$PWD/backend/runtime/demo-submission-new.sqlite3"
+export DEBUG_TRUTH_TRACKS=0
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+PowerShell equivalent:
+
+```powershell
+New-Item -ItemType Directory -Force backend/runtime | Out-Null
+$env:HARBORGUARD_DB = Join-Path (Get-Location) 'backend/runtime/demo-submission-new.sqlite3'
+$env:DEBUG_TRUTH_TRACKS = '0'
+.venv/Scripts/python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+Keep old databases. A checkpoint/configuration fingerprint mismatch must not be bypassed. Choose a genuinely new filename for an incompatible configuration rather than deleting history. Restarting the same version with the same compatible database restores the scenario in a paused state. Only one writer/worker is supported.
+
+### Start C: deterministic offline fallback profile
+
+In terminal 2, repository root, macOS/Linux:
+
+```bash
+source .venv/bin/activate
+export BACKEND_BASE_URL=http://127.0.0.1:8000
+export BACKEND_WS_URL=ws://127.0.0.1:8000/ws
+export AGENT_HOST=127.0.0.1
+export AGENT_PORT=8001
+export AGENT_LANG=en
+export CLOUD_PROVIDER=disabled
+export OLLAMA_BASE_URL=http://127.0.0.1:9/v1
+export OLLAMA_MODEL=qwen3:1.7b
+export OLLAMA_FORMAT_OVERRIDES=''
+export OLLAMA_TIMEOUT_S=0.2
+python -m agent.main
+```
+
+For PowerShell, set the same variables with `$env:NAME = 'value'`, then run `.venv/Scripts/python.exe -m agent.main`. This profile deliberately uses an unavailable local-model endpoint to reach the deterministic template promptly; a local warmup failure is expected. No cloud credential, GPU or running Ollama instance is required for this profile. Verify an actual recommendation has `model=template`; startup health may initially report `idle`.
+
+The Agent explicitly loads the root `.env` without overriding existing process variables. `.env.example` documents optional cloud/local settings, but it is not a credential and its defaults are not this offline profile. Never print or commit `.env`, tokens or keys. Use the [Mac runbook](docs/mac-demo-runbook.md) only when deliberately selecting the separately documented OpenRouter/Ollama deployment.
+
+The latest C code honors the configured local model and defaults `AGENT_LANG` to `en`. Chinese output in English mode is rejected and may fall back to the English template within the existing budget. C's isolated retest reported 10 English recommendations, all template and none local; it did not establish English LoRA quality. Frozen Chinese test50/confirm60 scores do not measure English performance.
+
+### Start A
+
+In terminal 3:
+
+```bash
+cd frontend
+npm run preview -- --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Use `npm.cmd` on PowerShell. Open `http://127.0.0.1:5173/`. Standard CORS permits localhost/127.0.0.1 on port 5173. `VITE_API_BASE` and `VITE_WS_URL` are build-time variables; rebuild intentionally when changing them. Do not silently reuse a QA build pointed at a different backend.
+
+Health checks: B `http://127.0.0.1:8000/api/health`; C `http://127.0.0.1:8001/health`. Wait for B's model warmup and application startup before beginning.
+
+## Five-minute demo
+
+1. Explain that observations/AIS are synthetic or simulated. Start **Scenario A, 10x** in LIVE mode.
+2. Wait for level-three alert and current response options; inspect the sonar PNG and its `yolo26n` or `stub` source label. A stub is a fallback, not real-model acceptance.
+3. Inspect the actual Agent route. Show that a recommendation alone imposes no restriction. Select a current option and operator, then approve; only then should the affected zones become restricted. Reject does not automatically restrict them.
+4. Use 3D only after testing the actual presentation computer; otherwise stay in 2D.
+5. Start **Scenario B, 10x**, and inspect blocked/unsurveyed states, coverage and confirmed-clear route candidates. A green simulation zone is not permission to reopen.
+6. Show an explicitly labeled **REPLAY**, with read-only controls and the correct version/model provenance.
+
+Use the [detailed runbook](docs/demo-runbook.md). A real 2D rehearsal is evidence of a working flow, not proof of every business rule, historical recovery boundary or hardware behavior. This README does not claim a video has been recorded or submitted.
+
+## Persistence, recovery and replay
+
+Both approve and reject are persisted before a successful response and publish the existing structured `decision` event; write failure must not report success. Old history is not authority to approve an inactive alert. Scenario reset removes active restrictions and state while preserving stored history.
+
+`GET /api/events` retains its frozen **500-event window**. It has no new pagination, total-count or truncation fields. Persisted detail queries do not make all early events discoverable through that window. Do not parse free-text logs into fabricated approval state. See [history handoff](backend/docs/history-handoff.md) and [frontend integration](docs/frontend-integration.md).
+
+Historical `frontend/public/replay_a.jsonl` and `replay_b.jsonl` require their `replay_assets/` files and can be opened with `?replay=replay_a.jsonl` or `?replay=replay_b.jsonl`. They include historical stub results and must not be presented as current real-model LIVE evidence. The acceptance run also captured a separate, versioned real A/B/C transport replay. Existing `demo_a/demo_b/demo_full` summaries exceed the frozen length limit in the audited version; do not use them as evidence that every replay validates.
+
+## Tests
+
+From an activated development environment:
+
+```bash
+python -m pytest backend/tests tests agent/tests -q
+python -m ruff check backend
+python -m compileall -q backend agent ml
+python -m pip check
+python -m backend.tools.model_acceptance --scenario b --repeat 3 --out artifacts/real-b.json
+cd frontend
+npm run build
+npm run lint
+npm run check:a1
+npm run check:a2
+npm run check:a3
+npm run check:a4
+npm run check:a5
+npm run check:a6
+npm run check:recovery
+npm run check:sonar
+npm run check:english
+```
+
+PowerShell can call `.venv/Scripts/python.exe` and `npm.cmd` directly. Missing optional weights, API access, real Wi-Fi tests or target-machine checks must be reported as SKIP/PENDING rather than PASS. Existing test totals belong to their recorded SHA and environment.
+
+## C model and Agent provenance
+
+These are C-team records preserved from the previous README, not new measurements made during this documentation edit:
+
+| Module | Recorded evidence and limits |
+| --- | --- |
+| C1 sonar renderer | 4,000 **synthetic** examples, seed 0; 3,400 training / 600 validation; deterministic fan PNG generation and B adapter integration. They are not physical sonar samples. |
+| C2 YOLO | Lenovo-delivered weights were independently checked on the Mac: synthetic validation mAP50 **0.9771**, CPU **49.7 ms/image**, 600 samples. Weights/classes/manifests were verified. See [Mac acceptance](ml/yolo/ACCEPTANCE-MAC.md). |
+| C3 Agent | C reports an isolated 20/20 OpenRouter cloud run. The Windows system acceptance above deliberately used **template**. A prior qwen3 run's 20/20 structure/ID result is not a 20/20 natural-language factual-accuracy result. |
+| C4 LoRA | C reports completed Lenovo training/GGUF export and Mac serving using `harborguard-lora` with `format=json`: test50 factual validity **44/50**, confirm60 **39/60**. **Both sets are synthetic contexts.** See [source audit](acceptance_c4/data_provenance_20261017/README.md). |
+
+C4's 501 input records split into 493 training records (450 synthetic + 43 captured from the simulated backend) and 8 internal validation records. "Captured backend contexts" do not mean real-sea measurements. Paired base/LoRA evaluations require the same base, quantization, template and parameters; compare datasets separately and retain denominators. The independently recorded qwen3 system baseline must not be mislabeled as a matched-base improvement.
+
+Historical C0 automatic checks and GPU checks do not replace physical Wi-Fi loss, projector or cross-device video playback. The earlier macOS 26/Homebrew Python issue motivated `scripts/setup_env_runtime.sh` preferring uv; this is a machine-specific workaround, not a reason to rebuild a working environment. Keep runtime, YOLO training and LoRA training environments separate. No new training is needed for the demo.
+
+For full module details use [Agent documentation](agent/README.md), [LoRA documentation](ml/lora/README.md), [Chinese historical README](docs/README.zh-CN.md) and the source audit. The Agent validates structure, IDs and selected deterministic facts, but cannot certify every free-text assertion; invalid output may retry or fall back. It never changes alert levels or calls the decision endpoint itself.
+
+## Three twists and future work
+
+- **Federal funding:** proposed **NSF SBIR Phase I** for real-echo validation and calibrated uncertainty, subject to suitability, applicant eligibility, Project Pitch and invitation. No grant, invitation or eligibility determination is claimed. See [NSF](https://www.nsf.gov/funding/opportunities/small-business-innovation-research-small-business-technology) and [eligibility](https://seedfund.nsf.gov/solicitation-eligibility/).
+- **Global application:** a proposed Los Angeles -> Shanghai/Yangshan adaptation. Authorized local maps, depth/tidal references, acoustic calibration, language, data controls and approval procedures must be validated. No overseas partner, deployment or field result is claimed.
+- **Poster:** an **A3 portrait PDF with A's recorded 3D overview** has been prepared for the organizer's Drive-link submission workflow. The screenshot is labeled as replay evidence and is separate from the older system metrics. File preparation is separate from uploading it, checking viewer access and pasting its Drive link into Devpost.
+
+Detailed [Twist responses](docs/twist-responses-en.md) and the [English project story](docs/devpost-story-en.md) are available for team review. A pitch deck, playable video, actual teammate confirmations and final submission receipt remain separate deliverables; this repository does not prove their completion.
+
+## Responsible use and data attribution
+
+HarborGuard could be misused for unauthorized surveillance or unsafe operational decisions based on incomplete data.
+Human approval and explicit uncertainty limit these risks; the synthetic prototype is not certified for navigation or port reopening.
+
+Public map/bathymetric layers retain their upstream attribution, including OpenStreetMap, NOAA and USGS where used by the frontend. Historical bathymetry, water-level references and visual alignment are not live acoustic sensing or field safety acceptance. Use the source/validation notes in `frontend/` before making claims about a layer. AI development assistance includes Codex and ChatGPT; disclose any other tools actually used by the team. No IBM Bob use is claimed by this README.
+
+Do not commit `.env`, credentials, virtual environments, datasets, runtime failure logs, caches or large model outputs. The explicit delivered-weight exception is `ml/yolo/weights/best.pt`. Preserve third-party source, model and asset licensing requirements; a public repository does not by itself grant a new license to every component.
