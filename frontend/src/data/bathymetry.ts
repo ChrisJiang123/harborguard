@@ -12,6 +12,8 @@ export interface BathymetryGrid {
     reference_water_level_note?: string
     measurement_method?: 'multibeam_echosounder'
     survey_id?: string
+    native_resolution?: string
+    transition_m?: number
   }
   values: number[]
 }

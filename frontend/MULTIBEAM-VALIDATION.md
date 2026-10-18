@@ -1,5 +1,7 @@
 # Multibeam frontend validation — 2026-10-18
 
+Current shoreline changes and new on-device evidence are in [3D shoreline validation](../docs/3d-shoreline-realism/README.md). The records below retain their original historical scope.
+
 **Historical browser record for commit `2c677a3` and its 2 m patch.** The later
 sonar/1 m display revision has different sample/triangle counts and has NOT
 been browser-validated: Work settings disable local browser control. See
