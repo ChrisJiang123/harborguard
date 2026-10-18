@@ -102,11 +102,15 @@ class Settings:
     ollama_timeout_s: float            # 契约：本地超时 30 秒
     ollama_keep_alive: str
     ollama_format_overrides: str       # 显式按模型覆盖输出格式："model:json,…";空 = 全部完整 schema（C3 现状，可回退）
+    agent_lang: str = "en"
 
 
 def load_settings() -> Settings:
     """每次调用重新读取环境变量（便于测试）；常规入口用 get_settings()。"""
+    from .language import language
+
     return Settings(
+        agent_lang=language(),
         # 云端 LLM
         cloud_provider=_get_str("CLOUD_PROVIDER", "disabled").lower(),
         openrouter_api_key=_get_opt("OPENROUTER_API_KEY"),

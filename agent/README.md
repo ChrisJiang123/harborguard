@@ -41,9 +41,20 @@ python -m agent.main        # 默认监听 127.0.0.1:8001
 及实际响应模型，不会为健康检查发送收费请求。密钥只从 `.env`/进程环境读取且不进入日志。
 
 旧 `CLOUD_PROVIDER=anthropic` 适配仍可显式启用；协议兼容不证明实际服务是 Anthropic Claude。
-本轮不再访问 Z.ai。`OLLAMA_MODEL` 当前应为已验证的 `qwen3:1.7b`；
-`harborguard-lora` 尚未训练或部署（C4 蒸馏/训练/评估管线见 `ml/lora/README.md`；
-蒸馏教师与本服务共用 `prompts.SYSTEM_PROMPT` 与同一套校验，训练分布与运行时一致）。
+本轮不再访问 Z.ai。演示机 `.env` 当前配置 `OLLAMA_MODEL=harborguard-lora`、
+`OLLAMA_FORMAT_OVERRIDES=harborguard-lora:json`；未列出的模型（含 qwen3:1.7b）
+仍使用完整 schema。C0 自检沿用同一本地适配器，输出被测模型与格式，不替换成其他已安装模型。
+
+`AGENT_LANG=en|zh` 默认 `en`，控制建议与问答语言。英文建议限制为 summary 25 words、
+explanation 120 words、每条 uncertainty 15 words；中文沿用 60/300/40 字。
+后端契约 v1 的 60/300/40 字符上限同时保留，英文截断优先保留完整词。
+英文模板使用英文类别名，不回显中文方案标签或原始 unknown 类名。
+
+当前 LoRA 使用中文蒸馏数据训练。本轮不重训；英文模式下任何模型建议字段含中文都会在
+截断前被拒绝，按现有重试与预算降级到英文模板，model=template，不计本地模型成功。
+`/ask` 同样拒绝英文模式下的中文回复。结构、ID、事实、方案及低置信度规则继续保留；
+英文可核验词汇转换仅用于事实检查视图，不改返回文本或上下文 ID。
+历史 test50/confirm60 中文基准需以原冻结中文提示词复验，不能当作英文能力指标。
 
 ```bash
 curl http://127.0.0.1:8001/health

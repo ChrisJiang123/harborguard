@@ -14,6 +14,8 @@
 from __future__ import annotations
 
 import importlib
+import asyncio
+import json
 import os
 import shutil
 import subprocess
@@ -26,6 +28,34 @@ sys.path.insert(0, str(ROOT))
 PASS, FAIL, PENDING = "PASS", "FAIL", "PENDING"
 ICON = {PASS: "[ok]  ", FAIL: "[X]   ", PENDING: "[...] "}
 _results: list[tuple[str, str, str]] = []
+
+
+async def configured_local_chat(cfg, models: list[str]) -> tuple[str, str, str]:
+    """Use the runtime adapter/format; never substitute another installed model."""
+    from agent.prompts import SYSTEM_PROMPT
+    from agent.router import LocalProvider
+
+    def canonical(name):
+        return name.removesuffix(":latest")
+
+    if canonical(cfg.ollama_model) not in {canonical(m) for m in models}:
+        raise ValueError(f"configured model {cfg.ollama_model!r} is not installed")
+    provider = LocalProvider(cfg)
+    context = {
+        "kind": "security", "network": "offline", "options": [], "ranked": [],
+        "alert": {"id": "A0", "level": 2, "risk": .4},
+        "track": {"id": "T0", "cls": "unknown", "conf": .8},
+        "buoys": {"down": [], "covering_track": ["B1", "B2"]},
+    }
+    try:
+        response = await provider.complete(SYSTEM_PROMPT,
+            [{"role": "user", "content": json.dumps(context, sort_keys=True)}], cfg.ollama_timeout_s)
+        payload = json.loads(response.text)
+        if not isinstance(payload, dict) or not payload:
+            raise ValueError("configured model returned an empty/non-object JSON response")
+        return cfg.ollama_model, provider.draft_output_format, response.text
+    finally:
+        await provider.aclose()
 
 
 def record(name: str, status: str, detail: str = "") -> None:
@@ -171,30 +201,15 @@ def main() -> int:
     except Exception as e:  # noqa: BLE001
         record("ollama.server", FAIL, f"{e.__class__.__name__}: 无法连接 {tags_url}（brew services start ollama）")
 
-    # 6. Ollama 本地真实对话（OpenAI 兼容接口） ----------------------------
+    # 6. 与运行时同一原生接口、模型和format；这里只验连通/JSON，不冒充事实验收。
     if models:
         try:
-            import re
-
-            from openai import OpenAI
-
-            oc = OpenAI(base_url=cfg.ollama_base_url, api_key="ollama", timeout=cfg.ollama_timeout_s)
-            target = cfg.ollama_model if cfg.ollama_model in models else models[0]
-            resp = oc.chat.completions.create(
-                model=target,
-                messages=[{"role": "user", "content": "只回答一个数字：1+1=?"}],
-                max_tokens=512,  # qwen3 为 thinking 模型，预算太小会耗在 <think> 里
-            )
-            text = (resp.choices[0].message.content or "").strip()
-            text = re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
-            if not text:
-                record("ollama.chat", PENDING, f"model={target} 有响应但剥离 <think> 后无文本，待复核")
-            else:
-                record("ollama.chat", PASS, f"model={target} 回复: {text[:60]!r}")
+            target, fmt, text = asyncio.run(configured_local_chat(cfg, models))
+            record("ollama.chat", PASS, f"model={target} format={fmt} JSON回复: {text[:120]!r}（连通性检查）")
         except Exception as e:  # noqa: BLE001
             record("ollama.chat", FAIL, f"{e.__class__.__name__}: {e}")
     else:
-        record("ollama.chat", PENDING, "无本地模型，先 ollama pull qwen3:1.7b")
+        record("ollama.chat", PENDING, f"无本地模型；需要配置的 {cfg.ollama_model}（自检不下载模型）")
 
     # 7. 云端 LLM 一次真实调用 --------------------------------------------
     has_cred = bool(cfg.anthropic_api_key or cfg.anthropic_auth_token)
@@ -202,7 +217,10 @@ def main() -> int:
         os.environ.get("ANTHROPIC_API_KEY")
         or os.environ.get("ANTHROPIC_AUTH_TOKEN")
     )
-    if not (has_cred or sdk_env_cred):
+    if cfg.cloud_provider != "anthropic":
+        record("cloud.llm", PENDING,
+               f"CLOUD_PROVIDER={cfg.cloud_provider}; 不探测旧Anthropic适配，不发生收费调用")
+    elif not (has_cred or sdk_env_cred):
         record(
             "cloud.llm",
             PENDING,

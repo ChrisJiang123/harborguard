@@ -1,4 +1,7 @@
 """C4 distill 管线测试：C3 同一套校验、重试语义、幂等键、确定性划分。"""
+import pytest
+pytestmark = pytest.mark.agent_language("zh")
+
 
 import asyncio
 import hashlib

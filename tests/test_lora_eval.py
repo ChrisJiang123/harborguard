@@ -1,4 +1,7 @@
 """C4 eval 管线测试：记录加载、教师名推断、分阶段校验与指标聚合。"""
+import pytest
+pytestmark = pytest.mark.agent_language("zh")
+
 
 import asyncio
 import json

@@ -382,6 +382,7 @@ class AskBody(BaseModel):
 @app.get("/health")
 async def health() -> dict:
     route_health = router.health()
+    route_health["agent_lang"] = settings.agent_lang
     current_model = (route_health.get("last_route") or {}).get("model") or "idle"
     return {
         "ok": True,
