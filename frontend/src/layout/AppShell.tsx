@@ -33,6 +33,7 @@ function StatusNotice() {
   if (error) return <div className="status-notice error" role="alert">{englishText(error)}<button onClick={() => useHarbor.getState().setError(null)} aria-label="Dismiss message">×</button></div>
   if (conn === 'disconnected' || conn === 'connecting') return <div className="status-notice">{conn === 'connecting' ? 'Connecting to backend…' : 'Backend disconnected. Reconnecting automatically.'} Select Local Demo in the top bar to continue.</div>
   if (conn === 'live' && recovery.phase === 'loading') return <div className="status-notice">Restoring history and joining live events…</div>
+  if (conn === 'live' && recovery.message?.startsWith('Incomplete history:')) return <details className="history-notice"><summary>Recent activity only</summary><p>Live updates are connected. Older recommendations and approvals may be outside the available history.</p><p>Approval status is shown only when a confirmed decision record is available.</p></details>
   if (conn === 'live' && recovery.message) return <div className="status-notice warning" role="status">{recovery.message} Approval status is never inferred from free-text logs.</div>
   return null
 }

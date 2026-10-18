@@ -464,3 +464,7 @@ a { color: #70c8f9; text-decoration: none; }
   .demo-dialog .dialog-heading { top: -22px; margin: -22px -18px 16px; padding: 18px; }
   .recording-banner, .recording-ready { top: 12px; }
 }
+
+.history-notice { padding: 6px 18px; background: #0b1a28; border-bottom: 1px solid #203448; color: #a8bed0; font-size: 12px; }
+.history-notice summary { cursor: pointer; width: fit-content; }
+.history-notice p { margin: 8px 0; max-width: 75ch; font-size: 14px; }
