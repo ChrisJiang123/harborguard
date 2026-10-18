@@ -50,6 +50,8 @@ DISASTER_COVERAGE_RATE, DISASTER_CLEAR_COVERAGE = 0.02, 0.9
 # Unconfirmed survey echoes stay unsurveyed, with bounded re-observation.
 # Avoid a degenerate near-field image by selecting a physically different buoy.
 DISASTER_RETRY_S, DISASTER_RETRY_MAX, DISASTER_MIN_RANGE_M = 20.0, 3, 30.0
+DISASTER_OBSERVATION_GRID_M = 1.0
+DISASTER_ASSOCIATION_M = 40.0
 EVENT_CACHE_SIZE, LOG_CACHE_SIZE = 500, 1000
 WS_QUEUE_SIZE, DETECTION_CACHE_SIZE = 64, 64
 MAX_STATE_BYTES = 50_000
