@@ -16,28 +16,28 @@ function LoraSummary({ value }: { value: unknown }) {
   const model = object(metrics.lora)
   if (typeof model.model !== 'string') return null
   const sets = [
-    { name: 'test50', label: '合成固定测试集', metric: model, sample: object(samples.test50) },
-    { name: 'confirm60', label: '合成确认集', metric: object(confirm.lora), sample: object(samples.confirm60) },
+    { name: 'test50', label: 'Synthetic fixed test set', metric: model, sample: object(samples.test50) },
+    { name: 'confirm60', label: 'Synthetic confirmation set', metric: object(confirm.lora), sample: object(samples.confirm60) },
   ]
   return <div>
-    <p>评估模型：{model.model} · {typeof config.output_format === 'string' && config.output_format.startsWith('format=json') ? 'format=json' : '格式见原始配置'}</p>
+    <p>Evaluated model: {model.model} · {typeof config.output_format === 'string' && config.output_format.startsWith('format=json') ? 'format=json' : 'See raw format configuration'}</p>
     {sets.map(set => {
       if (!set.metric.model) return null
       const counts = object(set.metric.counts)
       const fact = object(counts.id_fact_valid)
       return <div key={set.name}>
-        <b>{set.name} · {set.label}（{String(set.sample.n ?? '—')} 条）</b>
+        <b>{set.name} · {set.label} ({String(set.sample.n ?? '—')} samples)</b>
         <dl>{([
-          ['struct_valid', '结构'], ['id_fact_valid', 'ID + 事实'],
-          ['option_agree', '方案一致'], ['null_recommend_correct', 'null 正确'],
+          ['struct_valid', 'Structure'], ['id_fact_valid', 'IDs + facts'],
+          ['option_agree', 'Option agreement'], ['null_recommend_correct', 'Correct null'],
         ] as const).map(([key, label]) => {
           const count = object(counts[key])
-          return <div key={key}><dt>{label}</dt><dd>{typeof count.pass === 'number' && typeof count.total === 'number' ? `${count.pass}/${count.total}` : '整数分母待提供'}</dd></div>
-        })}<div><dt>平均业务生成耗时（含重试）</dt><dd>{String(set.metric.latency_s ?? '—')} 秒</dd></div></dl>
-        {typeof fact.pass === 'number' && typeof fact.total === 'number' && <p className="training">事实质量局限：{fact.total - fact.pass}/{fact.total} 条未通过 ID + 确定性事实校验。</p>}
+          return <div key={key}><dt>{label}</dt><dd>{typeof count.pass === 'number' && typeof count.total === 'number' ? `${count.pass}/${count.total}` : 'Integer counts unavailable'}</dd></div>
+        })}<div><dt>Mean generation time (including retries)</dt><dd>{String(set.metric.latency_s ?? '—')} s</dd></div></dl>
+        {typeof fact.pass === 'number' && typeof fact.total === 'number' && <p className="training">Fact quality limit: {fact.total - fact.pass}/{fact.total} samples failed ID + deterministic fact checks.</p>}
       </div>
     })}
-    <p className="muted">两组合成上下文结果分别统计；自由文本事实不能完全验证。模板兜底不计作模型成功，离线评估超时与线上事件预算不同。</p>
+    <p className="muted">The synthetic sets are reported separately. Free-text facts are not fully verified. Template fallbacks are not model successes; offline timeouts differ from the runtime event budget.</p>
   </div>
 }
 
@@ -50,10 +50,10 @@ export function MetricsCard() {
     const abort = new AbortController()
     void api.metrics(abort.signal).then(value => {
       if (abort.signal.aborted) return
-      if (!value || !('yolo' in value) || !('lora' in value)) { setError('指标响应缺少 yolo / lora 字段。'); return }
+      if (!value || !('yolo' in value) || !('lora' in value)) { setError('Metrics response is missing yolo / lora fields.'); return }
       setResult(value); setError(null)
-    }).catch((cause: unknown) => { if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : '指标读取失败。') })
+    }).catch((cause: unknown) => { if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : 'Could not load metrics.') })
     return () => abort.abort()
   }, [conn, revision])
-  return <details className="metrics-card"><summary>合成数据指标</summary><p className="muted">仅展示数据源原值，不代表真实海域效果。{conn === 'replay' && '回放无指标侧车文件，未访问后端。'}</p>{error ? <p role="alert">指标不可用：{error}</p> : result ? (['yolo', 'lora'] as const).map(model => <div className="metric-model" key={model}><b>{model === 'yolo' ? 'YOLO · mAP50 / 各类召回 / CPU 每图延迟' : 'LoRA · 结构 / 事实 / 方案 / 本地延迟'}</b>{result[model] === null ? <p className="training">尚未提供评估结果</p> : <>{model === 'lora' && <LoraSummary value={result[model]} />}<details open={model === 'yolo'}><summary>原始指标与配置（含历史失败）</summary><dl>{metricEntries(result[model]).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}</dl></details>{metricEntries(result[model]).length === 0 && <p>指标格式待对齐，未生成替代数值。</p>}</>}</div>) : <p>正在读取指标…</p>}<button onClick={() => setRevision(value => value + 1)}>刷新指标</button></details>
+  return <details className="metrics-card"><summary>Synthetic Data Metrics</summary><p className="muted">Source-provided values; not a measure of real-world marine performance.{conn === 'replay' && 'No metrics sidecar in replay. Backend was not queried.'}</p>{error ? <p role="alert">Metrics unavailable: {error}</p> : result ? (['yolo', 'lora'] as const).map(model => <div className="metric-model" key={model}><b>{model === 'yolo' ? 'YOLO · mAP50 / Recall by class / CPU latency per image' : 'LoRA · Structure / Facts / Options / Local latency'}</b>{result[model] === null ? <p className="training">Evaluation results not available</p> : <>{model === 'lora' && <LoraSummary value={result[model]} />}<details open={model === 'yolo'}><summary>Raw metrics and configuration (including historical failures)</summary><dl>{metricEntries(result[model]).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}</dl></details>{metricEntries(result[model]).length === 0 && <p>Unsupported metrics format. No substitute values were generated.</p>}</>}</div>) : <p>Loading metrics…</p>}<button onClick={() => setRevision(value => value + 1)}>Refresh metrics</button></details>
 }

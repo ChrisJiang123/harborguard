@@ -1,15 +1,14 @@
 """Active sonar scheduler and bounded detection/image cache."""
 from __future__ import annotations
 
-from math import atan2, degrees, hypot
+from math import hypot
 
 from .. import config
 from ..geo import to_local
+from ..perception.classifier import sonar_pixel
+from ..sim.sonar import sonar_scene
+from ..sim.sonar import value as value  # Compatibility re-export for internal callers.
 from .alerts import AlertManager
-
-
-def value(target, key, default=None):
-    return target.get(key, default) if isinstance(target, dict) else getattr(target, key, default)
 
 
 class Pinger:
@@ -41,36 +40,23 @@ class Pinger:
         return True
 
     def scene(self, buoy: dict, track: dict, world) -> list[dict]:
-        bx, by = to_local(buoy["lat"], buoy["lon"])
         tx, ty = to_local(track["lat"], track["lon"])
-        heading = degrees(atan2(tx-bx, ty-by))
-        targets = []
-        for target in world.targets:
-            if value(target, "cls") not in config.SONAR_TARGET_CLASSES:
-                continue
-            dx, dy = value(target, "x")-bx, value(target, "y")-by
-            distance = hypot(dx, dy)
-            bearing = (degrees(atan2(dx, dy))-heading+180) % 360-180
-            if distance > config.PING_RANGE_M or abs(bearing) > config.SONAR_FOV_DEG/2:
-                continue
-            targets.append({"cls": value(target, "cls"), "range_m": distance, "bearing_deg": bearing,
-                            "length_m": value(target, "length_m", 2.0),
-                            "width_m": value(target, "width_m", 0.5),
-                            "aspect_deg": degrees(atan2(value(target, "vx", 0), value(target, "vy", 0)))-heading})
-        return targets
+        return sonar_scene(world, buoy, tx, ty)
 
     def detect(self, track_id: str, buoy: dict, targets: list[dict], world,
-               expected_range: float | None = None) -> tuple[dict, list[tuple]]:
+               expected_range: float | None = None, expected_bearing: float = 0.0) -> tuple[dict, list[tuple]]:
         seed = int(world.rng.integers(0, 2**31-1))
         result = self.classifier.classify(targets, seed=seed)
         detections = result.get("detections", [])
         # Aim toward the track. Select the detection closest to its predicted central pixel.
-        target_range = expected_range if expected_range is not None else min(
-            (p["range_m"] for p in targets), default=0)
-        expected_y = config.SONAR_SIZE-1-target_range/config.PING_RANGE_M*(config.SONAR_SIZE-1)
+        # Association uses the observed/predicted range, never renderer truth.
+        expected = sonar_pixel(expected_range, expected_bearing,
+                               projection=result.get("_projection", "stub_linear")) if expected_range is not None else None
         def rank(item):
+            if expected is None:
+                return -item["conf"]
             box = item["bbox"]
-            return ((box[0]+box[2])/2-config.SONAR_SIZE/2)**2 + ((box[1]+box[3])/2-expected_y)**2
+            return ((box[0]+box[2])/2-expected[0])**2 + ((box[1]+box[3])/2-expected[1])**2
         chosen = min(detections, key=rank) if detections else {"cls": "unknown", "conf": 0.0, "bbox": [0, 0, 0, 0]}
         self.counter += 1
         did = f"det-{self.counter}"

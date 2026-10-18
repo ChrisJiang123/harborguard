@@ -4,7 +4,7 @@ import type { MapResources } from './mapGeometry'
 
 export async function fetchJSON(url: string, timeoutMs = 3000): Promise<unknown> {
   const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
-  if (!response.ok || !response.headers.get('content-type')?.includes('json')) throw new Error('图层文件未就绪')
+  if (!response.ok || !response.headers.get('content-type')?.includes('json')) throw new Error('Layer file is not ready')
   return response.json()
 }
 

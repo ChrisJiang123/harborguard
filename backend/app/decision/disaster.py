@@ -8,8 +8,8 @@ from shapely.geometry import Point
 
 from .. import config
 from ..geo import to_local
+from ..sim.sonar import sonar_scene, survey_contacts
 from .alerts import AlertManager
-from .pinger import value
 from .zones import Zones
 
 
@@ -19,11 +19,13 @@ class DisasterSurvey:
         self.detected_debris: set[str] = set()
         self.blocked_zones: set[str] = set()
         self.coverage_weights: dict[str, dict[str, float]] = {}
+        self.attempts: dict[str, dict] = {}
 
     def reset(self):
         self.detected_debris.clear()
         self.blocked_zones.clear()
         self.coverage_weights.clear()
+        self.attempts.clear()
 
     def step(self, world, tracks, dt, statuses, restrictions, pinger) -> list[tuple]:
         events = []
@@ -38,33 +40,77 @@ class DisasterSurvey:
             for zid, fraction in self.coverage_weights[bid].items():
                 statuses[zid]["coverage"] = min(1.0, statuses[zid]["coverage"]+
                                                 dt*config.DISASTER_COVERAGE_RATE*fraction)
-            for index, target in enumerate(world.targets):
-                if value(target, "cls") != "debris":
-                    continue
-                target_key = str(value(target, "id", index))
-                if target_key in self.detected_debris:
-                    continue
-                x, y = value(target, "x"), value(target, "y")
-                if hypot(x-bx, y-by) > config.DISASTER_DETECT_RANGE_M:
-                    continue
-                if not pinger.safe(buoy, tracks):
-                    continue
-                scene = [{"cls": "debris", "range_m": hypot(x-bx, y-by), "bearing_deg": 0.0,
-                          "length_m": value(target, "length_m", 2.0),
-                          "width_m": value(target, "width_m", 0.5), "aspect_deg": 0.0}]
-                detection, generated = pinger.detect("", buoy, scene, world)
-                events.extend(generated)
-                self.detected_debris.add(target_key)
-                if detection["cls"] == "debris" and detection["conf"] >= config.DETECTION_MIN_CONF:
-                    zid = self.zones.zone_of(x, y)
-                    if zid:
-                        self.blocked_zones.add(zid)
-                        events.append(AlertManager.log(world.t, f"分区 {zid} 检测到碎片，等待人工清理", "warn"))
+        # Sensor positions are synthetic observations, not truth classes/IDs.
+        # Misses, non-debris predictions and unusable geometry are all unresolved.
+        associated = set()
+        for contact in survey_contacts(world):
+            x, y = contact.x, contact.y
+            available = []
+            for bid, buoy in world.buoys.items():
+                bx, by = to_local(buoy["lat"], buoy["lon"])
+                distance = hypot(x-bx, y-by)
+                if buoy["status"] == "ok" and distance <= config.DISASTER_DETECT_RANGE_M:
+                    available.append((distance, bid, buoy))
+            if not available:
+                continue
+            matches = [(hypot(x-a["x"], y-a["y"]), key) for key, a in self.attempts.items()
+                       if key not in associated and hypot(x-a["x"], y-a["y"]) <= config.DISASTER_ASSOCIATION_M]
+            key = min(matches)[1] if matches else contact.key
+            associated.add(key)
+            point = Point(x, y)
+            zone_ids = [zid for zid, polygon in self.zones.polygons.items()
+                        if polygon.distance(point) <= contact.uncertainty_m]
+            if key not in self.attempts:
+                self.attempts[key] = {"zone_id": self.zones.zone_of(x, y), "count": 0,
+                                      "zone_ids": zone_ids, "last_t": None, "buoy_ids": [], "reason": None}
+            attempt = self.attempts[key]
+            attempt.update(x=x, y=y, zone_ids=sorted(set(attempt["zone_ids"]) | set(zone_ids)))
+            if key in self.detected_debris:
+                self.blocked_zones.update(attempt["zone_ids"])
+                continue
+            if (attempt["count"] >= config.DISASTER_RETRY_MAX
+                    or (attempt["last_t"] is not None
+                        and world.t-attempt["last_t"] < config.DISASTER_RETRY_S-config.SIM_TIME_EPSILON_S)):
+                if attempt["reason"] is not None:
+                    self._unresolved(attempt, attempt["reason"], world.t, events)
+                continue
+            min_range = getattr(pinger.classifier, "survey_min_range_m", config.DISASTER_MIN_RANGE_M)
+            suitable = [item for item in available if item[0] >= min_range
+                        and pinger.safe(item[2], tracks)]
+            if not suitable:
+                reason = "near_field" if all(item[0] < min_range for item in available) else "protected"
+                self._unresolved(attempt, reason, world.t, events)
+                continue  # Near-field/mammal-protected candidates remain uncertain.
+            distance, bid, buoy = min(suitable, key=lambda item: (
+                item[1] in attempt["buoy_ids"], item[0], item[1]))
+            # The simulator renders ALL visible reflectors with their physical
+            # shapes. Policy sees only the detector's output, not those labels.
+            scene = sonar_scene(world, buoy, x, y)
+            detection, generated = pinger.detect("", buoy, scene, world, expected_range=distance)
+            events.extend(generated)
+            attempt["count"] += 1
+            attempt["last_t"] = world.t
+            attempt["buoy_ids"].append(bid)
+            if detection["cls"] == "debris" and detection["conf"] >= config.DETECTION_MIN_CONF:
+                attempt["reason"] = "confirmed"
+                self.detected_debris.add(key)
+                if attempt["zone_ids"]:
+                    self.blocked_zones.update(attempt["zone_ids"])
+                    events.append(AlertManager.log(world.t,
+                        f"分区 {'/'.join(attempt['zone_ids'])} 检测到碎片，等待人工清理", "warn"))
+            else:
+                reason = "no_detection" if detection["cls"] == "unknown" else (
+                    "low_confidence" if detection["conf"] < config.DETECTION_MIN_CONF else "non_debris")
+                self._unresolved(attempt, reason, world.t, events)
+        uncertain = {zid for key, a in self.attempts.items() if key not in self.detected_debris
+                     for zid in a["zone_ids"]}
         for zid, status in statuses.items():
             if zid in restrictions:
                 state = "restricted"
             elif zid in self.blocked_zones:
                 state = "blocked"
+            elif zid in uncertain:
+                state = "unsurveyed"
             elif status["coverage"] >= config.DISASTER_CLEAR_COVERAGE:
                 state = "clear"
             else:
@@ -73,6 +119,22 @@ class DisasterSurvey:
                 status["state"] = state
                 events.append(("zone_changed", {"zone_id": zid, "state": state}))
         return events
+
+    @staticmethod
+    def _unresolved(attempt, reason, t, events):
+        # Explain using existing log events; no new wire fields/status enums.
+        marker = [reason, attempt["count"], attempt["zone_ids"]]
+        if attempt.get("reported") == marker:
+            return
+        attempt["reason"] = reason
+        attempt["reported"] = marker
+        reasons = {"near_field": "近场成像边界，缺少可靠观测位置", "protected": "海洋哺乳动物保护，暂不发射",
+                   "no_detection": "声呐未检出", "low_confidence": "识别置信度不足",
+                   "non_debris": "识别为非碎片，不能据此排除障碍"}
+        if attempt["zone_ids"]:
+            events.append(AlertManager.log(t,
+                f"分区 {'/'.join(attempt['zone_ids'])}：{reasons[reason]}；保持未勘测/待复核"
+                f"（已发射{attempt['count']}/{config.DISASTER_RETRY_MAX}，达到上限也不自动清除）", "warn"))
 
     def reopen(self, statuses: dict) -> dict:
         props = self.zones.properties
@@ -91,7 +153,7 @@ class DisasterSurvey:
                   if props[neighbor]["kind"] == "berth" and statuses[neighbor]["state"] == "clear"}
         unsurveyed = sorted(z for z, s in statuses.items() if s["state"] == "unsurveyed")
         blocked = sorted(z for z, s in statuses.items() if s["state"] == "blocked")
-        surveyed = len(statuses)-len(unsurveyed)-len(blocked)
+        surveyed = sum(s["state"] == "clear" for s in statuses.values())
         return {"route_zone_ids": sorted(reachable), "reopen_berth_zone_ids": sorted(berths),
                 "unsurveyed_zone_ids": unsurveyed, "blocked_zone_ids": blocked,
                 "est_hours_saved": surveyed*config.SURVEY_H}

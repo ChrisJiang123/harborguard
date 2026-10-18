@@ -40,6 +40,42 @@ def application(path):
     return create_app(run_loop=False, debug_truth=False, storage_path=path)
 
 
+def test_identical_log_text_at_same_sim_time_remains_two_durable_events(tmp_path):
+    path = tmp_path / "repeated-logs.sqlite3"
+    body = dict(level="info", source="operator", text="same legitimate message")
+    with TestClient(application(path)) as client:
+        for _ in range(2):
+            assert client.post("/api/log", json=body).status_code == 200
+        events = [event for event in client.get("/api/events").json() if event["event"] == "log"]
+        logs = client.get("/api/log").json()
+        assert len(events) == len(logs) == 2
+        assert events[0]["seq"] < events[1]["seq"]
+        assert events[0]["t"] == events[1]["t"] == 0
+        assert events[0]["data"] == events[1]["data"]
+    with TestClient(application(path)) as client:
+        assert client.get("/api/events").json() == events
+        assert client.get("/api/log").json() == logs
+
+
+@pytest.mark.parametrize("action", ["approve", "reject"])
+def test_same_time_decisions_from_distinct_operators_survive_restart(tmp_path, action):
+    path = tmp_path / "multiple-operators.sqlite3"
+    with TestClient(application(path)) as client:
+        seed(client.app.state.engine)  # Contract fixture; not a scenario/browser acceptance claim.
+        for operator in ("operator-A", "operator-B"):
+            body = dict(alert_id="A1", option_id="opt-1", action=action, operator=operator)
+            assert client.post("/api/decision", json=body).status_code == 200
+        events = [event for event in client.get("/api/events").json() if event["event"] == "decision"]
+        assert len(events) == 2
+        assert events[0]["seq"] < events[1]["seq"]
+        assert events[0]["t"] == events[1]["t"]
+        assert [event["data"]["operator"] for event in events] == ["operator-A", "operator-B"]
+        assert client.app.state.engine.store.get_object("latest_decision", "A1") == body
+    with TestClient(application(path)) as client:
+        assert [event for event in client.get("/api/events").json() if event["event"] == "decision"] == events
+        assert client.app.state.engine.store.get_object("latest_decision", "A1") == body
+
+
 @pytest.mark.parametrize("action", ["approve", "reject"])
 def test_decision_recommendation_details_and_state_survive_restart(tmp_path, action):
     path = tmp_path / "history.sqlite3"

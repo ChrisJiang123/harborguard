@@ -70,14 +70,14 @@ async function main() {
     assert.equal(zoneStyle('open', false, true).color, '#7dd3fc')
 
     const localCalls = calls.length
-    await api.decide({ alert_id: 'A1', option_id: 'port-closure', action: 'approve', operator: '操作员 A' })
+    await api.decide({ alert_id: 'A1', option_id: 'port-closure', action: 'approve', operator: 'Operator A' })
     state = useHarbor.getState()
     assert.equal(state.decisionsByAlert.A1.action, 'approve')
     assert.equal(state.decisionsByAlert.A1.option_id, 'port-closure')
     assert.equal(state.decisionsByAlert.A1.t, 66)
     assert.equal(state.decisionRequests.A1, undefined)
     assert.equal(state.latest.zones.filter(zone => zone.state === 'restricted').length, 10)
-    await assert.rejects(() => api.decide({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: 'A' }), /已处理/)
+    await assert.rejects(() => api.decide({ alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: 'A' }), /already been handled/)
     assert.equal(calls.length, localCalls)
 
     await api.startScenario('a', 10)
@@ -110,16 +110,16 @@ async function main() {
     assert.equal(state.chosenOptionId, null)
 
     state.setConnection('replay')
-    await assert.rejects(() => api.startScenario('a'), /回放模式/)
+    await assert.rejects(() => api.startScenario('a'), /disabled during replay/)
     state.setConnection('disconnected')
-    await assert.rejects(() => api.control({ action: 'resume' }), /未连接/)
+    await assert.rejects(() => api.control({ action: 'resume' }), /disconnected/)
     assert.equal(calls.length, localCalls)
     stop(); stop = null
 
     seedLive()
     const postCalls = []
     global.fetch = async (url, init) => { postCalls.push({ url, init }); return new Response(JSON.stringify({ ok: true }), { headers: { 'content-type': 'application/json' } }) }
-    const input = { alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: '操作员 A' }
+    const input = { alert_id: 'A1', option_id: 'opt-1', action: 'approve', operator: 'Operator A' }
     await api.decide(input)
     assert.equal(useHarbor.getState().decisionsByAlert.A1, undefined)
     assert.ok(useHarbor.getState().decisionRequests.A1)
@@ -134,36 +134,46 @@ async function main() {
     assert.equal(useHarbor.getState().latest.zones.find(zone => zone.id === 'Z4').state, 'restricted')
 
     seedLive()
-    global.fetch = async () => new Response(JSON.stringify({ detail: '方案不存在' }), { status: 422, headers: { 'content-type': 'application/json' } })
-    const success = await runOperation('批准方案', () => api.decide(input))
+    const rejectInput = { ...input, action: 'reject' }
+    await api.decide(rejectInput)
+    assert.equal(useHarbor.getState().decisionRequests.A1, undefined)
+    assert.equal(useHarbor.getState().decisionsByAlert.A1, undefined)
+    assert.equal(useHarbor.getState().uncertainDecisions.A1.reason, 'reject-without-event')
+    receiveMessage({ type: 'event', seq: 100002, t: 68, event: 'decision', data: rejectInput })
+    assert.equal(useHarbor.getState().uncertainDecisions.A1, undefined)
+    assert.equal(useHarbor.getState().decisionsByAlert.A1.action, 'reject')
+
+    seedLive()
+    global.fetch = async () => new Response(JSON.stringify({ detail: 'Option not found' }), { status: 422, headers: { 'content-type': 'application/json' } })
+    const success = await runOperation('Approve option', () => api.decide(input))
     assert.equal(success, false)
     assert.equal(useOperations.getState().pending, null)
-    assert.match(useOperations.getState().toast.text, /方案不存在/)
+    assert.match(useOperations.getState().toast.text, /Option not found/)
     assert.equal(useOperations.getState().toast.kind, 'error')
     assert.equal(useHarbor.getState().decisionsByAlert.A1, undefined)
     assert.equal(useHarbor.getState().decisionRequests.A1, undefined)
 
     global.fetch = async () => new Response(JSON.stringify({ ok: false }), { headers: { 'content-type': 'application/json' } })
-    await assert.rejects(() => api.startScenario('a'), /未确认接受/)
+    await assert.rejects(() => api.startScenario('a'), /did not confirm/)
     global.fetch = async () => { throw new TypeError('offline') }
-    await assert.rejects(() => api.control({ action: 'pause' }), /连接失败/)
+    await assert.rejects(() => api.control({ action: 'pause' }), /Connection failed/)
     global.fetch = async () => new Response('not json', { headers: { 'content-type': 'text/plain' } })
-    await assert.rejects(() => requestJSON('https://example.invalid/'), error => error instanceof APIError && /有效 JSON/.test(error.message))
+    await assert.rejects(() => requestJSON('https://example.invalid/'), error => error instanceof APIError && /valid JSON/.test(error.message))
 
     const timeoutCalls = []
     AbortSignal.timeout = milliseconds => { timeoutCalls.push(milliseconds); return new AbortController().signal }
     seedLive()
-    global.fetch = async url => new Response(JSON.stringify(url.endsWith('/agent/ask') ? { answer: '收到', model: 'template' } : { ok: true }), { headers: { 'content-type': 'application/json' } })
+    global.fetch = async url => new Response(JSON.stringify(url.endsWith('/agent/ask') ? { answer: 'Received.', model: 'template' } : { ok: true }), { headers: { 'content-type': 'application/json' } })
     await api.health()
-    assert.deepEqual(await api.ask('当前态势？'), { answer: '收到', model: 'template' })
+    assert.deepEqual(await api.ask('Current situation?'), { answer: 'Received.', model: 'template' })
     assert.deepEqual(timeoutCalls, [8000, 19000])
     AbortSignal.timeout = originalAbortTimeout
 
     let release
     let duplicate = false
-    const first = runOperation('测试操作', () => new Promise(resolve => { release = resolve }))
-    assert.equal(useOperations.getState().pending, '测试操作')
-    assert.equal(await runOperation('重复操作', async () => { duplicate = true }), false)
+    const first = runOperation('Test action', () => new Promise(resolve => { release = resolve }))
+    assert.equal(useOperations.getState().pending, 'Test action')
+    assert.equal(await runOperation('Duplicate action', async () => { duplicate = true }), false)
     assert.equal(duplicate, false)
     release()
     assert.equal(await first, true)
@@ -175,7 +185,7 @@ async function main() {
     assert.deepEqual(useHarbor.getState().decisionRequests, {})
     assert.deepEqual(useHarbor.getState().optionsByAlert, {})
     assert.equal(useHarbor.getState().latestRec, null)
-    console.log('PASS A3: scenario A approval/rejection; manual/default options; target-specific context; contribution display; network/mode/scenario controls; replay POST lock; real-event-only confirmation; HTTP/toast errors; 8s default and 19s Agent ask timeouts; request de-duplication; clean session reset.')
+    console.log('PASS A3: scenario A approval/rejection; manual/default options; target-specific context; contribution display; network/mode/scenario controls; replay POST lock; real-event-only confirmation; explicit unconfirmed reject state; HTTP/toast errors; 8s default and 19s Agent ask timeouts; request de-duplication; clean session reset.')
   } finally {
     stop?.()
     global.fetch = originalFetch

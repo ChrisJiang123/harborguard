@@ -1,0 +1,246 @@
+{
+  "checked_date": "2026-10-17",
+  "client_timezone": "America/Los_Angeles",
+  "validated_source_commit": "8034d381827644d5de872de5b47e0dd7ce2e5381",
+  "baselines": {
+    "main": "5817b9c7ee488b41df7549bdf177a688b71de1b0",
+    "C": "78d39574266b01a582b0626c17021181749271c8",
+    "B_handoff": "368df2ede67f2c8e353a628afb1559a95d70cb68"
+  },
+  "python_tests": {
+    "passed": 103,
+    "skipped": 2,
+    "warnings": 1,
+    "seconds": 57.16,
+    "command": "python -m pytest -q backend/tests tests --basetemp artifacts/final-integration-pytest",
+    "skip_reason": "Two optional pretrained-weight smoke tests have no .cache/yolo26n.pt."
+  },
+  "python_static_checks": {
+    "ruff_backend": "passed",
+    "compileall_backend_agent_ml": "passed",
+    "pip_check": "passed"
+  },
+  "frontend_checks": {
+    "build": "passed",
+    "lint": "passed",
+    "A1_A6": "all passed",
+    "scene_chunk_kB": 980.77,
+    "chunk_warning_retained": true
+  },
+  "environment": {
+    "python": "3.11.17",
+    "node": "24.19.0",
+    "npm": "11.17.0",
+    "python_manager": "uv; py -3.11 does not resolve this installation",
+    "model_or_cloud_credentials_required": false
+  },
+  "contracts": {
+    "frozen_interfaces_checked": [
+      "Alert",
+      "Asset",
+      "Buoy",
+      "Detection",
+      "EventMsg",
+      "LogEntry",
+      "Option",
+      "Recommendation",
+      "ReopenPlan",
+      "StateMsg",
+      "Track",
+      "ZoneStatus"
+    ],
+    "rest_operations": 21,
+    "source_provenance": {
+      "A": {
+        "ref": "origin/main",
+        "unchanged": true
+      },
+      "B": {
+        "ref": "origin/main",
+        "unchanged": true
+      },
+      "C": {
+        "ref": "78d39574266b01a582b0626c17021181749271c8",
+        "unchanged": true
+      }
+    },
+    "merge_prechecks": "clean"
+  },
+  "runtime": {
+    "status": "passed",
+    "checks": [
+      {
+        "name": "Backend health",
+        "detail": null
+      },
+      {
+        "name": "Real C3 Agent health",
+        "detail": null
+      },
+      {
+        "name": "Security level 3 and options",
+        "detail": null
+      },
+      {
+        "name": "Real Agent recommendation accepted",
+        "detail": null
+      },
+      {
+        "name": "No automatic restriction",
+        "detail": null
+      },
+      {
+        "name": "Reject preserves zone access",
+        "detail": null
+      },
+      {
+        "name": "Approval event and exact zone state agree",
+        "detail": null
+      },
+      {
+        "name": "B to real C ask proxy",
+        "detail": null
+      },
+      {
+        "name": "Event recovery includes recommendation and decision",
+        "detail": null
+      },
+      {
+        "name": "Reset rejects stale operator decision",
+        "detail": null
+      },
+      {
+        "name": "Recovery has four anonymous debris detections",
+        "detail": null
+      },
+      {
+        "name": "Recovery zone states",
+        "detail": null
+      },
+      {
+        "name": "Recovery plan preserves demo metrics",
+        "detail": null
+      },
+      {
+        "name": "Recovery buoy failures",
+        "detail": null
+      },
+      {
+        "name": "Real C renderer images are served by B",
+        "detail": null
+      },
+      {
+        "name": "Offline a replay and all PNG assets",
+        "detail": {
+          "messages": 722,
+          "images": 14,
+          "wall_seconds": 120.0
+        }
+      },
+      {
+        "name": "Offline b replay and all PNG assets",
+        "detail": {
+          "messages": 335,
+          "images": 4,
+          "wall_seconds": 60.0
+        }
+      },
+      {
+        "name": "Real WebSocket cadence",
+        "detail": 4.997
+      },
+      {
+        "name": "Agent has no task errors",
+        "detail": null
+      },
+      {
+        "name": "Final idle and healthy",
+        "detail": null
+      }
+    ],
+    "state_count": 546,
+    "event_count": 102,
+    "security_seconds_to_recommendation": 48.485,
+    "agent_recommendation_latency_ms": 42.8,
+    "recovery": {
+      "zones": {
+        "clear": 6,
+        "blocked": 4,
+        "unsurveyed": 2
+      },
+      "detections": 4,
+      "plan": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "berth_fuel",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      }
+    },
+    "replay_a": {
+      "messages": 722,
+      "images": 14,
+      "wall_seconds": 120.0
+    },
+    "replay_b": {
+      "messages": 335,
+      "images": 4,
+      "wall_seconds": 60.0
+    },
+    "state_hz": 4.997,
+    "agent_stats": {
+      "processed": 1,
+      "submitted": 1,
+      "errors": 0,
+      "dropped": 0
+    },
+    "elapsed_s": 109.718,
+    "server_errors": 0,
+    "tick_warnings": 13,
+    "max_warned_tick_ms": 142.3,
+    "temporary_ports_released": true
+  },
+  "assessment": {
+    "controlled_five_minute_demo": "ready under documented conditions",
+    "unconditional_full_acceptance": "blocked by A refresh/recovery and anonymous-debris preview issues",
+    "production_source_changed_by_final_docs": false,
+    "github_main_merged_by_agent": false
+  },
+  "observed_remote_C_after_validation": {
+    "sha": "9af08a7ab13a9775bb7c06c95abece4eb25a8330",
+    "included": false,
+    "reason": "New cloud/Ollama routing is outside the validated template-demo scope.",
+    "text_merge_precheck": "clean; simulated merge preserves upstream C files; no merge applied or new routing tested"
+  },
+  "prepublication_security": {
+    "tracked_files_scanned": 237,
+    "current_tree_candidate_secrets": 0,
+    "disallowed_paths": [],
+    "history_blobs_scanned": 238,
+    "history_candidate_secrets": 0,
+    "scope": "Current Git index and all outgoing snapshots before final report commit; common-pattern scan, not a guarantee of exhaustive secret detection.",
+    "intentional_existing_large_files": [
+      {
+        "path": "frontend/public/demo_full.jsonl",
+        "bytes": 9630814
+      },
+      {
+        "path": "frontend/public/replay_a.jsonl",
+        "bytes": 10901770
+      }
+    ]
+  }
+}

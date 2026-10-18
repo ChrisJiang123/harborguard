@@ -4,12 +4,13 @@ import { DEMO_ASSETS, DEMO_BUOYS, DEMO_ZONES } from './demoGeometry'
 import type { StaticBuoy } from './mapGeometry'
 import { loadLocalData } from './staticData'
 import type { DecisionInput, InjectInput } from './commands'
+import { demoVesselTrack } from './vesselMotion'
 
 export const MOCK_ASSETS: Asset[] = DEMO_ASSETS
 function mockOptions(zoneIds: string[]): Option[] {
   return [
-    { id: 'opt-1', label: '局部限制通航', is_baseline: false, zones_closed: [...new Set([zoneIds[3] ?? zoneIds[0]!, zoneIds[4] ?? zoneIds[0]!])], speed_limit_zones: zoneIds[5] ? [zoneIds[5]] : [], berths_open_pct: 0.82, vessels_affected: 3, delay_vessel_hours: 4.5, residual_risk: 0.18 },
-    { id: 'port-closure', label: '全港关闭', is_baseline: true, zones_closed: zoneIds, speed_limit_zones: [], berths_open_pct: 0, vessels_affected: 18, delay_vessel_hours: 36, residual_risk: 0.03 },
+    { id: 'opt-1', label: 'Local Navigation Restrictions', is_baseline: false, zones_closed: [...new Set([zoneIds[3] ?? zoneIds[0]!, zoneIds[4] ?? zoneIds[0]!])], speed_limit_zones: zoneIds[5] ? [zoneIds[5]] : [], berths_open_pct: 0.82, vessels_affected: 3, delay_vessel_hours: 4.5, residual_risk: 0.18 },
+    { id: 'port-closure', label: 'Full Port Closure', is_baseline: true, zones_closed: zoneIds, speed_limit_zones: [], berths_open_pct: 0, vessels_affected: 18, delay_vessel_hours: 36, residual_risk: 0.03 },
   ]
 }
 export const MOCK_OPTIONS: Option[] = mockOptions(DEMO_ZONES.features.map(zone => zone.properties.id))
@@ -30,7 +31,6 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
   let restricted = new Set<string>()
   const delivered = new Set<string>()
   let history: Track['history'] = []
-  let vesselHistories: Record<'T3' | 'T4', Track['history']> = { T3: [], T4: [] }
   const asset = inputAsset ?? MOCK_ASSETS[0]!
   const zoneIds = inputZoneIds?.length ? inputZoneIds : DEMO_ZONES.features.map(zone => zone.properties.id)
   const options = mockOptions(zoneIds)
@@ -41,32 +41,6 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
   }
   function once(key: string, at: number, fn: () => void) {
     if (t >= at && !delivered.has(key)) { delivered.add(key); fn() }
-  }
-  function vesselTrack(id: 'T3' | 'T4', start: [number, number], end: [number, number], duration: number, bend: number, speed_mps: number): Track {
-    const position = (time: number) => {
-      const p = Math.max(0, Math.min(1, time / duration))
-      const lat = start[0] + (end[0] - start[0]) * p + Math.sin(Math.PI * p) * bend
-      const lon = start[1] + (end[1] - start[1]) * p
-      const q = Math.min(1, p + .001)
-      const nextLat = start[0] + (end[0] - start[0]) * q + Math.sin(Math.PI * q) * bend
-      const nextLon = start[1] + (end[1] - start[1]) * q
-      const east = (nextLon - lon) * 111320 * Math.cos(lat * Math.PI / 180)
-      const north = (nextLat - lat) * 110540
-      const heading = (Math.atan2(east, north) * 180 / Math.PI + 360) % 360
-      return { lat, lon, heading }
-    }
-    const current = position(t)
-    const point: Track['history'][number] = [current.lat, current.lon, 0, t]
-    if (vesselHistories[id].at(-1)?.[3] !== t) vesselHistories[id] = [...vesselHistories[id], point].slice(-60)
-    const distanceE = (end[1] - start[1]) * 111320 * Math.cos(current.lat * Math.PI / 180)
-    const distanceN = (end[0] - start[0]) * 110540
-    return {
-      id, status: 'confirmed', cls: 'vessel', conf: 0.99, cue: 'none', lat: current.lat, lon: current.lon, depth_m: 0,
-      vel_e: distanceE / duration, vel_n: distanceN / duration, vel_d: 0, speed_mps, heading_deg: current.heading,
-      err: { a_m: 18, b_m: 8, angle_deg: current.heading }, history: vesselHistories[id],
-      predicted: Array.from({ length: 10 }, (_, index) => { const future = t + (index + 1) * 30; const next = position(future); return [next.lat, next.lon, 0, future] }),
-      level: 0, risk: 0.01, detection_id: null,
-    }
   }
   function snapshot(): StateMsg {
     const progress = Math.min(t / 90, 1)
@@ -94,8 +68,8 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
       depth_m: 7, vel_e: 0.5, vel_n: 0.3, speed_mps: 0.58, heading_deg: 59,
       history: [], predicted: [], level: 0, risk: 0.03, detection_id: null,
     }
-    const eastbound = vesselTrack('T3', [asset.lat - .012, asset.lon - .028], [asset.lat - .006, asset.lon + .020], 120, .0018, 7.2)
-    const westbound = vesselTrack('T4', [asset.lat + .010, asset.lon + .022], [asset.lat + .006, asset.lon - .026], 150, -.0015, 5.8)
+    const inbound = demoVesselTrack('T3', t)
+    const outbound = demoVesselTrack('T4', t)
     const alert: Alert = {
       id: 'A1', track_id: 'T1', level: level === 0 ? 1 : level, risk,
       breakdown: { C: risk, P: risk, B: risk, Z: risk, D: risk },
@@ -105,7 +79,7 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
     return {
       type: 'state', seq: ++seq, t, mode, network, scenario, paused, speed,
       buoys: buoys.map((buoy, i) => ({ ...buoy, pinging: buoy.status === 'ok' && Math.floor(t * 5) % 25 === i * 2 })),
-      tracks: [target, fish, eastbound, westbound], alerts: level > 0 ? [alert] : [],
+      tracks: [target, fish, inbound, outbound], alerts: level > 0 ? [alert] : [],
       zones: zoneIds.map((id, i) => mode === 'disaster' ? disasterZone(id, i) : { id, state: restricted.has(id) ? 'restricted' : 'open', coverage: 1 }),
     }
   }
@@ -123,50 +97,50 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
     const state = snapshot()
     sink(state)
     const alert = state.alerts[0]!
-    once('started', 0, () => event('log', { log: { t, level: 'info', source: 'sim', text: '本地演示已启动；当前全部为模拟数据。' } }))
+    once('started', 0, () => event('log', { log: { t, level: 'info', source: 'sim', text: 'Local demo started. All current data is simulated.' } }))
     if (mode === 'disaster' && scenario === 'b') {
       for (const at of [12, 24, 45]) once(`survey-${at}`, at, () => {
         state.zones.forEach(zone => event('zone_changed', { zone_id: zone.id, state: zone.state }))
-        event('log', { log: { t, level: at === 24 ? 'warn' : 'info', source: 'sim', text: `模拟勘测节点 ${at} 秒：分区状态已更新。` } })
+        event('log', { log: { t, level: at === 24 ? 'warn' : 'info', source: 'sim', text: `Simulated survey checkpoint at ${at} s: zone status updated.` } })
       })
       once('reopen-first', 24, () => event('reopen_plan', disasterPlan(false)))
       once('reopen-final', 45, () => {
         event('reopen_plan', disasterPlan(true))
-        event('recommendation', { recommendation: { id: 'rec-b', kind: 'disaster', alert_id: null, model: 'template', summary: '优先开放已勘测航道与指定泊位。', explanation: '本地模板演示：仅展示预设模拟服务给出的分区和节省时间；待勘测与封闭区域不在复航建议内。', recommended_option_id: null, evidence_ids: zoneIds.slice(0, 3), uncertainties: ['示例分区和时间并非真实勘测结果。', '断网演示仍使用模板，不代表已训练本地模型。'], confidence: 'medium', created_t: t, latency_ms: 0 } })
+        event('recommendation', { recommendation: { id: 'rec-b', kind: 'disaster', alert_id: null, model: 'template', summary: 'Prioritize surveyed channels and designated berths for reopening.', explanation: 'Local template demo: zones and time savings come from preset simulated responses. Unsurveyed and blocked zones are excluded.', recommended_option_id: null, evidence_ids: zoneIds.slice(0, 3), uncertainties: ['Demo zones and timings are not actual survey results.', 'The offline demo uses a template, not a trained local model.'], confidence: 'medium', created_t: t, latency_ms: 0 } })
       })
       return
     }
     if (mode !== 'security' || scenario !== 'a') return
-    once('level1', 10, () => { event('alert_raised', { alert }); event('log', { log: { t, level: 'info', source: 'sim', text: 'T1 触发一级警报，持续跟踪。' } }) })
+    once('level1', 10, () => { event('alert_raised', { alert }); event('log', { log: { t, level: 'info', source: 'sim', text: 'T1 triggered a Level 1 alert. Tracking continues.' } }) })
     once('level2', 35, () => {
       event('alert_changed', { alert, from_level: 1, to_level: 2 })
       event('detection', { detection: { id: 'det-1', track_id: 'T1', buoy_id: buoys[0]!.id, t, cls: 'uuv', conf: 0.94, bbox: [100, 150, 320, 290], image_url: '/data/sonar-stub.svg', model: 'stub' } })
-      event('log', { log: { t, level: 'warn', source: 'perception', text: 'T1 模拟识别为 UUV，警报升级为二级。' } })
+      event('log', { log: { t, level: 'warn', source: 'perception', text: 'Simulated classification of T1 as a UUV. Escalated to Level 2.' } })
     })
     once('level3', 60, () => {
       event('alert_changed', { alert, from_level: 2, to_level: 3 })
       event('options_ready', { alert_id: 'A1', options, ranked: ['opt-1', 'port-closure'] })
-      event('log', { log: { t, level: 'critical', source: 'decision', text: '三级警报，模拟处置方案已就绪。' } })
+      event('log', { log: { t, level: 'critical', source: 'decision', text: 'Level 3 alert. Simulated response options are ready.' } })
     })
     once('rec', 66, () => {
       const recommendation: Recommendation = {
         id: 'rec-1', kind: 'security', alert_id: 'A1', model: 'template',
-        summary: '建议局部限制通航，保留其他泊位运行。',
-        explanation: '这是本地模板演示。模拟目标正在接近示例资产，请对照航迹与模拟识别记录，由操作员决定是否批准。',
+        summary: 'Restrict local navigation while keeping other berths operational.',
+        explanation: 'Local template demo: a simulated target is approaching a demo asset. Review its track and detection evidence before approving a response.',
         recommended_option_id: 'opt-1', evidence_ids: ['T1', 'det-1', primaryZone],
-        uncertainties: ['全部为模拟数据，不代表真实港口风险。'], confidence: 'medium', created_t: t, latency_ms: 0,
+        uncertainties: ['All data is simulated and does not represent actual port risk.'], confidence: 'medium', created_t: t, latency_ms: 0,
       }
       event('recommendation', { recommendation })
-      event('log', { log: { t, level: 'info', source: 'agent', text: '模板建议已生成，等待人工批准。' } })
+      event('log', { log: { t, level: 'info', source: 'agent', text: 'Template recommendation generated. Awaiting operator approval.' } })
     })
   }
   function resetScenario(next: StateMsg['scenario'], nextSpeed = 1) {
-    t = 0; paused = next === null; speed = nextSpeed; restricted = new Set(); delivered.clear(); history = []; vesselHistories = { T3: [], T4: [] }
+    t = 0; paused = next === null; speed = nextSpeed; restricted = new Set(); delivered.clear(); history = []
     decided = false; scenario = next; mode = next === 'b' ? 'disaster' : 'security'; network = 'online'
     buoys.forEach(buoy => { buoy.status = 'ok' })
     event('scenario_changed', { scenario: next, status: next ? 'started' : 'reset' })
     publish()
-    if (next === 'b') event('log', { log: { t, level: 'info', source: 'sim', text: '灾害演示：12/24/45 秒收到预设勘测节点，45 秒收到最终模板复航建议。' } })
+    if (next === 'b') event('log', { log: { t, level: 'info', source: 'sim', text: 'Disaster demo: survey updates at 12/24/45 s; final template reopening recommendation at 45 s.' } })
   }
   return {
     start() { publish() },
@@ -183,7 +157,7 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
       publish()
     },
     startScenario(id: 'a' | 'b', nextSpeed = 1) {
-      if (![1, 4, 10].includes(nextSpeed)) throw new Error('倍速须为 1、4 或 10。')
+      if (![1, 4, 10].includes(nextSpeed)) throw new Error('Playback speed must be 1, 4, or 10.')
       resetScenario(id, nextSpeed)
     },
     setMode(next: StateMsg['mode']) { mode = next; event('mode_changed', { mode }); publish() },
@@ -193,27 +167,27 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
         event('network_changed', { network })
       } else if (body.type === 'buoy_down' || body.type === 'buoy_up') {
         const buoy = buoys.find(item => item.id === (body.target ?? buoys[0]!.id))
-        if (!buoy) throw new Error('未找到指定浮标。')
+        if (!buoy) throw new Error('The selected buoy was not found.')
         buoy.status = body.type === 'buoy_down' ? 'down' : 'ok'
         event('buoy_changed', { buoy_id: buoy.id, status: buoy.status })
       }
-      event('log', { log: { t, level: 'info', source: 'operator', text: `本地注入：${body.type}${body.target ? ` · ${body.target}` : ''}` } })
+      event('log', { log: { t, level: 'info', source: 'operator', text: `Local injection: ${body.type}${body.target ? ` · ${body.target}` : ''}` } })
       publish()
     },
     getOptions(alertId: string) {
-      if (alertId !== 'A1' || !delivered.has('level3') || mode !== 'security' || scenario !== 'a') throw new Error('该警报的方案尚未就绪。')
+      if (alertId !== 'A1' || !delivered.has('level3') || mode !== 'security' || scenario !== 'a') throw new Error('Options for this alert are not ready.')
       return { alert_id: alertId, options, ranked: options.map(option => option.id) }
     },
     decision(body: DecisionInput) {
       const option = options.find(item => item.id === body.option_id)
-      if (!delivered.has('rec') || body.alert_id !== 'A1' || !option || mode !== 'security' || scenario !== 'a') throw new Error('请等待模拟建议生成后再操作。')
-      if (decided) throw new Error('该警报已经处理，请重新开始场景后再演示。')
+      if (!delivered.has('rec') || body.alert_id !== 'A1' || !option || mode !== 'security' || scenario !== 'a') throw new Error('Wait for the simulated recommendation before taking action.')
+      if (decided) throw new Error('This alert has already been handled. Restart the scenario to repeat the demo.')
       decided = true
       if (body.action === 'approve') {
         option.zones_closed.forEach(id => { restricted.add(id); event('zone_changed', { zone_id: id, state: 'restricted' }) })
       }
       event('decision', body)
-      event('log', { log: { t, level: 'info', source: 'operator', text: body.action === 'approve' ? `已批准：${option.label}。` : `已驳回：${option.label}。` } })
+      event('log', { log: { t, level: 'info', source: 'operator', text: body.action === 'approve' ? `Approved: ${option.label}.` : `Rejected: ${option.label}.` } })
       publish()
     },
     stop() { stopped = true },

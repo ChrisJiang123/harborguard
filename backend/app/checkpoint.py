@@ -100,7 +100,7 @@ def capture(game, *, copy_values=True):
         "world": fields(game.world, WORLD), "tracker": vars(game.tracker),
         "decision": fields(decision, DECISION), "risk": {"first_seen": decision.risk.first_seen},
         "alerts": vars(decision.alert_manager), "pinger": fields(decision.pinger, PINGER),
-        "disaster": fields(decision.disaster, ["detected_debris", "blocked_zones", "coverage_weights"])}
+        "disaster": fields(decision.disaster, ["detected_debris", "blocked_zones", "coverage_weights", "attempts"])}
     return copy.deepcopy(snapshot) if copy_values else snapshot
 
 

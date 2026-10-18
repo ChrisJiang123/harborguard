@@ -1,0 +1,234 @@
+{
+  "upstream_main": "5a68f12",
+  "upstream_b_implementation": "97a8c75",
+  "integration_branch": "codex/c4-latest-integration",
+  "numerical_test_commit": "8227b95e8c9b592b321a1b3c86136f43b6d6bea8",
+  "provenance_checks": {
+    "all_frozen_hashes_match": true,
+    "contexts500_reproduced_seed0": true,
+    "contexts_extra80_reproduced_seed1": true,
+    "confirm60_reproduced_seed424242": true,
+    "distilled_keys_match_message_contexts": true,
+    "test_rebuilt_exact_order_from_synthetic_seed0": true,
+    "train450_rebuilt_exact_order_from_synthetic_seed0": true,
+    "all_real51_appended_to_train_tail": true,
+    "confirm60_wrapper_matches_raw_contexts": true,
+    "train_test_exact_overlap_zero": true,
+    "test_real_exact_overlap_zero": true,
+    "test_confirm60_exact_overlap_zero": true,
+    "train_confirm60_exact_overlap_zero": true,
+    "test50_unique": true,
+    "confirm60_unique": true,
+    "training_meta_hash_matches_train501": true,
+    "training_meta_split_is_493_plus_8": true,
+    "training_did_not_read_test": true,
+    "handoff_commit_test50_hash_unchanged": true,
+    "handoff_commit_confirm60_hash_unchanged": true
+  },
+  "full_tests": {
+    "passed": 232,
+    "skipped": 2,
+    "failed": 0,
+    "skip_reason": "Separate COCO smoke weights absent; delivered sonar YOLO weights tested."
+  },
+  "scoped_tests": 122,
+  "integration_bundle_tests": 4,
+  "frontend_build": "PASS (existing Node22.23.1; existing dependencies; repository package-lock unchanged)",
+  "english_check": "PASS",
+  "health": {
+    "backend": "http://127.0.0.1:8004",
+    "frontend": "http://127.0.0.1:5174",
+    "agent": "http://127.0.0.1:8002",
+    "local_model": "harborguard-lora",
+    "draft_output_format": "json",
+    "cloud_provider": "disabled",
+    "cloud_draft_attempts": 0,
+    "cloud_ask_attempts": 0,
+    "warmup_excluded_from_business_latency": true,
+    "original_8000_8001_5173_services_unchanged": true
+  },
+  "b_repeats": [
+    {
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "semantic_sha256": "09d4ca8e8d9ec8b1bdbeee7e0162a22c09f2e1ac7b1ff168a6246bca3628f6b4",
+      "no_obstacle_clear_throughout": true
+    },
+    {
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "semantic_sha256": "09d4ca8e8d9ec8b1bdbeee7e0162a22c09f2e1ac7b1ff168a6246bca3628f6b4",
+      "no_obstacle_clear_throughout": true
+    },
+    {
+      "zone_counts": {
+        "clear": 6,
+        "blocked": 3,
+        "unsurveyed": 3
+      },
+      "debris_zones": [
+        {
+          "target": "debris1",
+          "zone": "channel_main_n",
+          "state": "blocked"
+        },
+        {
+          "target": "debris2",
+          "zone": "channel_turning",
+          "state": "blocked"
+        },
+        {
+          "target": "debris3",
+          "zone": "berth_fuel",
+          "state": "unsurveyed"
+        },
+        {
+          "target": "debris4",
+          "zone": "anchorage_north",
+          "state": "blocked"
+        }
+      ],
+      "reopen": {
+        "route_zone_ids": [
+          "channel_entrance",
+          "channel_main_s"
+        ],
+        "reopen_berth_zone_ids": [
+          "berth_container_1"
+        ],
+        "unsurveyed_zone_ids": [
+          "berth_container_3",
+          "berth_cruise",
+          "berth_fuel"
+        ],
+        "blocked_zone_ids": [
+          "anchorage_north",
+          "channel_main_n",
+          "channel_turning"
+        ],
+        "est_hours_saved": 9.0
+      },
+      "semantic_sha256": "09d4ca8e8d9ec8b1bdbeee7e0162a22c09f2e1ac7b1ff168a6246bca3628f6b4",
+      "no_obstacle_clear_throughout": true
+    }
+  ],
+  "weights_sha256": "2cad3146fa4b98516efa0057367c3c5d53220dc2a3246058f5608094a6568839",
+  "http_call_attempts_offline": 0,
+  "a_timing": {
+    "first_levels": {
+      "1": 1.0,
+      "2": 150.7,
+      "3": 505.0
+    },
+    "first_uuv_t": 363.9,
+    "security_level3_within_500s": false
+  },
+  "known_limits": [
+    "Security L3 at505 seconds exceeds500 seconds; not waived.",
+    "Synthetic anonymous geometry contacts do not establish real-echo perception or full truth-independent tracking.",
+    "No qwen3/LoRA round-trip rollback or physical Wi-Fi/projector/cross-device acceptance."
+  ],
+  "evidence": {
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/latest-full-tests.log": "4184ddcd9995c1560d64822565a4d05bbc31342b5389e8182651ba7ca6241863",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/latest-full-tests-retry.log": "4adccd3e8163e6a5b8ba9da0db68d9b154a7c2b23d166b6b8d49c7b0ecea09c7",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/latest-fixture-tests.log": "698857960888a8b7dfacbbedaa34caceac2111f4575220562fe736c8ada79c50",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/latest-provenance.json": "13c44381bbad49fdebfcd042d2e52b2c269974957c56fa0c759b58b28e607c31",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/b-latest-offline-raw.json": "c0d95d6b6bdf570429d422f6162a2007d823e71a2489e5b99ca3817ed73671e3",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/a-latest-offline-raw.json": "9bd083ced88fef993612a02efcbff2f1bb0e3f840b93dcdca7866336d3d45a6e",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/latest-frontend-isolated-build.log": "2cf8e436f68cc5bb76278813e5eb0300978aaa09dd8aa1f54302acd4174eb215",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/latest-english-check.log": "c9a098de440d1a34528718367bd4871be0c629a84d5aa31e243b20629a945823",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/ui-latest-test50.png": "dc77652ab631d71a7a5a88d513cc76f6725b14b7f50c2a7f8ef73b957c6e745f",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/ui-latest-confirm60.png": "38819732d342f43aa3ed9180937c0d92ea316e42edebafc7181a5ef7f2352694",
+    "/Users/chrisjiang/Projects/harborguard/runs/codex-c4-handoff/ui-latest-ax.txt": "b573c014c703b2bb093ff19f413197518fc1c5cae058b18e75a2c5ca106fdf5b"
+  }
+}

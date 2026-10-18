@@ -32,6 +32,7 @@ class DecisionEngine:
         self.option_sets: dict[str, tuple] = {}
         self.operator_restrictions: set[str] = set()
         self.pinger = Pinger(self.classifier)
+        self.classifier = self.pinger.classifier  # Preserve the loaded/warmed model across reset/start.
         self.pinger.counter = previous_detection_counter
         self.detections = self.pinger.detections
         self.images = self.pinger.images

@@ -19,6 +19,8 @@ work/
 coverage/
 *.tsbuildinfo
 recordings/
+artifacts/
+screenshots/
 *.webm
 *.mp4
 

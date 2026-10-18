@@ -27,7 +27,7 @@ export function recordStream(stream: MediaStream, callbacks: Callbacks, supplied
   let recorder: MediaRecorder
   try {
     const mimeType = RECORDING_MIMES.find(mime => runtime.Recorder.isTypeSupported(mime))
-    if (!mimeType) throw new Error('浏览器不支持本页视频格式，请使用系统录屏。')
+    if (!mimeType) throw new Error('This browser does not support the recording format. Use a system recorder.')
     recorder = new runtime.Recorder(stream, { mimeType, videoBitsPerSecond: 4_000_000 })
   } catch (error) { stream.getTracks().forEach(track => track.stop()); throw error }
   const chunks: Blob[] = []
@@ -48,23 +48,23 @@ export function recordStream(stream: MediaStream, callbacks: Callbacks, supplied
     if (!cancelled && !failed) {
       const blob = new Blob(chunks, { type: recorder.mimeType })
       if (blob.size) callbacks.complete(blob, elapsed())
-      else callbacks.error('未收到视频数据，请重新录制或使用系统录屏。')
+      else callbacks.error('No video data received. Try again or use a system recorder.')
     }
     chunks.length = 0
   }
   function stop() {
     if (done) return
     if (recorder.state === 'inactive') { finish(); return }
-    try { recorder.stop() } catch { failed = true; callbacks.error('停止录屏失败，请使用浏览器“停止共享”。'); finish() }
+    try { recorder.stop() } catch { failed = true; callbacks.error('Could not stop recording. Use the browser Stop sharing control.'); finish() }
   }
   recorder.ondataavailable = event => {
     if (done || failed || cancelled || !event.data.size) return
     bytes += event.data.size
-    if (bytes > RECORDING_MAX_BYTES) { failed = true; callbacks.error('视频数据超过 120 MB，本次录制已终止，请降低分辨率后重试。'); stop(); return }
+    if (bytes > RECORDING_MAX_BYTES) { failed = true; callbacks.error('Recording exceeded 120 MB and was stopped. Lower the resolution and try again.'); stop(); return }
     chunks.push(event.data)
   }
   recorder.onstop = finish
-  recorder.onerror = () => { failed = true; callbacks.error('浏览器录制发生错误，本次视频不可用。'); stop() }
+  recorder.onerror = () => { failed = true; callbacks.error('A browser recording error occurred. This recording is unavailable.'); stop() }
   try {
     recorder.start(1000)
     stream.getVideoTracks().forEach(track => track.addEventListener('ended', stop, { once: true }))

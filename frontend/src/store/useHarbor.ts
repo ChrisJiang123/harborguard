@@ -3,6 +3,24 @@ import type { Alert, Detection, EventMsg, HarborMsg, LogEntry, Option, Recommend
 import type { DecisionInput } from '../data/commands'
 
 export type Connection = 'live' | 'mock' | 'replay' | 'connecting' | 'disconnected'
+export type RecoveryPhase = 'idle' | 'loading' | 'complete' | 'partial' | 'failed'
+export interface RecoveryState {
+  phase: RecoveryPhase
+  eventsReturned: number
+  detailFailures: number
+  checkedAt: number | null
+  message: string | null
+}
+export interface RecoveryMeta {
+  eventsAvailable: boolean
+  eventsReturned: number
+  eventLimitReached: boolean
+  detailFailures: number
+  previousSnapshotSeq?: number
+}
+export interface UncertainDecision extends DecisionInput {
+  reason: 'reject-without-event'
+}
 type Payload = Record<string, unknown>
 const record = (value: unknown): Payload | null => typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Payload : null
 const indexed = <T extends { id: string }>(items: T[]) => Object.fromEntries(items.map(item => [item.id, item]))
@@ -22,6 +40,8 @@ export function initialData() {
     chosenOptionAlertId: null as string | null,
     decisionsByAlert: {} as Record<string, DecisionInput & { t: number }>,
     decisionRequests: {} as Record<string, DecisionInput>,
+    uncertainDecisions: {} as Record<string, UncertainDecision>,
+    recovery: { phase: 'idle', eventsReturned: 0, detailFailures: 0, checkedAt: null, message: null } as RecoveryState,
     session: 0,
     error: null as string | null,
   }
@@ -37,8 +57,11 @@ export type HarborStore = ReturnType<typeof initialData> & {
   setError: (error: string | null) => void
   chooseOption: (alertId: string, optionId: string) => void
   setDecisionRequest: (alertId: string, body: DecisionInput | null) => void
+  markDecisionUncertain: (alertId: string, body: UncertainDecision | null) => void
+  setRecoveryLoading: (expectedSession?: number) => void
   cacheOptions: (alertId: string, options: Option[]) => void
   cacheDetection: (detection: Detection) => void
+  recoverLive: (snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]>, detections: Record<string, Detection>, meta?: RecoveryMeta, expectedSession?: number) => void
 }
 
 export const useHarbor = create<HarborStore>((set) => ({
@@ -55,10 +78,91 @@ export const useHarbor = create<HarborStore>((set) => ({
     else delete decisionRequests[alertId]
     return { decisionRequests }
   }),
+  markDecisionUncertain: (alertId, body) => set(state => {
+    const uncertainDecisions = { ...state.uncertainDecisions }
+    if (body) uncertainDecisions[alertId] = body
+    else delete uncertainDecisions[alertId]
+    return { uncertainDecisions }
+  }),
+  setRecoveryLoading: expectedSession => set(state => expectedSession !== undefined && state.session !== expectedSession ? state : { recovery: { phase: 'loading', eventsReturned: 0, detailFailures: 0, checkedAt: null, message: null } }),
   cacheOptions: (alertId, options) => set(state => ({ optionsByAlert: { ...state.optionsByAlert, [alertId]: options } })),
   cacheDetection: detection => set(state => ({ detections: { ...state.detections, [detection.id]: detection } })),
+  recoverLive: (snapshot, events, logs, options, detections, meta, expectedSession) => set(state => expectedSession !== undefined && state.session !== expectedSession ? state : recoverLiveState(state, snapshot, events, logs, options, detections, meta)),
   ingest: msg => set(state => reduceMessage(state, msg)),
 }))
+
+/** Rebuild event-derived UI state after refresh/reconnect, then keep the newest live snapshot. */
+export function eventIdentity(event: EventMsg): string {
+  const data = record(event.data)
+  const recommendation = record(data?.recommendation)
+  const detection = record(data?.detection)
+  const alert = record(data?.alert)
+  if (typeof recommendation?.id === 'string') return `recommendation:${recommendation.id}`
+  if (typeof detection?.id === 'string') return `detection:${detection.id}`
+  if (typeof alert?.id === 'string') return `${event.event}:${alert.id}:${String(alert.updated_t ?? event.t)}`
+  if (typeof data?.alert_id === 'string' && event.event === 'decision') return `decision:${data.alert_id}:${String(data.option_id)}:${String(data.action)}:${event.t}`
+  if (typeof data?.alert_id === 'string' && event.event === 'options_ready') return `options:${data.alert_id}:${event.t}`
+  return `${event.seq}:${event.event}:${event.t}`
+}
+
+function logIdentity(log: LogEntry): string {
+  return `${log.t}:${log.level}:${log.source}:${log.text}`
+}
+
+/** Keep bounded REST history first, then append any logs observed while its request was pending. */
+export function mergeRecoveredLogs(newestFirstHistory: LogEntry[], recoveredEventLogs: LogEntry[], liveLogs: LogEntry[]): LogEntry[] {
+  const seen = new Set<string>()
+  const merged: LogEntry[] = []
+  for (const log of [...newestFirstHistory].reverse().concat(recoveredEventLogs, liveLogs)) {
+    const identity = logIdentity(log)
+    if (seen.has(identity)) continue
+    seen.add(identity)
+    merged.push(log)
+  }
+  return merged.slice(-200)
+}
+
+export function recoverLiveState(state: HarborStore, snapshot: StateMsg, events: EventMsg[], logs: LogEntry[], options: Record<string, Option[]> = {}, detections: Record<string, Detection> = {}, meta?: RecoveryMeta): Partial<HarborStore> {
+  // This is a connection-start baseline, not the snapshot that may have arrived
+  // while asynchronous REST recovery was still in flight.
+  const previousSnapshotSeq = meta?.previousSnapshotSeq
+  const serverRestarted = previousSnapshotSeq !== undefined && snapshot.seq < previousSnapshotSeq
+  const byIdentity = new Map<string, EventMsg>()
+  for (const event of [...events, ...(serverRestarted ? [] : state.events)]) byIdentity.set(eventIdentity(event), event)
+  const ordered = [...byIdentity.values()].sort((a, b) => a.seq - b.seq || a.t - b.t)
+  let recovered = { ...state, ...initialData(), conn: state.conn, view: state.view } as HarborStore
+  for (const event of ordered) recovered = { ...recovered, ...reduceMessage(recovered, event) }
+  const latest = !serverRestarted && state.latest && state.latest.seq > snapshot.seq ? state.latest : snapshot
+  recovered = { ...recovered, ...reduceMessage(recovered, latest) }
+  const decisionsByAlert = recovered.decisionsByAlert
+  const decisionRequests = serverRestarted ? {} : Object.fromEntries(Object.entries(state.decisionRequests).filter(([alertId]) => !decisionsByAlert[alertId]))
+  const uncertainDecisions = serverRestarted ? {} : Object.fromEntries(Object.entries(state.uncertainDecisions).filter(([alertId]) => !decisionsByAlert[alertId]))
+  const effectiveMeta = meta ?? { eventsAvailable: true, eventsReturned: events.length, eventLimitReached: events.length >= 500, detailFailures: 0 }
+  const phase: RecoveryPhase = !effectiveMeta.eventsAvailable ? 'failed' : serverRestarted || effectiveMeta.eventLimitReached || effectiveMeta.detailFailures > 0 ? 'partial' : 'complete'
+  const message = !effectiveMeta.eventsAvailable
+    ? 'History loading failed. Live state continues, but previous recommendations and approvals could not be restored.'
+    : serverRestarted
+      ? 'Backend sequence reset detected. Previous-session data was cleared; pre-restart recommendation and approval status is unconfirmed.'
+    : effectiveMeta.eventLimitReached
+      ? 'Incomplete history: the server returned its 500-event cache limit. Older recommendations and approvals may be unavailable.'
+      : effectiveMeta.detailFailures > 0
+        ? `History partially restored: ${effectiveMeta.detailFailures}  detail requests failed.`
+        : null
+  return {
+    ...recovered,
+    logs: mergeRecoveredLogs(logs, recovered.logs, state.logs),
+    optionsByAlert: { ...recovered.optionsByAlert, ...options },
+    detections: { ...recovered.detections, ...detections },
+    decisionRequests,
+    uncertainDecisions,
+    recovery: { phase, eventsReturned: effectiveMeta.eventsReturned, detailFailures: effectiveMeta.detailFailures, checkedAt: Date.now(), message },
+    // A sequence rollback is handled synchronously by ws.ts before the new
+    // snapshot is ingested. Do not advance the session a second time here.
+    session: state.session,
+    error: state.error,
+    selectedTrackId: state.selectedTrackId && latest.tracks.some(track => track.id === state.selectedTrackId) ? state.selectedTrackId : null,
+  }
+}
 
 // Replay seeks use the same reducer without publishing thousands of intermediate UI states.
 export function reduceMessage(state: HarborStore, msg: HarborMsg): Partial<HarborStore> {
@@ -69,7 +173,7 @@ export function reduceMessage(state: HarborStore, msg: HarborMsg): Partial<Harbo
       }
     }
     // Deduplicate reconnect/event backfill without losing different events at the same seq.
-    if (state.events.some(event => event.seq === msg.seq && event.event === msg.event && event.t === msg.t)) return state
+    if (state.events.some(event => eventIdentity(event) === eventIdentity(msg))) return state
     const changes: Partial<HarborStore> = { events: [...state.events, msg].slice(-500) }
     const data = record(msg.data)
     if (!data) return changes
@@ -115,8 +219,11 @@ export function reduceMessage(state: HarborStore, msg: HarborMsg): Partial<Harbo
       case 'decision':
         if (typeof data.alert_id === 'string' && typeof data.option_id === 'string' && typeof data.operator === 'string' && (data.action === 'approve' || data.action === 'reject')) {
           const decisionRequests = { ...state.decisionRequests }
+          const uncertainDecisions = { ...state.uncertainDecisions }
           delete decisionRequests[data.alert_id]
+          delete uncertainDecisions[data.alert_id]
           changes.decisionRequests = decisionRequests
+          changes.uncertainDecisions = uncertainDecisions
           changes.decisionsByAlert = { ...state.decisionsByAlert, [data.alert_id]: { alert_id: data.alert_id, option_id: data.option_id, action: data.action, operator: data.operator, t: msg.t } }
         }
         break

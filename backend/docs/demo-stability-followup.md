@@ -10,9 +10,13 @@
 
 ## A 更新检查
 
-通过 GitHub PR 元数据与实际 git fetch 双重核对，PR #7 当前 head 为 `17d440bf03f4db7dbf41d16c511fa8bd7325a7dd`，open、未 merged。相对已测试 `9850558`，该提交增加陆上 DEM、航拍底图及相关 3D 文件，**没有修改** `frontend/src/store/useHarbor.ts`、`frontend/src/data/liveRecovery.ts`、`frontend/src/data/ws.ts`。这不是恢复竞态修复，不把 PR 的旧描述或一般构建通过当作修复证据；本次没有对这批新 3D 内容执行完整浏览器验收。
+后续复测已完成：PR #7 的 `dc69ad28ac37e8d0592d9271f9d61e28c79ff27c` 修复了旧竞态，真实浏览器确认延迟历史期间新日志、真实模板建议和普通审批均保留，且不再假报序列回退。仍有 A 的两个身份去重边界失败：同刻合法重复日志刷新后变少；同刻另一操作员的新 decision 实时被忽略，刷新才恢复。详见 `pr7-recovery-dc69ad2.md` 及对应证据。**该 SHA 已测试，后续跟进不要重复跑同一提交；等待 R1/R2 修复后再复测。** 继续保留稳定 B/C，不自动 Push/更新 PR/Merge。
 
-A 继续独立处理：首次连接的旧序列为空时，不得与 REST 等待期间已经前进的最新 state 比较并误判重启；恢复历史日志时，不得覆盖同一等待窗口内刚收到的结构化 log 事件。具体源码位置和延迟复现见 `ab-integration-9850558.md` 第 3 节。B 不修改 frontend/，不让前端解析自由文本伪造审批状态。
+该轮收尾再次核对到 `b549515337e0a50889d331ae397e4f381e4694ca`，为界面英文翻译，两处去重逻辑未变，未重复整轮验证；后续仅有此类无关更新时保持安静。
+
+此前通过 GitHub PR 元数据与实际 git fetch 双重核对，PR #7 当时 head 为 `17d440bf03f4db7dbf41d16c511fa8bd7325a7dd`，open、未 merged。相对已测试 `9850558`，该提交增加陆上 DEM、航拍底图及相关 3D 文件，**没有修改** `frontend/src/store/useHarbor.ts`、`frontend/src/data/liveRecovery.ts`、`frontend/src/data/ws.ts`。当时没有把 PR 的旧描述或一般构建通过当作恢复修复证据；后续 dc69ad2 的测试范围以上述新报告为准。
+
+上轮交给 A 的要求是：首次连接的旧序列为空时，不得与 REST 等待期间已经前进的最新 state 比较并误判重启；恢复历史日志时，不得覆盖同一等待窗口内刚收到的结构化 log 事件。旧复现保留在 `ab-integration-9850558.md` 第 3 节，当前修复与剩余项见新报告。B 不修改 frontend/，不让前端解析自由文本伪造审批状态。
 
 已创建当前线程跟进任务 `harborguard-pr7`，每 15 分钟检查一次。恢复逻辑没有变化或只有无关更新时保持安静，不反复跑相同测试；出现修复后在独立测试 checkout 中验证。自动化不执行 Push、PR 修改或 Merge main。
 

@@ -1,3 +1,4 @@
+import { englishText } from '../data/english'
 import { useEffect, useRef, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { api } from '../data/api'
@@ -11,10 +12,8 @@ import { activeAlertId, effectiveOptionId } from './selection'
 import { SectionHeading } from './SectionHeading'
 
 const EMPTY: Option[] = []
-// local 目前是 Ollama 基座（qwen3:1.7b）；harborguard-lora 部署后如需标"本地 LoRA"再改回。
-// 在 LoRA 未部署前不得把本地路由标成已训练 LoRA（演示集成验收第 6 条）。
-const MODELS = { cloud: '云端', local: '本地模型', template: '模板' }
-const CONFIDENCE = { low: '低', medium: '中', high: '高' }
+const MODELS = { cloud: 'Cloud', local: 'Local LoRA', template: 'Template' }
+const CONFIDENCE = { low: 'Low', medium: 'Medium', high: 'High' }
 
 function EvidenceChips({ recommendation }: { recommendation: Recommendation }) {
   const trackIds = useHarbor(useShallow(s => Object.keys(s.tracks)))
@@ -24,7 +23,7 @@ function EvidenceChips({ recommendation }: { recommendation: Recommendation }) {
     if (trackIds.includes(id)) { useHarbor.getState().selectTrack(id); return }
     if (zones?.features.some(zone => zone.properties.id === id)) { useHarbor.setState({ focusedZoneId: id, view: '2d' }); return }
     if (detections[id]) { useHarbor.setState({ sonarModalDetId: id }); return }
-    if (id.startsWith('det-')) void runOperation('读取识别记录', async () => {
+    if (id.startsWith('det-')) void runOperation('Load detection record', async () => {
       const session = useHarbor.getState().session
       const detection = await api.detection(id)
       if (useHarbor.getState().session !== session) return
@@ -32,9 +31,9 @@ function EvidenceChips({ recommendation }: { recommendation: Recommendation }) {
       useHarbor.setState({ sonarModalDetId: id })
     })
   }
-  return <div className="evidence-chips" aria-label="建议证据">{recommendation.evidence_ids.map(id => {
+  return <div className="evidence-chips" aria-label="Recommendation evidence">{recommendation.evidence_ids.map(id => {
     const available = trackIds.includes(id) || !!detections[id] || id.startsWith('det-') || zones?.features.some(zone => zone.properties.id === id)
-    return <button key={id} disabled={!available} onClick={() => open(id)} title={available ? `定位证据 ${id}` : '等待对应证据数据'}>{id}</button>
+    return <button key={id} disabled={!available} onClick={() => open(id)} title={available ? `Locate evidence ${id}` : 'Waiting for evidence'}>{id}</button>
   })}</div>
 }
 
@@ -49,28 +48,34 @@ export function AgentCard() {
   const mode = useHarbor(s => s.latest?.mode)
   const confirmed = useHarbor(s => alertId ? s.decisionsByAlert[alertId] : undefined)
   const requested = useHarbor(s => alertId ? s.decisionRequests[alertId] : undefined)
+  const uncertain = useHarbor(s => alertId ? s.uncertainDecisions[alertId] : undefined)
+  const recovery = useHarbor(s => s.recovery)
   const pending = useOperations(s => s.pending)
-  const [operator, setOperator] = useState('操作员 A')
+  const [operator, setOperator] = useState('Operator A')
   const effective = effectiveOptionId(alertId, options, rec, chosen, chosenFor)
-  const locked = !!pending || !!confirmed || !!requested || !effective || !operator.trim() || (conn !== 'live' && conn !== 'mock')
+  const locked = !!pending || !!confirmed || !!requested || !!uncertain || !effective || !operator.trim() || (conn !== 'live' && conn !== 'mock')
   const decide = (action: 'approve' | 'reject') => {
     if (!alertId || !effective || locked) return
-    void runOperation(action === 'approve' ? '批准方案' : '驳回方案', async () => {
+    void runOperation(action === 'approve' ? 'Approve option' : 'Reject option', async () => {
       await api.decide({ alert_id: alertId, option_id: effective, action, operator: operator.trim() })
-      if (useHarbor.getState().decisionRequests[alertId]) notify('操作请求已送达，等待后端决策事件确认。')
+      if (action === 'reject' && useHarbor.getState().uncertainDecisions[alertId]) notify('The rejection request was accepted, but no structured decision event was returned. Status is unconfirmed.')
+      else if (useHarbor.getState().decisionRequests[alertId]) notify('Request sent. Waiting for a backend decision event.')
     })
   }
-  return <section className="agent-section"><SectionHeading index="03" title="Agent 建议" note={alertId ?? '待命'} />
-    {rec ? <div className="agent-body"><div className="agent-meta"><span className={`model-badge ${rec.model}`}>{MODELS[rec.model]}</span><span>置信度：{CONFIDENCE[rec.confidence]}</span></div><h3>{rec.summary}</h3><details className="agent-explanation"><summary>查看建议解读</summary><p>{rec.explanation}</p></details>
-      {rec.uncertainties.length > 0 && <ul className="uncertainty-list">{rec.uncertainties.map((text, index) => <li key={index}>{text}</li>)}</ul>}
+  return <section className="agent-section"><SectionHeading index="03" title="Agent Recommendation" note={alertId ?? 'Standby'} />
+    {rec ? <div className="agent-body"><div className="agent-meta"><span className={`model-badge ${rec.model}`}>{MODELS[rec.model]}</span><span>Confidence: {CONFIDENCE[rec.confidence]}</span></div><h3>{englishText(rec.summary)}</h3><details className="agent-explanation"><summary>View recommendation details</summary><p>{englishText(rec.explanation)}</p></details>
+      {rec.uncertainties.length > 0 && <ul className="uncertainty-list">{rec.uncertainties.map((text, index) => <li key={index}>{englishText(text)}</li>)}</ul>}
       <EvidenceChips recommendation={rec} />
-      {alertId && <div className="decision-area"><label className="operator-label">操作员<input aria-label="操作员名称" value={operator} maxLength={32} onChange={event => setOperator(event.target.value)} disabled={!!pending || !!confirmed || !!requested} /></label>
-        {effective ? <p className="decision-option">当前方案：{options.find(option => option.id === effective)?.label}</p> : <p className="decision-option muted">请先在下方选择一个可用方案。</p>}
-        <div className="decision-buttons"><button className="approve-button" disabled={locked} onClick={() => decide('approve')}>{pending === '批准方案' ? '批准中…' : '批准'}</button><button className="reject-button" disabled={locked} onClick={() => decide('reject')}>{pending === '驳回方案' ? '驳回中…' : '驳回'}</button></div>
-        {confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">{confirmed.action === 'approve' ? '已批准' : '已驳回'} · {clock(confirmed.t)} · {confirmed.operator}</p>}
-        {requested && !confirmed && <p className="decision-waiting" role="status">等待后端确认，请勿重复操作。</p>}
+      {alertId && <div className="decision-area"><label className="operator-label">Operator<input aria-label="Operator name" value={operator} maxLength={32} onChange={event => setOperator(event.target.value)} disabled={!!pending || !!confirmed || !!requested || !!uncertain} /></label>
+        {effective ? <p className="decision-option">Selected option: {englishText(options.find(option => option.id === effective)?.label)}</p> : <p className="decision-option muted">Select an available option below first.</p>}
+        <div className="decision-buttons"><button className="approve-button" disabled={locked} onClick={() => decide('approve')}>{pending === 'Approve option' ? 'Approving…' : 'Approve'}</button><button className="reject-button" disabled={locked} onClick={() => decide('reject')}>{pending === 'Reject option' ? 'Rejecting…' : 'Reject'}</button></div>
+        {confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">{confirmed.action === 'approve' ? 'Approved' : 'Rejected'} · {clock(confirmed.t)} · {englishText(confirmed.operator)}</p>}
+        {requested && !confirmed && <p className="decision-waiting" role="status">Waiting for a structured backend decision. Do not submit again.</p>}
+        {uncertain && !confirmed && <p className="decision-uncertain" role="status">Unconfirmed: the rejection request was accepted, but the current contract provides no structured rejection event.</p>}
+        {!requested && !uncertain && !confirmed && conn === 'live' && recovery.phase === 'loading' && <p className="decision-waiting" role="status">Restoring approval history…</p>}
+        {!requested && !uncertain && !confirmed && conn === 'live' && (recovery.phase === 'complete' || recovery.phase === 'partial' || recovery.phase === 'failed') && <p className="decision-uncertain" role="status">No structured decision received. The historical status is unconfirmed.</p>}
       </div>}
-    </div> : <div className="agent-body"><div className="agent-waiting"><span>✦</span><strong>{selected && !alertId ? '该目标暂无活动警报' : mode === 'disaster' ? '等待勘测与复航建议' : '等待警报与处置建议'}</strong></div><p>{mode === 'disaster' ? '灾害模式下显示数据源发来的复航建议。' : '选中目标后显示对应建议；未选中时显示等级最高的活动警报。'}</p>{conn === 'mock' && <p className="hint">{mode === 'disaster' ? '场景 B 第 45 秒生成模板建议。' : '场景 A 第 66 秒生成模板建议。'}可使用 10× 加速。</p>}</div>}
+    </div> : <div className="agent-body"><div className="agent-waiting"><span>✦</span><strong>{selected && !alertId ? 'No active alert for this target' : mode === 'disaster' ? 'Waiting for survey and reopening recommendations' : 'Waiting for alerts and response recommendations'}</strong></div><p>{mode === 'disaster' ? 'Disaster mode shows reopening recommendations from the data source.' : 'Select a target to see its recommendation. Otherwise, the highest-level active alert is shown.'}</p>{confirmed && <p className={`decision-confirmed ${confirmed.action}`} role="status">This alert is {confirmed.action === 'approve' ? 'Approved' : 'Rejected'} · {clock(confirmed.t)} · {englishText(confirmed.operator)}</p>}{requested && !confirmed && <p className="decision-waiting" role="status">Request submitted. Waiting for a structured backend decision.</p>}{uncertain && !confirmed && <p className="decision-uncertain" role="status">Unconfirmed: no structured rejection event was returned.</p>}{alertId && !confirmed && !requested && !uncertain && conn === 'live' && recovery.phase !== 'idle' && <p className="decision-uncertain" role="status">No structured recommendation or decision can be restored. Historical status is unconfirmed.</p>}{conn === 'mock' && <p className="hint">{mode === 'disaster' ? 'Scenario B generates a template recommendation at 45 s.' : 'Scenario A generates a template recommendation at 66 s.'}{' '}Use 10× speed to accelerate.</p>}</div>}
   </section>
 }
 
@@ -83,11 +88,11 @@ export function DetectionPreview() {
     if (id && !dialog.current?.open) dialog.current?.showModal()
     else if (!id && dialog.current?.open) dialog.current.close()
   }, [id])
-  return <dialog ref={dialog} className="detection-dialog" onClose={() => useHarbor.setState({ sonarModalDetId: null })} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close() }} aria-labelledby="detection-title"><div className="dialog-content"><div className="dialog-heading"><h2 id="detection-title">识别记录 · {id}</h2><button onClick={() => dialog.current?.close()} aria-label="关闭识别记录">×</button></div>{detection ? <><dl><dt>类别</dt><dd>{CLASS_NAMES[detection.cls]}</dd><dt>置信度</dt><dd>{Math.round(detection.conf * 100)}%</dd><dt>浮标</dt><dd>{detection.buoy_id}</dd><dt>模型</dt><dd>{detection.model}</dd><dt>时间</dt><dd>{clock(detection.t)}</dd></dl><SonarImage key={`${conn}-${detection.id}`} src={conn === 'mock' || conn === 'replay' ? localSonarPath(detection) : api.sonarURL(detection.id)} />{detection.model === 'stub' && <p className="training">合成示意图 · 非真实声呐 / 非训练模型输出</p>}<p className="muted">展示数据源预标框图像，前端不重复推理或绘制检测框。</p></> : <p>等待识别记录。</p>}</div></dialog>
+  return <dialog ref={dialog} className="detection-dialog" onClose={() => useHarbor.setState({ sonarModalDetId: null })} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close() }} aria-labelledby="detection-title"><div className="dialog-content"><div className="dialog-heading"><h2 id="detection-title">Detection Record · {id}</h2><button onClick={() => dialog.current?.close()} aria-label="Close detection record">×</button></div>{detection ? <><dl><dt>Class</dt><dd>{CLASS_NAMES[detection.cls]}</dd><dt>Confidence</dt><dd>{Math.round(detection.conf * 100)}%</dd><dt>Buoy</dt><dd>{detection.buoy_id}</dd><dt>Model</dt><dd>{detection.model}</dd><dt>Time</dt><dd>{clock(detection.t)}</dd></dl><SonarImage key={`${conn}-${detection.id}`} src={conn === 'mock' || conn === 'replay' ? localSonarPath(detection) : api.sonarURL(detection.id)} />{detection.model === 'stub' && <p className="training">Synthetic illustration · Not actual sonar or trained-model output</p>}<p className="muted">Source-provided annotated image. The frontend does not rerun inference or draw detection boxes.</p></> : <p>Waiting for a detection record.</p>}</div></dialog>
 }
 
 function SonarImage({ src }: { src: string }) {
   const [failed, setFailed] = useState(false)
   const [revision, setRevision] = useState(0)
-  return <div className="sonar-image">{failed ? <div role="alert"><p>声呐图像未提供或加载失败。</p><button onClick={() => { setFailed(false); setRevision(value => value + 1) }}>重试图像</button></div> : <img key={revision} src={src} alt="数据源已标框的声呐识别图；stub 为合成示意图" onError={() => setFailed(true)} />}</div>
+  return <div className="sonar-image">{failed ? <div role="alert"><p>Sonar image is unavailable or failed to load.</p><button onClick={() => { setFailed(false); setRevision(value => value + 1) }}>Retry image</button></div> : <img key={revision} src={src} alt="Source-annotated sonar detection image; stub images are synthetic" onError={() => setFailed(true)} />}</div>
 }
