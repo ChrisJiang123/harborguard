@@ -1,8 +1,8 @@
-"""ml/yolo/infer.py（SonarDetector）测试（C2）。
+"""C2 SonarDetector contract tests.
 
-- 权重缺失必须抛 FileNotFoundError（契约：B 捕获后改用桩，不伪造预测）。
-- 用 .cache/yolo26n.pt（COCO 预训练，仅验证推理链路，非声呐权重）冒烟：
-  灰度图输入、强制 CPU、返回结构与 bbox 有效性。
+- Missing weights must raise FileNotFoundError for B's explicit stub fallback.
+- Optional cached COCO weights exercise grayscale input, forced CPU and valid
+  output/bboxes only; they do not establish sonar detection quality.
 """
 
 from __future__ import annotations
@@ -17,15 +17,15 @@ sys.path.insert(0, str(ROOT))
 
 from ml.yolo.infer import SonarDetector  # noqa: E402
 
-SMOKE_WEIGHTS = ROOT / ".cache/yolo26n.pt"  # check_c0 下载的 COCO 预训练权重（gitignored）
+SMOKE_WEIGHTS = ROOT / ".cache/yolo26n.pt"  # Ignored COCO weights cached by check_c0.
 
 
 def test_missing_weights_raise_clear_error(tmp_path):
-    with pytest.raises(FileNotFoundError, match="权重不存在"):
+    with pytest.raises(FileNotFoundError, match="weights do not exist"):
         SonarDetector(weights=str(tmp_path / "nope.pt"))
 
 
-@pytest.mark.skipif(not SMOKE_WEIGHTS.is_file(), reason="无 .cache/yolo26n.pt（先跑 check_c0 下载）")
+@pytest.mark.skipif(not SMOKE_WEIGHTS.is_file(), reason="Missing optional cached COCO smoke weights .cache/yolo26n.pt")
 def test_detect_contract_with_pretrained_smoke():
     from ml.sonar.render import render_ping
 
@@ -35,9 +35,9 @@ def test_detect_contract_with_pretrained_smoke():
               width_m=4.0, aspect_deg=0.0)],
         max_range_m=150.0, seed=3, size=640,
     )
-    out = det.detect(img)  # 灰度 2D 输入
+    out = det.detect(img)  # Two-dimensional grayscale input.
     assert isinstance(out, list)
-    for d in out:  # 若有检出，逐项校验契约结构
+    for d in out:  # Validate every returned detection against the contract.
         assert set(d) == {"cls", "conf", "bbox"}
         assert isinstance(d["cls"], str) and d["cls"]
         assert 0.0 <= d["conf"] <= 1.0
@@ -46,7 +46,7 @@ def test_detect_contract_with_pretrained_smoke():
         assert 0 <= x1 < x2 <= 640 and 0 <= y1 < y2 <= 640
 
 
-@pytest.mark.skipif(not SMOKE_WEIGHTS.is_file(), reason="无 .cache/yolo26n.pt")
+@pytest.mark.skipif(not SMOKE_WEIGHTS.is_file(), reason="Missing optional cached COCO smoke weights .cache/yolo26n.pt")
 def test_detect_rejects_bad_input():
     det = SonarDetector(weights=str(SMOKE_WEIGHTS), conf=0.25)
     import numpy as np

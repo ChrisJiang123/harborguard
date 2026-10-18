@@ -1,10 +1,8 @@
-"""ml.yolo.infer —— SonarDetector 推理接口（C2，共享契约 v1 §7，签名一字不改）。
-
-B 在后端 import（backend/app/perception/classifier.py）：
-- 构造时加载一次权重并**强制 CPU** 推理；
-- detect 输入灰度图（内部转三通道），返回 [{"cls": str, "conf": float, "bbox": [x1,y1,x2,y2]}]；
-- 权重文件不存在时抛 FileNotFoundError（明确信息），B 捕获后自动改用桩，不伪造预测。
+"""C2 SonarDetector with frozen section7 signature, imported by B. Load weights once and force CPU.
+detect converts grayscale internally to three channels and returns cls/conf/pixel bbox. Missing
+weights raise FileNotFoundError for an explicit B stub fallback, never invented predictions.
 """
+
 
 from __future__ import annotations
 
@@ -13,24 +11,21 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-# YOLO 类别 ID（共享契约）：0 uuv，1 fish_school，2 debris，3 marine_mammal
+# Frozen class IDs:0uuv,1fish_school,2debris,3marine_mammal.
 CLASS_NAMES: tuple[str, ...] = ("uuv", "fish_school", "debris", "marine_mammal")
 
 
 class SonarDetector:
-    """契约签名::
-
-        def __init__(self, weights: str = "ml/yolo/weights/best.pt", conf: float = 0.25)
-        def detect(self, img: "np.ndarray") -> list[dict]
+    """Frozen signatures: __init__(weights="ml/yolo/weights/best.pt",conf=0.25); detect(img:
+    np.ndarray) -> list[dict].
     """
-
     def __init__(self, weights: str = "ml/yolo/weights/best.pt", conf: float = 0.25):
         w = Path(weights)
         if not w.is_file():
             raise FileNotFoundError(
-                f"YOLO 声呐权重不存在: {w}——先完成训练得到 best.pt 并放入 ml/yolo/weights/（见 ml/yolo/train.md）"
+                f"YOLO sonar weights do not exist: {w}; train/export best.pt into ml/yolo/weights/ (see ml/yolo/train.md)"
             )
-        from ultralytics import YOLO  # 延迟导入：无权重时 import 本模块不应要求 torch
+        from ultralytics import YOLO  # Lazy import avoids requiring torch when weights are absent.
 
         self._model = YOLO(str(w))
         self.conf = float(conf)
@@ -38,16 +33,16 @@ class SonarDetector:
 
     def detect(self, img: "np.ndarray") -> list[dict]:
         arr = np.asarray(img)
-        if arr.ndim == 2:  # 灰度 → 三通道
+        if arr.ndim == 2:  # Grayscale to three channels.
             arr = cv2.cvtColor(arr, cv2.COLOR_GRAY2BGR)
         elif arr.ndim == 3 and arr.shape[2] == 3:
             pass
         elif arr.ndim == 3 and arr.shape[2] == 4:
             arr = cv2.cvtColor(arr, cv2.COLOR_BGRA2BGR)
         else:
-            raise ValueError(f"detect 需要 HxW 或 HxWx3/4 图像，收到 shape={arr.shape}")
+            raise ValueError(f"detect requires HxW or HxWx3/4 input, received shape={arr.shape}")
 
-        # 强制 CPU（任务书 C2：每张 < 100 ms 的 CPU 检测器）
+        # Force CPU (C2 target:under100ms/image).
         results = self._model.predict(arr, device="cpu", conf=self.conf, verbose=False)
         out: list[dict] = []
         for box in results[0].boxes:

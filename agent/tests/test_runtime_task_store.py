@@ -1,8 +1,9 @@
-"""C3 运行预算行为测试（离线部分）：任务淘汰/代际失效 + 过期 deadline 模板兜底。
-
-在线部分（真实 Ollama 推理、生成中取消、事实失败兜底）见
-acceptance_c4/candidate_json_20261017/test_runtime_events_part2.py（依赖本地模型，不入库）。
+"""Offline C3 budget tests: task eviction, scene-generation invalidation and expired-deadline template
+fallback. Historical online Ollama/cancellation/fact-failure cases are in the untracked
+acceptance_c4/candidate_json_20261017/test_runtime_events_part2.py.
 """
+
+
 from __future__ import annotations
 
 import asyncio
@@ -32,8 +33,8 @@ def test_duplicate_signature_and_replayed_seq_are_deduped() -> None:
     queue = TaskQueue()
     first = queue.offer_event(_alert_event(1, "A1"))
     assert first is not None
-    assert queue.offer_event(_alert_event(2, "A1")) is None  # 同 signature 去重
-    assert queue.offer_event(_alert_event(1, "A1")) is None  # seq 重放去重
+    assert queue.offer_event(_alert_event(2, "A1")) is None  # Deduplicate identical signatures.
+    assert queue.offer_event(_alert_event(1, "A1")) is None  # Deduplicate replayed seq.
 
 
 def test_new_version_invalidates_old_task() -> None:
@@ -80,7 +81,7 @@ def test_take_is_fifo() -> None:
 
 
 def test_expired_deadline_returns_template_without_provider_calls() -> None:
-    """过期 deadline：直接确定性模板兜底，任何 provider 都不被调用（超时取消的静态路径）。"""
+    """Expired deadline directly selects the deterministic template without calling a provider."""
     router = Router(load_settings())
     try:
         started = time.perf_counter()

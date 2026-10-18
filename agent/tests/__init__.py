@@ -1,1 +1,1 @@
-"""agent 包的 pytest 测试（C3 起补充）。"""
+"""Pytest tests for the Agent package (introduced in C3)."""

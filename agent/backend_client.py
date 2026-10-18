@@ -1,10 +1,8 @@
-"""与 B 后端的 REST / WebSocket 客户端（C3）。
-
-地址约定（任务书 C3 + 后端 README）：
-- BACKEND_BASE_URL 保持**后端根地址**语义（如 http://localhost:8000）；
-- REST 统一补且仅补一个 /api 前缀（防漏 /api 或重复 /api/api）；
-- WS 使用 /ws（.env 的 BACKEND_WS_URL 为空时由根地址推导）。
+"""REST/WebSocket client for B (C3). BACKEND_BASE_URL is the backend root, e.g. http://localhost:8000.
+REST adds exactly one /api prefix. WebSocket uses /ws, derived from the root when BACKEND_WS_URL is
+empty.
 """
+
 
 from __future__ import annotations
 
@@ -21,13 +19,13 @@ from .config import Settings, get_settings
 
 
 def normalize_base(base: str) -> str:
-    """后端根地址：去尾斜杠；误填 /api 结尾时剥掉，防止 /api/api。"""
+    """Normalize the backend root: remove trailing slash and an accidental /api suffix."""
     value = (base or "").strip().rstrip("/")
     return re.sub(r"/api$", "", value, flags=re.IGNORECASE)
 
 
 def api_url(base: str, path: str) -> str:
-    """统一构造 REST 地址：恰好一个 /api 前缀。"""
+    """Build a REST URL with exactly one /api prefix."""
     p = "/" + (path or "").strip().lstrip("/")
     if not (p == "/api" or p.startswith("/api/")):
         p = "/api" + p
@@ -42,7 +40,7 @@ def ws_url(base: str, ws: str | None = None) -> str:
 
 
 class BackendClient:
-    """契约 REST 的薄封装 + 断线重连的 WS 事件流。"""
+    """Thin contract REST wrapper and reconnecting WebSocket event stream."""
 
     def __init__(self, settings: Settings | None = None, timeout: float | None = None):
         self.settings = settings or get_settings()
@@ -59,7 +57,7 @@ class BackendClient:
         resp.raise_for_status()
         return resp.json()
 
-    # ---- 契约 GET 封装（本阶段用到的） ----
+    # Contract GET wrappers used in this phase.
     async def get_state(self) -> dict:
         return await self._get_json("state")
 
@@ -101,7 +99,7 @@ class BackendClient:
         resp.raise_for_status()
         return resp.json()
 
-    # ---- WebSocket：断线自动重连，重连后用 since_seq 补齐漏掉的事件 ----
+    # WebSocket reconnect with since_seq event compensation.
     async def stream_events(
         self,
         on_event: Callable[[dict], Awaitable[None] | None],
@@ -109,11 +107,10 @@ class BackendClient:
         stop: asyncio.Event,
         reconnect_delay_s: float = 2.0,
     ) -> None:
-        """持续投递事件，并在首次连接/重连时从 REST 缓存补齐。
-
-        WebSocket 先建立再补事件，因此补齐期间发生的实时事件会留在 WS 缓冲区；
-        ``last_seq`` 会过滤二者重叠。后端进程重启后 seq 会回退，此时从 0
-        重新建立游标。回调既可为普通函数，也可为 async 函数。
+        """Deliver events with initial/reconnect compensation from the REST cache. Connect WebSocket
+        before fetching history so concurrent live messages remain buffered. last_seq removes
+        overlap. A sequence rollback after backend restart resets the cursor to zero. Callbacks may
+        be synchronous or async.
         """
         last_seq: int | None = None
 
@@ -133,7 +130,7 @@ class BackendClient:
                     state = await self.get_state()
                     state_seq = int(state.get("seq", 0))
                     if last_seq is None or state_seq < last_seq:
-                        last_seq = 0  # 首次启动补缓存；seq 回退表示后端已重启
+                        last_seq = 0  # Recover cache initially; sequence rollback indicates backend restart.
                     for msg in await self.get_events(last_seq):
                         if msg.get("type") == "event":
                             await deliver(msg)
@@ -145,7 +142,7 @@ class BackendClient:
                             await deliver(msg)
             except asyncio.CancelledError:
                 raise
-            except Exception:  # noqa: BLE001 - 网络抖动一律退避重连
+            except Exception:  # noqa: BLE001 - Back off and reconnect after transient network failures.
                 if stop.is_set():
                     return
                 await asyncio.sleep(reconnect_delay_s)

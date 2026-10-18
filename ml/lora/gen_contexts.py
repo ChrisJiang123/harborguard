@@ -1,24 +1,11 @@
-"""C4 蒸馏上下文合成：按共享契约随机合成与 C3 collect_* 同构的上下文 JSON。
-
-多样性来源（任务书 C4）：
-- kind 比例 security 70% / disaster 20% / buoy 10%；
-- 随机警报等级、风险分项、识别类别与置信度、方案指标、浮标离线、network 状态。
-
-内部一致性（硬约束，tests/test_lora_gen_contexts.py 逐条验证）：
-- risk = C*0.30 + P*0.25 + B*0.25 + Z*0.15 + D*0.05（backend/app/config.py 同权重）；
-- ranked 顺序与 backend Optimizer 一致：残余风险 ≤ 0.2 的按延误升序在前，
-  其余按残余风险升序；ranked[0] 与 agent.factcheck.security_selection 的任务书规则一致；
-- 灾害 est_hours_saved = 已勘测分区数 × SURVEY_H(1.5)，route/复航泊位均为 clear 且可达；
-- 浮标失效的 coverage_impact 用真实 buoy/zones 几何复算（agent.context._zone_in_range）；
-- 全部 ID 取自 data/（B1…B10、分区、资产 ID），方案口径与 backend Optimizer 相同
-  （opt-1/opt-2/opt-3/port-closure，CLOSURE_H_LOCAL=2.0、CLOSURE_H_FULL=6.0）。
-
-每条上下文统一经 agent.context._trim 压缩并校验 ≤ 3 KB，与线上 User 消息完全同构。
-
-用法::
-
-    python -m ml.lora.gen_contexts --n 500 --seed 0 --out ml/lora/datasets/contexts.jsonl
+"""Generate synthetic C4 contexts matching C3 collect_* and the frozen contract. Kind ratios are
+security70/disaster20/buoy10 with varied alerts, weighted risk, detections, options, buoy loss and
+network. Risk weights match B; low-risk options rank by delay before remaining risk-ranked options.
+Selection agrees with factcheck.security_selection. Clear/reachable routes, survey-hour estimates
+and buoy geometry are internally consistent. IDs come from B data; _trim enforces <=3 KB UTF-8.
+Fixed seed reproduces contexts. All observations are synthetic, not field data.
 """
+
 
 from __future__ import annotations
 
@@ -35,7 +22,7 @@ DEFAULT_OUT = REPO_ROOT / "ml" / "lora" / "datasets" / "contexts.jsonl"
 
 RISK_WEIGHTS = {"C": 0.30, "P": 0.25, "B": 0.25, "Z": 0.15, "D": 0.05}
 RESIDUAL_ACCEPTABLE = 0.2
-CLOSURE_H_LOCAL, CLOSURE_H_FULL, SURVEY_H = 2.0, 6.0, 1.5  # 与 backend/app/config.py 一致
+CLOSURE_H_LOCAL, CLOSURE_H_FULL, SURVEY_H = 2.0, 6.0, 1.5  # Match backend/app/config.py.
 ENTRANCE_ZONE = "channel_entrance"
 
 KIND_RATIOS = (("security", 0.70), ("disaster", 0.20), ("buoy", 0.10))
@@ -77,7 +64,7 @@ def _round(value: float, digits: int = 2) -> float:
 
 
 def load_world(data_dir: Path | None = None) -> dict:
-    """读取 B 维护的静态数据：真实浮标 / 分区（含邻接）/ 资产 / 船期。"""
+    """Read B-maintained scenario buoys, zones/adjacency, assets and vessel schedules."""
     root = data_dir or (REPO_ROOT / "data")
     geo = json.loads((root / "zones.geojson").read_text(encoding="utf-8"))
     zones = []
@@ -107,16 +94,14 @@ def load_world(data_dir: Path | None = None) -> dict:
 
 
 def weighted_risk(breakdown: dict) -> float:
-    """共享契约：risk = 各分项 × 权重之和。"""
+    """Contract risk is the weighted sum of components."""
     return _round(sum(float(breakdown[key]) * weight for key, weight in RISK_WEIGHTS.items()))
 
 
 def _ranked(options: list[dict]) -> list[str]:
-    """「残余风险 ≤ 0.2 的按延误升序在前」，与 agent.factcheck.security_selection 同序。
-
-    与 backend Optimizer 的排序仅在延误并列的次序上可能不同（B 以残余风险、ID 决胜）；
-    训练数据统一采用任务书规则的决胜方式（并列取列表靠前者），保证 ranked[0]
-    与任务规则绝不冲突，蒸馏样本无需学习「报告排序差异」的分支。
+    """Rank risk<=0.2 options by delay first, matching factcheck.security_selection. B may break equal
+    delays by risk/ID; training uses the taskbook first-in-list tie break so ranked[0] never
+    contradicts the task rule or teaches a ranking-difference branch.
     """
     acceptable = [(i, o) for i, o in enumerate(options) if o["residual_risk"] <= RESIDUAL_ACCEPTABLE]
     rest = [(i, o) for i, o in enumerate(options) if o["residual_risk"] > RESIDUAL_ACCEPTABLE]
@@ -126,7 +111,7 @@ def _ranked(options: list[dict]) -> list[str]:
 
 
 def _closed_vessels(world: dict, closed: set[str], duration: float) -> int:
-    """与 Optimizer.option 同口径：受影响 = 封闭区内到离港且 t_h ≤ 封闭时长。"""
+    """Match B Optimizer.option: affected arrivals/departures lie in closed zones within closure duration."""
     return sum(
         1
         for v in world["vessels"]
@@ -135,7 +120,7 @@ def _closed_vessels(world: dict, closed: set[str], duration: float) -> int:
 
 
 def _make_options(rng: random.Random, world: dict, asset_zone: str) -> list[dict]:
-    """方案口径与 backend Optimizer 相同：三档局部封闭 + 全港关闭基线。"""
+    """Use the same option measures as B: three local closures and the full-port baseline."""
     neighbors = {z["id"]: z["neighbors"] for z in world["zones"]}
     channels = world["channel_zones"]
     berth_pool = [z for z in world["berth_zones"] if z != asset_zone]
@@ -174,7 +159,7 @@ def _make_options(rng: random.Random, world: dict, asset_zone: str) -> list[dict
                 "residual_risk": _round(rng.uniform(0.05, 0.55) if oid == "opt-1" else rng.uniform(0.03, 0.30)),
             }
         )
-    if rng.random() < 0.8:  # 全港关闭基线
+    if rng.random() < 0.8:  # Full-port closure baseline.
         all_closed = set(world["zone_ids"])
         affected = _closed_vessels(world, all_closed, CLOSURE_H_FULL)
         options.append(
@@ -190,7 +175,7 @@ def _make_options(rng: random.Random, world: dict, asset_zone: str) -> list[dict
                 "residual_risk": _round(rng.uniform(0.0, 0.08)),
             }
         )
-    # 至少一个方案满足残余风险阈值，保证「可推荐低风险方案」是多数样本。
+    # Ensure most samples have at least one option below the residual-risk threshold.
     if all(o["residual_risk"] > RESIDUAL_ACCEPTABLE for o in options):
         rng.choice(options)["residual_risk"] = _round(rng.uniform(0.05, 0.18))
     return options
@@ -202,7 +187,7 @@ def _security_context(rng: random.Random, world: dict, index: int) -> dict:
     t = _round(rng.uniform(30, 1200), 1)
     asset = rng.choice(world["assets"])
     asset_zone = rng.choice(world["berth_zones"])
-    has_options = rng.random() >= 0.10  # options_ready 前无方案，推荐应为 null
+    has_options = rng.random() >= 0.10  # Before options_ready there is no option; recommendation must be null.
 
     breakdown = {key: _round(rng.uniform(0.10, 0.95)) for key in RISK_WEIGHTS}
     risk = weighted_risk(breakdown)
@@ -290,7 +275,7 @@ def _security_context(rng: random.Random, world: dict, index: int) -> dict:
 
 
 def _reachable_clear(world: dict, clear: set[str]) -> set[str]:
-    """入口航道出发、只经过 clear 分区的可达集（与灾害复航语义一致）。"""
+    """Reachable set from entry channels using only clear zones, matching Recovery semantics."""
     neighbors = {z["id"]: z["neighbors"] for z in world["zones"]}
     visited: set[str] = set()
     queue = deque([ENTRANCE_ZONE] if ENTRANCE_ZONE in clear else [])
@@ -310,7 +295,7 @@ def _disaster_context(rng: random.Random, world: dict, index: int) -> dict:
     rest = [z for z in zone_ids if z not in blocked]
     unsurveyed = set(rest[: rng.randint(1, 4)])
     clear = {z for z in zone_ids if z not in blocked and z not in unsurveyed}
-    if rng.random() < 0.9:  # 保证多数场景有可复航路径
+    if rng.random() < 0.9:  # Ensure most synthetic scenarios include a reachable clear route.
         clear.add(ENTRANCE_ZONE)
         unsurveyed.discard(ENTRANCE_ZONE)
         blocked.discard(ENTRANCE_ZONE)
@@ -368,8 +353,8 @@ def _disaster_context(rng: random.Random, world: dict, index: int) -> dict:
 def _buoy_context(rng: random.Random, world: dict, index: int) -> dict:
     target_id = rng.choice(world["buoy_ids"])
     target = next(b for b in world["buoys"] if b["id"] == target_id)
-    # 演示场景同时离线的浮标很少（场景 B 仅 2 个）；额外离线至多 1 个，
-    # 避免 uncertainties 需要罗列过多 ID 导致教师输出难合规。
+    # Demo scenarios have few simultaneous offline buoys (B has two); add at most one
+    # to avoid too many IDs exceeding teacher uncertainty limits.
     others = [b for b in world["buoy_ids"] if b != target_id]
     extra_down = {rng.choice(others)} if rng.random() < 0.12 else set()
     down = {target_id, *extra_down}
@@ -422,16 +407,16 @@ def _buoy_context(rng: random.Random, world: dict, index: int) -> dict:
 
 
 def kind_counts(n: int) -> dict[str, int]:
-    """按比例分配并使总数恰为 n（余数给 security）。"""
+    """Allocate ratios to exactly n records, assigning the remainder to security."""
     counts = {kind: int(n * ratio) for kind, ratio in KIND_RATIOS}
     counts["security"] += n - sum(counts.values())
     return counts
 
 
 def generate_contexts(n: int = 500, seed: int = 0, world: dict | None = None) -> list[dict]:
-    """生成 n 条上下文；同一 seed 输出完全相同。"""
+    """Generate n contexts; identical seeds produce identical results."""
     if n < 1:
-        raise ValueError("n 必须为正整数")
+        raise ValueError("n must be a positive integer")
     rng = random.Random(seed)
     world = world or load_world()
     counts = kind_counts(n)
@@ -446,11 +431,11 @@ def generate_contexts(n: int = 500, seed: int = 0, world: dict | None = None) ->
     contexts = []
     for index, kind in enumerate(kinds, start=1):
         context = builders[kind](rng, world, index)
-        if context.get("kind") != kind:  # 防御：builder 与分配一致
-            raise ValueError(f"上下文类别不一致: 期望 {kind}, 实际 {context.get('kind')}")
+        if context.get("kind") != kind:  # Defensive check: builder output matches allocation.
+            raise ValueError(f"Context kind mismatch: expected {kind}, actual {context.get('kind')}")
         size = len(json.dumps(context, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
         if size > MAX_CONTEXT_BYTES:
-            raise ValueError(f"上下文 {index} 压缩后 {size} 字节，超过 {MAX_CONTEXT_BYTES}")
+            raise ValueError(f"Context {index} is {size} bytes after trimming, exceeds {MAX_CONTEXT_BYTES}")
         contexts.append(context)
     return contexts
 
@@ -465,10 +450,10 @@ def write_jsonl(contexts: list[dict], out: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="生成 C4 蒸馏上下文 JSONL（与 C3 上下文同构）")
-    parser.add_argument("--n", type=int, default=500, help="生成数量（默认 500）")
-    parser.add_argument("--seed", type=int, default=0, help="随机种子（默认 0）")
-    parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="输出 JSONL 路径")
+    parser = argparse.ArgumentParser(description="Generate C4 distillation JSONL matching C3 context schema")
+    parser.add_argument("--n", type=int, default=500, help="Record count (default500)")
+    parser.add_argument("--seed", type=int, default=0, help="Random seed (default0)")
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="Output JSONL path")
     args = parser.parse_args()
 
     contexts = generate_contexts(n=args.n, seed=args.seed)
@@ -494,18 +479,18 @@ def main() -> None:
         conf_weak += (track.get("conf") is None) or (track.get("conf", 1.0) < 0.6)
         no_options += not context["options"]
 
-    print(f"已写入 {len(contexts)} 条上下文 -> {args.out}")
+    print(f"Wrote {len(contexts)} contexts -> {args.out}")
     print(
-        "kind 分布: "
+        "Kind distribution: "
         + ", ".join(f"{kind} {count} ({count / len(contexts):.0%})" for kind, count in counts.items())
     )
     print(f"network offline: {network_offline} ({network_offline / len(contexts):.0%})")
     print(
-        "security 样本: 无方案 "
-        f"{no_options}/{counts['security']}, 覆盖≤1 {covering_weak}/{counts['security']}, "
-        f"置信度<0.6 {conf_weak}/{counts['security']}, 有浮标离线 {down_buoy_ctx}/{counts['security']}"
+        "Security samples: no options "
+        f"{no_options}/{counts['security']}, coverage<=1 {covering_weak}/{counts['security']}, "
+        f"confidence<0.6 {conf_weak}/{counts['security']}, offline buoys {down_buoy_ctx}/{counts['security']}"
     )
-    print(f"字节: min {min(sizes)} / 中位 {sorted(sizes)[len(sizes) // 2]} / max {max(sizes)}（上限 {MAX_CONTEXT_BYTES}）")
+    print(f"Bytes: min {min(sizes)} / median {sorted(sizes)[len(sizes) // 2]} / max {max(sizes)} (limit {MAX_CONTEXT_BYTES})")
 
 
 if __name__ == "__main__":

@@ -1,63 +1,58 @@
-# B 声呐与灾害保守判定修复验收
+# B Conservative Sonar/Disaster Fix Acceptance
 
-后续P0真值依赖/原坏帧审计见 [survey-p0-audit.md](survey-p0-audit.md)。下文是#10的历史验证；绿色和节省时间是演示指标，不能当作真实可靠复航结论，也不代表全系统已真值无关。
+Historical #10 validation. Later truth-dependency/original-bad-frame audit: [survey-p0-audit.md](survey-p0-audit.md). Green zones/time savings are demonstration metrics, not reliable real reopening conclusions or proof of an entirely truth-independent system.
 
-日期：2026-10-17。依据负责人批准的独立本地实施范围，以及后续明确的 Push 指令。仅提交 B 后端、测试、验证工具和文档；不修改 A/C 源码、共享契约或 main，不替换运行中的演示。
+Date2026-10-17. Scope follows owner-approved isolated local implementation and subsequent explicit Push instruction. Only B implementation/tests/tools/docs; no A/C source, frozen contract, main, or running-demo replacement. **B fixes can be reviewed independently; newer C/full taskbook acceptance is not implied.** Real-model Security L3 remains505 simulation seconds, beyond original500. New-combination browser recovery,20-minute endurance, and venue rehearsals remained pending.
 
-**B 修复可以单独审查合并；这不代表新版 C 或整套任务书全部验收通过。** 真实模型的 Security 三级警报仍在仿真 505 秒，超过原任务书 500 秒上限。新组合的浏览器恢复、20 分钟耐久及现场彩排尚待验收。
+## Exact baseline and changes
 
-## 精确基线与改动
+- Publication branch: main8613834e7430eee40d2f020e6277dbdec72ca1f5, B implementation6353421.
+- Isolated candidate combined that main with C6389b705bec35b8fc44018d1c14d770f2a82b364, local merge3f237b87866592d43064c76a93083c0f67ac3bd0, B implementation8843422. Publication cherry-picked B only, not that C merge.
+- Candidate frontend/shared matched main; agent/ml/tests matched specified C. Existing demo remained on old checkout/template/database without restart/replacement.
+- No new REST/event types/fields/enums/pagination:21 operations,14 events; /api/events latest500.
 
-- 发布分支基于 main `8613834e7430eee40d2f020e6277dbdec72ca1f5`，B 实现提交 `6353421`。
-- 独立候选先组合上述 main 与 C `6389b705bec35b8fc44018d1c14d770f2a82b364`，本地合并提交 `3f237b87866592d43064c76a93083c0f67ac3bd0`，B 实现提交 `8843422`。发布分支只 cherry-pick B 实现，不携带这次 C 合并。
-- 候选的 frontend/shared 与 main 一致，agent/ml/tests 与指定 C 一致。当前演示仍运行旧工作区、旧模板和旧数据库；未重启或替换。
-- 不增加 REST 路由、事件种类、字段、枚举或分页语义。仍为 21 REST 操作、14 种事件；`/api/events` 仍只返回最近 500 条事件。
+Fixes:
+1. Empty, wrong-class, and low-confidence disaster candidates stay unsurveyed; coverage threshold cannot clear them. Only valid debris recognition confirms blocked; manual restrictions take precedence. Areas without suspected obstacles may clear/BFS normally.
+2. At most one retry per20 simulation seconds and3 total per candidate, preferring untried available safe buoys. Mammal protection remains. Existing security limit of5 actual pings per track is unchanged; empty images do not refund shots.
+3. For C fan imaging below30m, choose a physically appropriate alternative buoy. Without one, remain uncertain.0m is not fabricated as30m. B's rectangular-stub zero-distance positive control remains valid.
+4. Match boxes with the actual renderer projection: C fan and B linear stub differ. At164m, expected C y=437.636; old B approximation289.68. Internal _projection is not a public Detection/event field.
+5. Warm up the model with a separate seed before FastAPI lifespan readiness. Start/reset reuse it, without advancing world clock/RNG or creating business detections/PNG records/events. Missing C/weights still stub.
+6. Retry count/time/buoy history joins internal checkpoints and transactional rollback. No table/shared structure changes.
 
-修复包括：
+Main files: backend/app/decision/{disaster,pinger,__init__}.py, perception/classifier.py, {config,checkpoint,main}.py; test_model_safety.py/test_real_model.py and two reproducible tools.
 
-1. 灾害候选的空结果、错分类及低置信结果保持 `unsurveyed`，不因覆盖率达到阈值就变 `clear`。只有有效 debris 识别会确认并 `blocked`；人工限制优先。无疑似障碍区仍可正常 clear/BFS 复航。
-2. 同一候选每 20 仿真秒最多重试一次，总计最多 3 次，优先选择未尝试过的可用安全浮标。保留海洋哺乳动物保护；原安防每航迹最多 5 次实际发射的预算未改变，没有为“空图”返还次数。
-3. C 扇形近场不足 30m 时选择实际距离合适的另一浮标；没有可用浮标则保持不确定。没有把 0m 输入伪造成 30m。B 自有矩形桩的零距离正例保持有效。
-4. 检测框匹配按实际渲染布局选择投影；C 扇形与 B 线性桩分开处理。164m 示例的 C 预期 y 为 437.636，原 B 公式为 289.68。内部 `_projection` 不进入公开 Detection/事件。
-5. 在 FastAPI lifespan 就绪前以独立种子预热模型；开始/重置复用模型，不再丢掉预热结果。不推进世界时钟/RNG，不生成业务检测、PNG 记录或事件。缺少 C/权重仍明确显示 stub。
-6. 重试次数、时间和浮标记录进入内部检查点，与其他状态一同持久化和失败回滚。数据库表和共享数据结构未变。
+## Actual tests/evidence
 
-主要文件：`backend/app/decision/{disaster,pinger,__init__}.py`、`backend/app/perception/classifier.py`、`backend/app/{config,checkpoint,main}.py`；新增 `test_model_safety.py`、`test_real_model.py` 和两个可复现验证工具。
+[Machine record](evidence/sonar-safety-20261017.json). Raw logs/JUnit/model calls/new databases stay in ignored artifacts/model-fixes/, not Git.
 
-## 实际测试与证据
-
-机器可读证据：[sonar-safety-20261017.json](evidence/sonar-safety-20261017.json)。原始日志、JUnit、模型调用和新数据库保留于候选本地 `artifacts/model-fixes/`，未把缓存/数据库/日志提交到 Git。
-
-| 验证 | 结果与范围 |
+| Check | Result/scope |
 | --- | --- |
-| 修复前 main+C 全量 | 170 PASS、5 FAIL、2 SKIP，101.82s；2 项为真实模型不满足旧桩识别断言，3 项是 C 数据集生成器 Windows 跨 C/D 盘 relpath 限制 |
-| 修复后 main+C 全量 | 191 PASS、2 SKIP，93.07s；使用 C 盘 basetemp，未修改 C 生成器；跳过的 2 项缺少另一份 COCO 预训练冒烟权重，交付 sonar 权重另有真实验证 |
-| 单独发布的 main+B | 110 PASS、1 SKIP，66.87s；main 没有新 C 权重，因此真实模型测试明确跳过；另有 2 条 pytest 缓存目录权限警告，不影响断言 |
-| 原有桩识别正对照 | 显式选用完整 B 桩，保留原有 4 碎片、6 clear/4 blocked/2 unsurveyed、安防时间窗及完整回放断言；未把原断言放宽成全部未勘测 |
-| 新增 B 安全回归 | 16 PASS：空/错/低置信、重试冷却/上限、近场、禁 Ping、人工限制、投影、模型复用/预热、同库重启、写入失败回滚及真实 sonar 权重保守复航 |
-| 固定种子真实模型 | A/B 各跑 3 次完整离线场景，未启用 DEBUG_TRUTH_TRACKS；每场景 3 次事件、状态和 PNG 语义哈希一致 |
-| 冷启动真实 HTTP/WS+C | PASS：新端口 8004/8006、新数据库；实际模板建议、拒绝/批准、真实 WS 断开后的 API 补偿、PNG 及同库重启验证；不是浏览器验收 |
-| 静态检查 | Ruff、git diff --check、pip check 通过；A/C/共享契约的基线比较无额外差异 |
+| Before fix main+C |170 PASS,5 FAIL,2 SKIP,101.82s. Two old stub assumptions failed under real weights; three C-generator Windows cross-C/D relpath failures |
+| After fix main+C |191 PASS,2 SKIP,93.07s; C-drive basetemp, C generator unchanged. Two missing separate COCO smoke weights; delivered sonar weights tested separately |
+| B-only publication main+B |110 PASS,1 SKIP,66.87s; main lacked newer C weights, so real-model test explicitly skipped. Two pytest cache-permission warnings, no assertion effect |
+| Original stub positive controls |Full explicit B stub preserves4 debris,6clear/4blocked/2unsurveyed, security timing, complete replay assertions; not weakened to all-unsurveyed |
+| New B safety regression |16 PASS: empty/wrong/low-confidence, cooldown/limit, near field, forbidden ping, manual restrictions, projection, reuse/warmup, same-DB restart, rollback, actual-weight conservative reopening |
+| Seeded real model |Full A/B offline three times each, DEBUG_TRUTH_TRACKS off; event/state/PNG semantic hashes identical per scenario |
+| Cold real HTTP/WS+C |PASS, free8004/8006,new DB: actual template advice,reject/approve,real WS disconnect/API compensation,PNG,same-DB restart; not browser acceptance |
+| Static |Ruff,diff check,pip check PASS; no extra A/C/frozen differences |
 
-真实模型仅指交付的 YOLO 权重对**合成声呐图**推理，不代表实海声呐或硬件验收。云路由 disabled，Ollama 指向本机关闭端口，实际建议 model=template；没有把 LoRA 当成已训练。
+“Real model” means delivered YOLO weights infer on **synthetic sonar**, not sea/hardware acceptance. Cloud disabled; Ollama pointed at closed local port; actual advice model=template. No claim that this run trained LoRA.
 
-| 实测项目 | 修复前 | 修复后 |
+| Measurement | Before | After |
 | --- | --- | --- |
-| B 最终分区 | 8 clear、2 blocked、2 unsurveyed；燃料泊位/北锚地误绿 | 6 clear、3 blocked、3 unsurveyed；4 个障碍所在区无误绿 |
-| B 节省小时 | 12（错误包含未确认区） | 9 |
-| B 燃料泊位 | clear | unsurveyed；唯一范围内浮标与目标约 0m，没有物理可用的替代观测位置 |
-| B 正常复航 | 入口/南主航道及集装箱泊位1 | 继续可复航，未以全黄规避检测 |
-| A 首次 UUV / 三级 | 363.9s / 505s | 363.9s / 505s，时序没有改善；500s 要求 FAIL |
+| Final B zones |8clear/2blocked/2unsurveyed; fuel/north incorrectly green |6clear/3blocked/3unsurveyed; none of4 hazard zones incorrectly green |
+| Estimated saved hours |12, erroneously included unresolved areas |9 |
+| Fuel berth |clear |unsurveyed; only in-range buoy is~0m from target, no physically valid alternative |
+| Valid reopening |entrance/south main/container berth1 |Still available; no all-yellow shortcut |
+| A first UUV/L3 |363.9s/505s |363.9s/505s unchanged;500s requirement FAIL |
 
-冷启动到健康检查 5.959s，同库重启到健康检查 5.824s。连续连接段共 294 帧，平均 5.00168Hz，最大间隔 393.04ms，P99 间隔 315.10ms，最大状态包 24,264B。进程树 RSS 峰值 431.59MiB，单核 CPU 均值 46.13%，16 逻辑核机器占用约 2.88%。这些是约一分钟样本，不是新版 20 分钟耐久。
+Cold health5.959s; same-DB restart5.824s. Connected sample294 states,5.00168Hz,max interval393.04ms,P99315.10ms,max24264B. Process-tree peak RSS431.59MiB,mean single-core CPU46.13% (~2.88% across16 logical cores). This is~one minute, not20-minute endurance.
 
-离线工具没有调用 lifespan 预热，首轮 B 外层 tick 峰值仍为 2382.94ms，其中首次 classify 2216.57ms；后续 B 整体 tick 峰值约 380–385ms。不能拿预热移出实时路径当作消除了计算成本。20ms 继续为尽力目标；实时平均 5Hz 也不代表每帧严格 200ms。
+Offline tools bypass lifespan warmup: first B outer-tick peak2382.94ms,first classify2216.57ms; later B peaks~380–385ms. Moving warmup out of the live path does not remove computation cost.20ms remains best effort; average5Hz does not guarantee exact200ms frames.
 
-## 合并与启动注意
+## Merge/startup precautions
 
-**新参数改变内部检查点指纹，旧配置数据库不会被自动迁移或清空。** 直接用旧库启动会明确失败；这比静默丢历史更安全。合并前保留旧版本/旧库，为新版指定独立新库。不要删除或覆盖当前演示库，也不要修改 fingerprint 强行加载旧状态。
-
-已准备好依赖时，在仓库根目录运行（Windows）：
+New parameters change checkpoint fingerprint. Old databases are neither automatically migrated nor cleared; incompatible startup explicitly fails rather than silently dropping history. Preserve old version/database and select a new independent path. Never delete/overwrite demo data or edit fingerprint to load old state.
 
 ```powershell
 $env:HARBORGUARD_DB = Join-Path (Get-Location) 'backend/runtime/sonar-safety.sqlite3'
@@ -65,7 +60,7 @@ $env:DEBUG_TRUTH_TRACKS = '0'
 .venv/Scripts/python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
 
-仅 B 分支没有引入 C 的新权重，缺少模型时按契约显式 stub。要复现指定 C 的真实权重结果，先在独立测试分支组合精确 C 提交，按 `requirements-runtime.txt` 准备 CPU 推理依赖；不得把未验收云路由自动用于比赛。候选安装使用独立 venv，未更改原演示依赖。
+B-only branch does not bring newer C weights; missing models remain explicit stub. To reproduce specified C, combine its exact commit in a separate test branch and install CPU runtime dependencies from requirements-runtime.txt. Do not enable unaccepted cloud routes automatically. Candidate used its own venv, not the old demo environment.
 
 ```powershell
 .venv/Scripts/python.exe -m pytest backend/tests tests -q --basetemp=artifacts/pytest-model
@@ -73,15 +68,15 @@ $env:DEBUG_TRUTH_TRACKS = '0'
 .venv/Scripts/python.exe -m backend.tools.live_model_smoke --out artifacts/live-model-new
 ```
 
-最后一个命令要求 8004/8006 空闲、输出目录不存在，会使用新库并清理自己启动的进程。它临时覆盖 B 内部 Agent 目标到 8006，不改生产配置；8000/8001/5173 原演示保持不动。
+Last command requires free8004/8006 and a nonexistent output directory. It uses a new DB and cleans only its processes. Its temporary internal Agent destination8006 does not change production config;8000/8001/5173 remain intact.
 
-## 未通过、未验证与队友下一步
+## Failures, pending items, owner actions
 
-- **FAIL：** 新 C 权重下 A 三级警报 505s，原要求 400–500s。本次不调风险阈值或消耗更多 Ping 来制造达标。B/C 后续应检查可用视距、前几次真实检测和有限发射窗口。
-- **限制：** 燃料泊位仍未确认，不能宣称 4 个真实碎片均完成识别。若需补测需合理的新观测位置/场景数据评审；本次不改共享场景坐标或 C 渲染器。
-- **PENDING：** 此新组合浏览器刷新/重连竞态、目标投影电脑、真实测深/潮位/声呐、真实断 Wi-Fi、20 分钟耐久、三次现场彩排、录制/Devpost。不得复用旧模板的已通过记录为新版全部背书。
-- **A：** 使用既有 unsurveyed/blocked/clear 展示；不要让覆盖率 100% 覆盖服务端的未勘测状态。继续处理同刻重复日志、不同操作员 decision 去重及旧 REST 覆盖新实时状态的既有问题，不解析日志伪造审批。新分支不提供分页历史；500 窗口以外诚实降级。
-- **C：** 原提交保持原样；独立验收新路由和模型，提供近场/远距失败样例，保持 model 标签真实。英文建议遵守 summary≤60、explanation≤300 **字符**，不能按单词放宽。
-- **B：** 这次修复和证据先独立提交审查；不将 C 合并提交或旧 #6 整体混入 main。新版回放需在隔离目录重录后交 A 审查，本次不覆盖 frontend 的旧回放。
+- FAIL: new-C L3 at505s versus400–500s. No risk-threshold/ping-budget manipulation. B/C can later examine line of sight, first actual detections, and finite shot window.
+- Fuel remains unconfirmed: cannot claim all4 actual debris recognized. Any new observation location/scenario data needs review; no shared coordinate/C renderer changes here.
+- PENDING: newer browser refresh/reconnect race, projector, real bathymetry/tides/sonar, actual Wi-Fi disconnect,20-minute soak,three venue rehearsals,recording/Devpost. Old template passes do not accept this whole candidate.
+- A: honor backend unsurveyed/blocked/clear;100% coverage must not override state. Fix identical-time log multiplicity,multi-operator seq,old REST/new live races; never parse approvals from logs. No pagination; degrade beyond500.
+- C: original commit remains intact; accept new routes/models separately, provide near/far failure examples, label model truthfully. English summary<=60/explanation<=300 **characters**, not words.
+- B: submit/review isolated fixes/evidence; do not mix C merge or old#6 wholesale into main. Re-record new replays in isolation for A review; do not overwrite old frontend files.
 
-该报告补充已有 B0–B7 历史验收，不能把原有 37 项历史结论直接套用到新 C 候选。
+This supplements historical B0–B7 and does not transfer all37 old checkbox results to newer C.

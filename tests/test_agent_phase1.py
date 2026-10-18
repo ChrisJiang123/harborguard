@@ -1,4 +1,4 @@
-"""Agent C3 阶段一测试：地址构造 / 事件队列 / 上下文计算 / 模板 / 双重校验。"""
+"""Agent C3 phase-one tests: URLs, queue, context, templates and dual validation."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from agent.schemas import RecommendationDraft, normalize_draft, validate_draft  
 from agent.template import generate_answer, generate_security  # noqa: E402
 
 
-# ---------------------------------------------------------------- 地址构造
+# ---------------------------------------------------------------- URL construction
 
 def test_api_url_exactly_one_api_prefix():
     assert api_url("http://localhost:8000", "alerts/A1") == "http://localhost:8000/api/alerts/A1"
@@ -40,7 +40,7 @@ def test_ws_url_derivation():
 
 
 def test_stream_events_initial_recovery_accepts_sync_callback(monkeypatch):
-    """首次连接也补事件；main.handle_event 是同步函数，客户端不得错误 await None。"""
+    """Recover on first connection; synchronous handle_event must not be awaited."""
     class EmptyWebSocket:
         async def __aenter__(self):
             return self
@@ -81,7 +81,7 @@ def test_stream_events_initial_recovery_accepts_sync_callback(monkeypatch):
     asyncio.run(run())
 
 
-# ---------------------------------------------------------------- 事件队列
+# ---------------------------------------------------------------- Event queue
 
 def _opts_ready(seq, alert_id="A1", ranked=("opt-1",), opts=("opt-1",)):
     return {"type": "event", "seq": seq, "t": 1.0, "event": "options_ready",
@@ -138,19 +138,19 @@ def test_task_queue_multi_alert_and_clear():
     assert not q.is_current(stale), "已从队列取出或正在处理的旧场景任务也必须失效"
 
 
-# ---------------------------------------------------------------- 上下文计算
+# ---------------------------------------------------------------- Context calculations
 
 def test_history_summary_metrics():
-    # 直线匀深：直度 1.0，深度 std 0
+    # Straight path, constant depth: straightness 1.0 and depth std 0.
     straight = [[0.0, 0.0, 10.0, 0], [0.001, 0.001, 10.0, 30], [0.002, 0.002, 10.0, 60]]
     s = history_summary(straight, t_now=60)
     assert s["straightness"] == 1.0 and s["depth_std_m"] == 0.0
-    # 转弯路径：弦长 < 路径长 → 直度 < 1；窗口外的旧点不计入
+    # Turning: chord < path length, so straightness < 1; exclude older points.
     turning = [[0.0, 0.0, 10.0, 0], [0.01, 0.0, 12.0, 30], [0.0, 0.01, 8.0, 55], [0.0, 0.0, 99.0, 500]]
     s2 = history_summary(turning, t_now=60)
     assert 0.0 < s2["straightness"] < 1.0
     assert s2["depth_std_m"] > 0
-    # 近 60 秒深度 [10,12,8] 的总体标准差（与 np.std 一致）；窗口外的 99 不得计入
+    # Population std of depths [10,12,8] within 60s matches np.std; exclude old 99.
     assert abs(s2["depth_std_m"] - 1.633) < 0.01, "60 秒窗口外的点(深度99)不得参与统计"
 
 
@@ -167,7 +167,7 @@ def test_context_ids_collects_real_ids():
         assert expected in ids
 
 
-# ---------------------------------------------------------------- 模板与校验
+# ---------------------------------------------------------------- Templates and validation
 
 def _sample_context():
     return {

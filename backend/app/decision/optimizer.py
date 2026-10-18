@@ -35,9 +35,9 @@ class Optimizer:
                 closed.add(asset_zone)
             neighbors = {neighbor for zid in closed for neighbor in props[zid].get("neighbors", [])}
             speed_limit = {zid for zid in neighbors-closed if props[zid]["kind"] == "channel"} if index == 2 else set()
-            candidates.append((f"opt-{index}", "最小封闭" if index == 1 else "扩大缓冲 + 限速", False, closed, speed_limit))
+            candidates.append((f"opt-{index}", "Minimal closure" if index == 1 else "Expanded buffer + speed limits", False, closed, speed_limit))
         surrounding = Point(asset_xy).buffer(config.ASSET_CLOSURE_RADIUS_M)
-        candidates.append(("opt-3", "资产周边封闭", False,
+        candidates.append(("opt-3", "Asset perimeter closure", False,
                            {zid for zid, polygon in polygons.items() if surrounding.intersects(polygon)}, set()))
         # Deduplicate local sets and retain the explicit full-port baseline.
         seen = {frozenset(all_zones)}
@@ -48,7 +48,7 @@ class Optimizer:
                 continue
             seen.add(key)
             options.append(self.option(oid, label, baseline, closed, limited, track))
-        options.append(self.option("port-closure", "全港关闭", True, all_zones, set(), track))
+        options.append(self.option("port-closure", "Full port closure", True, all_zones, set(), track))
         ranked = sorted(options, key=lambda o: (
             0 if o["residual_risk"] <= config.RESIDUAL_ACCEPTABLE else 1,
             o["delay_vessel_hours"] if o["residual_risk"] <= config.RESIDUAL_ACCEPTABLE else o["residual_risk"],

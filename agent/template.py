@@ -1,12 +1,9 @@
-"""模板建议（C3 末级兜底）：不用模型，按 ranked 首个有效方案拼建议，2 秒内返回。
-
-规则（任务书 C3 系统提示词的模板化表达，与后续 LLM 同一上下文）：
-- 推荐有效 ranked 中的首个方案；无可用方案时 recommended_option_id = null，
-  说明值班员应核实什么；
-- 证据不足（仅 1 个浮标覆盖、识别置信度 < 0.6、有浮标离线、残余风险 > 0.2）
-  写入 uncertainties 并降低 confidence；
-- 只解读和推荐，不改警报等级、不执行任何操作；model 恒为 template。
+"""C3 final template fallback: no model; recommend the first valid ranked option within two seconds.
+With no valid option use null and state what the operator must check. Report insufficient coverage,
+confidence <0.6, offline buoys or residual risk >0.2 in uncertainties and lower confidence.
+Interpret/recommend only; never act or change alert levels. model is always template.
 """
+
 
 from __future__ import annotations
 
@@ -215,7 +212,7 @@ def _dominant_factor(breakdown: dict) -> tuple[str, float | None]:
 
 
 def _generate_answer_zh(question: str, *, track: dict | None, state: dict | None) -> str:
-    """/ask 的模板回答：只引用后端事实数字，≤150 字，model=template。"""
+    """Template /ask answer: backend facts only, <=150 characters, model=template."""
     parts: list[str] = []
     if track:
         parts.append(

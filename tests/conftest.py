@@ -1,4 +1,4 @@
-"""pytest 根配置：把仓库根加入 sys.path，使 `import ml...` / `import agent...` 生效。"""
+"""Root pytest setup: add the repository to sys.path for ml/agent imports."""
 
 import sys
 from pathlib import Path

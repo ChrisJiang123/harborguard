@@ -1,9 +1,8 @@
-"""上下文收集（C3）：REST 拉齐事实，压缩到 ≤ 3 KB。
-
-格式与任务书 C3 的上下文 JSON 一致（供云端/本地/模板三处共用）；
-history_summary 由航迹 history 计算：
-近 60 秒深度标准差与直线度；covering_track 为距离小于 range_m 的在线浮标。
+"""C3 context collection: collect REST facts and compress to <= 3 KB. Cloud, local and template share
+the taskbook context schema. history_summary uses recent depth standard deviation and path
+straightness; covering_track contains online buoys within range_m.
 """
+
 
 from __future__ import annotations
 
@@ -14,7 +13,7 @@ import httpx
 
 from .backend_client import BackendClient
 
-LAT0, LON0 = 33.7300, -118.2600  # 共享契约：本地米制坐标原点
+LAT0, LON0 = 33.7300, -118.2600  # Frozen contract origin for local metric coordinates.
 M_PER_LAT = 110540.0
 M_PER_LON = 111320.0 * math.cos(math.radians(LAT0))
 MAX_CONTEXT_BYTES = 3 * 1024
@@ -27,7 +26,7 @@ def _xy(point: list) -> tuple[float, float]:
 
 
 def history_summary(history: list, t_now: float, window_s: float = HISTORY_WINDOW_S) -> dict:
-    """近 window_s 秒的深度标准差与直线度（弦长/路径长，1.0 = 直线）。"""
+    """Depth standard deviation and chord/path straightness over window_s (1.0 means straight)."""
     pts = [p for p in history if len(p) >= 4 and 0.0 <= t_now - float(p[3]) <= window_s]
     if len(pts) < 2:
         return {"depth_std_m": 0.0, "straightness": 1.0}
@@ -63,7 +62,7 @@ def _slim_detection(d: dict) -> dict:
 
 
 def _trim(context: dict, limit: int = MAX_CONTEXT_BYTES) -> dict:
-    """按 UTF-8 实际字节逐级裁剪到 3 KB，同时保留模板决策所需事实。"""
+    """Trim by actual UTF-8 bytes to <= 3 KB while retaining facts required by templates."""
     def size(c: dict) -> int:
         return len(json.dumps(c, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
 
@@ -81,7 +80,7 @@ def _trim(context: dict, limit: int = MAX_CONTEXT_BYTES) -> dict:
     context["detections"] = context.get("detections", [])[:2]
     if size(context) <= limit:
         return context
-    # Option 的完整字段已由后端校验；模板只需以下指标和关闭分区数量。
+    # B already validates complete Options; templates need these metrics and closure count.
     option_fields = (
         "id", "label", "zones_closed", "vessels_affected",
         "delay_vessel_hours", "residual_risk",
@@ -92,7 +91,7 @@ def _trim(context: dict, limit: int = MAX_CONTEXT_BYTES) -> dict:
     ]
     if size(context) <= limit:
         return context
-    # security 的分区详情可由方案里的 zones_closed ID 代替；灾害/浮标必须保留状态。
+    # Security can use zones_closed IDs; disaster/buoy context must retain zone statuses.
     if context.get("kind") == "security":
         context["zones"] = []
     for option in context.get("options", []):
@@ -113,10 +112,9 @@ async def collect_security(
     options: list | None = None,
     ranked: list | None = None,
 ) -> dict:
-    """按真实 alert_id 拉齐安全事件上下文。
-
-    事件里的 options/ranked 已带则直接用；缺失时回退 GET /api/options/{alert_id}。
-    警报已不存在（场景重置等）时抛 httpx.HTTPStatusError(404)，由调用方丢弃任务。
+    """Collect Security context using the actual alert_id. Prefer options/ranked in the event;
+    otherwise GET /api/options/{alert_id}. An obsolete alert (e.g. after reset) raises
+    HTTPStatusError(404), allowing the caller to drop the job.
     """
     alert = await client.get_alert(alert_id)
     state = await client.get_state()
@@ -180,7 +178,7 @@ def _buoy_facts(buoys: list[dict]) -> dict:
 
 
 async def collect_disaster(client: BackendClient, plan: dict) -> dict:
-    """reopen_plan 的真实计划、分区状态和浮标状态上下文。"""
+    """Actual reopening plan, zone statuses and buoy statuses for reopen_plan context."""
     state = await client.get_state()
     buoys = await client.get_buoys()
     context = {
@@ -249,7 +247,7 @@ def _zone_in_range(buoy: dict, feature: dict) -> bool:
 
 
 async def collect_buoy(client: BackendClient, buoy_id: str) -> dict:
-    """浮标失效上下文；覆盖影响只声明量程圆与分区几何相交这一可复算事实。"""
+    """Buoy-loss context; coverage impact claims only the recomputable range-circle/zone intersection."""
     state = await client.get_state()
     buoys = await client.get_buoys()
     target = next((b for b in buoys if b.get("id") == buoy_id), None)
@@ -297,7 +295,7 @@ async def collect_buoy(client: BackendClient, buoy_id: str) -> dict:
 
 
 def context_ids(context: dict) -> set[str]:
-    """上下文中真实存在的全部 ID（双重校验的第一重依据）。"""
+    """All IDs actually present in context, the first layer of ID validation."""
     ids: set[str] = set()
     if a := context.get("alert"):
         ids.add(a.get("id"))

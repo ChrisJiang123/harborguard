@@ -1,4 +1,4 @@
-"""Agent C3 第三阶段：事实检查、事件触发、上下文与模板。"""
+"""Agent C3 phase three: fact checks, event triggers, contexts and templates."""
 
 from __future__ import annotations
 

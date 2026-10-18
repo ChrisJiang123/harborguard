@@ -97,7 +97,7 @@ class DisasterSurvey:
                 if attempt["zone_ids"]:
                     self.blocked_zones.update(attempt["zone_ids"])
                     events.append(AlertManager.log(world.t,
-                        f"分区 {'/'.join(attempt['zone_ids'])} 检测到碎片，等待人工清理", "warn"))
+                        f"Debris detected in zones {'/'.join(attempt['zone_ids'])}; awaiting manual clearance", "warn"))
             else:
                 reason = "no_detection" if detection["cls"] == "unknown" else (
                     "low_confidence" if detection["conf"] < config.DETECTION_MIN_CONF else "non_debris")
@@ -128,13 +128,14 @@ class DisasterSurvey:
             return
         attempt["reason"] = reason
         attempt["reported"] = marker
-        reasons = {"near_field": "近场成像边界，缺少可靠观测位置", "protected": "海洋哺乳动物保护，暂不发射",
-                   "no_detection": "声呐未检出", "low_confidence": "识别置信度不足",
-                   "non_debris": "识别为非碎片，不能据此排除障碍"}
+        reasons = {"near_field": "near-field imaging boundary; no reliable observation position",
+                   "protected": "marine mammal protection; ping withheld",
+                   "no_detection": "no sonar detection", "low_confidence": "insufficient detection confidence",
+                   "non_debris": "classified as non-debris; an obstruction cannot be ruled out"}
         if attempt["zone_ids"]:
             events.append(AlertManager.log(t,
-                f"分区 {'/'.join(attempt['zone_ids'])}：{reasons[reason]}；保持未勘测/待复核"
-                f"（已发射{attempt['count']}/{config.DISASTER_RETRY_MAX}，达到上限也不自动清除）", "warn"))
+                f"Zones {'/'.join(attempt['zone_ids'])}: {reasons[reason]}; remain unsurveyed/pending review "
+                f"(pings {attempt['count']}/{config.DISASTER_RETRY_MAX}; retry exhaustion does not clear the zone)", "warn"))
 
     def reopen(self, statuses: dict) -> dict:
         props = self.zones.properties

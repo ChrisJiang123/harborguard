@@ -1,9 +1,7 @@
-"""ml.sonar.preview —— 数据集抽样可视化（C1）。
-
-从数据集随机取 n 张（默认 16），画框与类名，拼成宫格图::
-
-    python -m ml.sonar.preview --dataset ml/datasets/sonar --out ml/sonar/samples.png
+"""C1 synthetic dataset preview: sample n images (default16), draw boxes/classes and assemble a grid.
+Example: python -m ml.sonar.preview.
 """
+
 
 from __future__ import annotations
 
@@ -16,7 +14,7 @@ import numpy as np
 
 from ml.sonar.render import CLASS_NAMES
 
-# BGR 调色（OpenCV 无中文字体，类名用英文）
+# BGR palette; English class names avoid unavailable CJK OpenCV fonts.
 _COLORS = ((0, 255, 0), (255, 255, 0), (0, 0, 255), (0, 255, 255))
 
 
@@ -33,7 +31,7 @@ def _load_labels(lbl_path: Path) -> list[tuple[int, float, float, float, float]]
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description="抽样可视化声呐数据集（C1）")
+    p = argparse.ArgumentParser(description="Preview sampled synthetic sonar images (C1)")
     p.add_argument("--dataset", default="ml/datasets/sonar")
     p.add_argument("--out", default="ml/sonar/samples.png")
     p.add_argument("--n", type=int, default=16)
@@ -44,13 +42,13 @@ def main(argv: list[str] | None = None) -> int:
     ds = Path(args.dataset)
     images = sorted((ds / "images/train").glob("*.png")) + sorted((ds / "images/val").glob("*.png"))
     if not images:
-        raise SystemExit(f"未找到图像: {ds}/images/{{train,val}}/*.png，先运行 gen_dataset")
+        raise SystemExit(f"No images: {ds}/images/{{train,val}}/*.png; run gen_dataset first")
     pick_rng = np.random.default_rng([args.seed, 7])
     chosen = pick_rng.choice(len(images), size=min(args.n, len(images)), replace=False)
 
     cell = cv2.imread(str(images[0]), cv2.IMREAD_GRAYSCALE)
     if cell is None:
-        raise SystemExit(f"读取失败: {images[0]}")
+        raise SystemExit(f"Cannot read: {images[0]}")
     h, w = cell.shape
 
     n = len(chosen)
@@ -75,7 +73,7 @@ def main(argv: list[str] | None = None) -> int:
                         (0, 0, 0), 3, cv2.LINE_AA)
             cv2.putText(bgr, name, (x1 + 2, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.45,
                         color, 1, cv2.LINE_AA)
-        if not lbl:  # 负样本：只有背景
+        if not lbl:  # Negative sample: background only.
             cv2.putText(bgr, "background", (8, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         (200, 200, 200), 1, cv2.LINE_AA)
         r, cidx = divmod(k, cols)
@@ -84,7 +82,7 @@ def main(argv: list[str] | None = None) -> int:
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out), grid)
-    print(f"已生成 {out}（{n} 宫格，取自 {len(images)} 张）")
+    print(f"Wrote {out} ({n}-image grid sampled from {len(images)} images)")
     return 0
 
 

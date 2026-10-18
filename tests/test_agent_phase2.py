@@ -1,4 +1,4 @@
-"""Agent C3 第二阶段：严格输出、重试、截止时间与三级路由。"""
+"""Agent C3 phase two: strict output, retries, deadlines and three-tier routing."""
 
 from __future__ import annotations
 

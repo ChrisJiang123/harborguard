@@ -200,15 +200,21 @@ C4's 501 input records split into 493 training records (450 synthetic + 43 captu
 
 Historical C0 automatic checks and GPU checks do not replace physical Wi-Fi loss, projector or cross-device video playback. The earlier macOS 26/Homebrew Python issue motivated `scripts/setup_env_runtime.sh` preferring uv; this is a machine-specific workaround, not a reason to rebuild a working environment. Keep runtime, YOLO training and LoRA training environments separate. No new training is needed for the demo.
 
-For full module details use [Agent documentation](agent/README.md), [LoRA documentation](ml/lora/README.md), [Chinese historical README](docs/README.zh-CN.md) and the source audit. The Agent validates structure, IDs and selected deterministic facts, but cannot certify every free-text assertion; invalid output may retry or fall back. It never changes alert levels or calls the decision endpoint itself.
+For full module details use [Agent documentation](agent/README.md), [LoRA documentation](ml/lora/README.md), [historical README archive, now in English](docs/README.zh-CN.md) and the source audit. The Agent validates structure, IDs and selected deterministic facts, but cannot certify every free-text assertion; invalid output may retry or fall back. It never changes alert levels or calls the decision endpoint itself.
 
 ## Three twists and future work
 
 - **Federal funding:** proposed **NSF SBIR Phase I** for real-echo validation and calibrated uncertainty, subject to suitability, applicant eligibility, Project Pitch and invitation. No grant, invitation or eligibility determination is claimed. See [NSF](https://www.nsf.gov/funding/opportunities/small-business-innovation-research-small-business-technology) and [eligibility](https://seedfund.nsf.gov/solicitation-eligibility/).
 - **Global application:** a proposed Los Angeles -> Shanghai/Yangshan adaptation. Authorized local maps, depth/tidal references, acoustic calibration, language, data controls and approval procedures must be validated. No overseas partner, deployment or field result is claimed.
-- **Poster:** an **A3 portrait PDF with A's recorded 3D overview** has been prepared for the organizer's Drive-link submission workflow. The screenshot is labeled as replay evidence and is separate from the older system metrics. File preparation is separate from uploading it, checking viewer access and pasting its Drive link into Devpost.
+- **Poster:** the [A3 portrait PDF](docs/poster-live/HarborGuard-Poster-A3-3D.pdf) now uses an actual **3D target-following frame from an isolated A/B/C simulation**, showing level-three and level-two alerts, tracks, options and logs. [Capture provenance](docs/poster-live-capture.md) distinguishes synthetic inputs, the paused live connection and the older system acceptance. File preparation is separate from uploading the PDF to Drive, checking viewer access and pasting its real Drive link into Devpost.
 
 Detailed [Twist responses](docs/twist-responses-en.md) and the [English project story](docs/devpost-story-en.md) are available for team review. A pitch deck, playable video, actual teammate confirmations and final submission receipt remain separate deliverables; this repository does not prove their completion.
+
+Documentation, comments and ordinary runtime display text have been translated to
+English. Frozen contracts, original evidence, Chinese-language model tests and
+legacy translation keys remain intact for compatibility and reproducibility.
+See the [translation scope and verification](docs/english-translation-scope.md)
+and the [non-authoritative English contract guide](docs/contract-reading-guide-en.md).
 
 ## Responsible use and data attribution
 

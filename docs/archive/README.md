@@ -1,10 +1,20 @@
-# 历史验收证据
+# Historical acceptance evidence
 
-`pr6-final-integration-results.json` 和 `pr6-final-integration-report.md` 原样来自 #6 的 head
-`5af2ae08d9baf6aa53fe58cacd6552986eed76a2`，描述旧 main `5817b9c`
-与模板 C `78d3957`。这是历史记录，不是当前 main `782d04d` 的验收结论。
+`pr6-final-integration-results.json` is preserved unchanged from PR #6 head
+`5af2ae08d9baf6aa53fe58cacd6552986eed76a2`. The accompanying
+`pr6-final-integration-report.md` is an English translation of that historical
+report, whose original text remains available at that commit. Both describe old
+main `5817b9c` and template C `78d3957`; they are not acceptance results for a
+later main, including `782d04d` mentioned when this archive was created.
 
-历史声呐为 stub、Agent为template，Recovery为6/4/2；当前真实YOLO候选
-结果为6/3/3。原文中的“无冲突”、C未合入、拒绝仅日志、A尚未实现恢复等
-不能沿用。当前接口和批准/拒绝持久化请看上级的 frontend-integration.md，
-最新测试、PR依赖和剩余问题见 final-integration-report.md。
+The historical sonar model was `stub`, the Agent was `template`, and Recovery
+reported 6 clear / 4 blocked / 2 unsurveyed. The real-YOLO candidate available
+when the archive was created reported 6 / 3 / 3. Historical statements about
+conflict-free merges, C not yet being merged, rejection producing only logs,
+or A lacking recovery must not be reused as current findings.
+
+For current interfaces and approval/rejection persistence, see
+[frontend integration](../frontend-integration.md). For the newer test results,
+PR dependencies and remaining issues, see
+[final integration report](../final-integration-report.md). Always check the
+exact source SHA and date of those reports before treating them as current.

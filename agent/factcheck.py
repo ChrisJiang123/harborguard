@@ -1,8 +1,8 @@
-"""RecommendationDraft 的确定性事实检查。
-
-这里只拒绝能从上下文明确证明错误的断言，或任务书明确要求但缺失的字段语义。
-任意自然语言事实的完全验证超出确定性规则能力，调用方必须公开这一局限。
+"""Deterministic RecommendationDraft fact checks. Reject only assertions demonstrably contradicted by
+context or missing taskbook-required semantics. Complete verification of arbitrary natural language
+is outside these rules; callers must disclose that limit.
 """
+
 
 from __future__ import annotations
 
@@ -14,9 +14,9 @@ from .schemas import RecommendationDraft
 from .language import language, text_errors
 
 FACT_CHECK_SCOPE = (
-    "确定性检查仅覆盖浮标离线/覆盖数量、识别置信度、方案风险与延误、"
-    "方案选择、recommended_option_id 及任务书规定的证据不足条件；"
-    "未宣称验证全部自由文本事实。"
+    "Deterministic checks cover buoy offline/coverage counts, detection confidence, "
+    "option risk/delay, option selection, recommended_option_id and taskbook "
+    "insufficient-evidence conditions; they do not verify all free-text facts."
 )
 
 _CLAUSE_SPLIT = re.compile(r"[。；;！!？?\n]+|\.(?=\s|$)")
@@ -50,7 +50,7 @@ def _number(value: Any) -> float | None:
 
 
 def security_selection(context: dict) -> SelectionCheck:
-    """分别计算任务书规则和后端 ranked 首项，不掩盖二者差异。"""
+    """Compute taskbook selection and backend ranked[0] separately without hiding differences."""
     options = [o for o in context.get("options", []) if isinstance(o, dict) and o.get("id")]
     by_id = {o["id"]: o for o in options}
     ranked = [oid for oid in context.get("ranked", []) if oid in by_id]
@@ -138,9 +138,9 @@ def _check_offline(draft: RecommendationDraft, context: dict, result: FactCheckR
         elif kind == "some" and not down:
             result.errors.append(f"声称存在浮标离线，但上下文离线列表为空：{clause[:80]}")
         elif kind == "some" and down:
-            # “B4 离线”是可验证的单项事实，并不等于声称离线总数未知或为零。
-            # 只有显式写出数量时才把该句视为总量陈述；完整总量与全部 ID
-            # 仍由下方 uncertainties 的强制规则保证。
+            # A single B4-offline assertion is verifiable and is not a claim of an unknown/zero total.
+            # Treat an explicit count as a total assertion; mandatory uncertainties below
+            # still require the complete total and all relevant IDs.
             if count is not None and count != len(down):
                 result.errors.append(f"浮标离线数量 {count!r} 与上下文 {len(down)} 不一致")
             if ids - down or (count is not None and ids != down):
@@ -323,7 +323,7 @@ def _check_selection(draft: RecommendationDraft, context: dict, result: FactChec
 
 
 def check_draft_facts(draft: RecommendationDraft, context: dict) -> FactCheckResult:
-    """检查能从结构化上下文明确判断的事实和任务规则。"""
+    """Check facts and task rules that structured context can establish."""
     result = FactCheckResult()
     result.errors.extend(text_errors(draft))
     # Canonicalize only the checker's view; recommendation text/IDs stay untouched.
@@ -377,7 +377,9 @@ def _fact_terms(text: str) -> str:
 
 
 def fact_snapshot(context: dict) -> dict:
-    """失败样例只保留校验所需结构化事实，不保存日志、坐标或凭证。"""
+    """Retain only structured facts required to check a failure, excluding logs, coordinates and
+    credentials.
+    """
     track = context.get("track") or {}
     buoys = context.get("buoys") or {}
     return {

@@ -53,7 +53,7 @@ class AlertManager:
             if tid in self.by_track:
                 aid = self.by_track.pop(tid)
                 self.alerts.pop(aid, None)
-                events.extend([("alert_cleared", {"alert_id": aid}), self.log(t, f"警报 {aid} 已解除")])
+                events.extend([("alert_cleared", {"alert_id": aid}), self.log(t, f"Alert {aid} cleared")])
             return events
         if tid not in self.by_track:
             self.counter += 1
@@ -68,7 +68,7 @@ class AlertManager:
         elif previous != level:
             events.append(("alert_changed", {"alert": deepcopy(alert), "from_level": previous, "to_level": level}))
         if previous != level:
-            events.append(self.log(t, f"航迹 {tid} 警报等级 {previous} → {level}", "critical" if level == 3 else "info"))
+            events.append(self.log(t, f"Track {tid} alert level {previous} -> {level}", "critical" if level == 3 else "info"))
         return events
 
     def remove_missing(self, live_ids: set[str], t: float) -> list[tuple]:
@@ -81,5 +81,5 @@ class AlertManager:
             aid = self.by_track.pop(tid, None)
             if aid:
                 self.alerts.pop(aid, None)
-                events.extend([("alert_cleared", {"alert_id": aid}), self.log(t, f"航迹 {tid} 消失，警报 {aid} 已解除")])
+                events.extend([("alert_cleared", {"alert_id": aid}), self.log(t, f"Track {tid} lost; alert {aid} cleared")])
         return events

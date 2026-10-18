@@ -98,7 +98,7 @@ class Pinger:
             buoy = min(available, key=lambda item: (item[0], item[1]))[2]
             if not self.safe(buoy, tracks):
                 if world.t-self.warning_at.get(tid, -float("inf")) >= config.PING_EVERY_S:
-                    events.append(AlertManager.log(world.t, "附近有海洋哺乳动物，禁止主动 ping", "warn"))
+                    events.append(AlertManager.log(world.t, "Marine mammal nearby; active ping prohibited", "warn"))
                     self.warning_at[tid] = world.t
                 continue
             bx, by = to_local(buoy["lat"], buoy["lon"])

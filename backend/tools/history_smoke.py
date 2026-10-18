@@ -128,8 +128,8 @@ async def exercise(directory: Path, port: int):
             oid = next(o["id"] for o in choices["options"] if not o["is_baseline"])
             state = await get(client, "/api/state")
             recommendation = dict(id=f"rec-history-{aid}", kind="security", alert_id=aid, model="template",
-                summary="持久化验收建议样例", explanation="B 接口验证 fixture；未调用 C Agent。请由操作员确认。",
-                recommended_option_id=oid, evidence_ids=[aid, alert["track_id"]], uncertainties=["合成数据，非真实识别验收"],
+                summary="Persistence acceptance recommendation fixture", explanation="Backend API fixture; C Agent was not called. Operator confirmation is required.",
+                recommended_option_id=oid, evidence_ids=[aid, alert["track_id"]], uncertainties=["Synthetic data; does not verify real detection"],
                 confidence="medium", created_t=state["t"], latency_ms=0)
             await post(client, "/api/recommendations", recommendation)
             body = dict(alert_id=aid, option_id=oid, action="reject", operator="history-smoke")

@@ -1,29 +1,29 @@
-# ============ HarborGuard .gitignore（C 维护） ============
-# 规则：.env、虚拟环境、数据集、训练日志、大型模型文件一律不入库。
+# ============ HarborGuard .gitignore (maintained by C) ============
+# Keep secrets, virtual environments, datasets, training logs and large models out of Git.
 
-# ---- 密钥与本地配置 ----
+# ---- Credentials and local configuration ----
 .env
 .env.*
 !.env.example
 
-# ---- 虚拟环境（运行环境 / YOLO 训练 / LoRA 训练，分开创建） ----
+# ---- Separate virtual environments for runtime, YOLO and LoRA training ----
 .venv/
 .venv-*/
 
-# ---- 数据集（合成声呐数据集、蒸馏语料等，体积大，可由脚本重跑生成） ----
+# ---- Large reproducible datasets: synthetic sonar and distilled examples ----
 ml/datasets/
 ml/lora/datasets/
 data/cache/
 
-# ---- 训练日志 / 训练输出 ----
+# ---- Training logs and output ----
 runs/
 wandb/
 *.log
 logs/
 agent/runtime/
 
-# ---- 大型模型文件（权重 / GGUF / checkpoint） ----
-# 例外：ml/yolo/weights/best.pt 为最终交付的 nano 权重（几 MB），允许入库
+# ---- Large model files: weights, GGUF and checkpoints ----
+# Exception: the delivered nano weights ml/yolo/weights/best.pt may be committed.
 *.pt
 *.pth
 *.ckpt
@@ -32,7 +32,7 @@ agent/runtime/
 !ml/yolo/weights/best.pt
 !ml/yolo/weights/.gitkeep
 
-# ---- 下载缓存（check_c0 下载的官方权重等） ----
+# ---- Download caches, including official weights fetched by check_c0 ----
 .cache/
 
 # ---- Python ----
@@ -46,7 +46,7 @@ __pycache__/
 # ---- Jupyter ----
 .ipynb_checkpoints/
 
-# ---- IDE / 系统 ----
+# ---- IDE and operating system ----
 .idea/
 .vscode/
 .DS_Store

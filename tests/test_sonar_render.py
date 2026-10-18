@@ -1,8 +1,9 @@
-"""C1 声呐渲染器测试（任务书 C1 验收的 pytest 部分）。
+"""C1 sonar-renderer tests (the pytest portion of taskbook C1 acceptance).
 
-运行：.venv/bin/python -m pytest tests -q
-覆盖：契约签名/确定性/全局随机状态/扇形几何/声影朝向/标注有效性/
-YOLO 归一化范围/负样本空标签/数据集 yaml 无绝对路径/各类形态与出界。
+Run: .venv/bin/python -m pytest tests -q
+Covers: contract signature, determinism, global RNG, fan geometry, shadow direction,
+valid annotations, normalized YOLO bounds, empty negative labels, relative dataset
+YAML paths, class shapes and out-of-frame handling.
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ import pytest
 from ml.sonar.gen_dataset import main as gen_main
 from ml.sonar.render import CLASS_NAMES, render_ping
 
-SIZE = 320  # 测试用小图加速
+SIZE = 320  # Smaller test images for speed.
 
 
 def _uuv(rng_m: float = 80.0, brg: float = 0.0, L: float = 4.0, W: float = 1.6,
@@ -24,7 +25,7 @@ def _uuv(rng_m: float = 80.0, brg: float = 0.0, L: float = 4.0, W: float = 1.6,
                 width_m=W, aspect_deg=asp)
 
 
-# ---------------------------------------------------------------- 契约与确定性
+# ---------------------------------------------------------------- Contract and determinism
 
 def test_signature_and_seed_determinism():
     targets = [_uuv(), dict(cls="fish_school", range_m=60.0, bearing_deg=10.0,
@@ -56,27 +57,27 @@ def test_bad_inputs_raise():
                           length_m=1.0, width_m=1.0, aspect_deg=0.0)])
 
 
-# ---------------------------------------------------------------- 扇形几何
+# ---------------------------------------------------------------- Fan geometry
 
 def test_sector_geometry_apex_bottom_outside_black():
     img, _ = render_ping([], seed=0, size=SIZE, fov_deg=120.0, noise=0.4)
-    # 扇形外为黑：四个角 + 顶边中点（120° 时顶边整体在量程外）
+    # Outside is black: four corners and top midpoint (at 120 degrees, top is out of range).
     for y, x in [(0, 0), (0, SIZE - 1), (SIZE - 1, 0), (SIZE - 1, SIZE - 1), (0, SIZE // 2)]:
         assert img[y, x] == 0, f"({y},{x}) 应为扇形外黑像素"
-    # 顶点在底部中央：底行仅中心附近属扇形内，中距中心区域应有回波内容
+    # Apex at bottom center: only nearby bottom pixels are inside; midrange center has returns.
     assert img[SIZE // 2, SIZE // 2 - 20 : SIZE // 2 + 20].max() > 0
 
 
-# ---------------------------------------------------------------- 声影与方位
+# ---------------------------------------------------------------- Shadows and bearing
 
 def test_uuv_shadow_on_far_side():
-    # 宽目标放大影子条带；低噪背景；对比影子区与近侧同形状区
+    # Wide target enlarges the shadow band; low noise; compare with matching nearer region.
     img, annos = render_ping(
         [_uuv(rng_m=90.0, L=4.0, W=8.0, asp=0.0)],
         max_range_m=120.0, noise=0.05, seed=7, size=SIZE,
     )
     assert annos, "uuv 应产出标注"
-    # r_max_px = min(319, 159/sin60°) ≈ 183.6；影子 92–104m → y∈[160,178]，近侧 76–88m → y∈[184,203]
+    # r_max_px=min(319,159/sin60deg)≈183.6; shadow92–104m→y[160,178], near76–88m→y[184,203].
     shadow = img[162:176, 150:170].mean()
     near = img[186:200, 150:170].mean()
     assert shadow < near * 0.6, f"声影区({shadow:.1f})应显著暗于近侧同形状区({near:.1f})"
@@ -91,7 +92,7 @@ def test_bearing_sign_maps_to_image_side():
     assert cx_l < SIZE / 2, "负 bearing（左）目标框中心应在图像左半"
 
 
-# ---------------------------------------------------------------- 标注有效性
+# ---------------------------------------------------------------- Annotation validity
 
 def test_all_classes_render_with_valid_boxes():
     targets = [
@@ -108,12 +109,12 @@ def test_all_classes_render_with_valid_boxes():
 
 
 def test_coverage_center_edge_near_partial_out_of_view():
-    """中央 / 视场边缘 / 近距离 / 部分出界四类情况，框必须有效。"""
+    """Boxes stay valid at center, FOV edge, short range and partially outside the frame."""
     targets = [
-        dict(cls="uuv", range_m=75.0, bearing_deg=0.0, length_m=4.0, width_m=1.8, aspect_deg=0.0),      # 中央
-        dict(cls="uuv", range_m=100.0, bearing_deg=55.0, length_m=5.0, width_m=2.0, aspect_deg=30.0),   # 视场边缘（部分出界）
-        dict(cls="debris", range_m=16.0, bearing_deg=-10.0, length_m=8.0, width_m=3.0, aspect_deg=90.0),  # 近距离
-        dict(cls="uuv", range_m=100.0, bearing_deg=-55.0, length_m=5.0, width_m=2.0, aspect_deg=-30.0),  # 反侧边缘
+        dict(cls="uuv", range_m=75.0, bearing_deg=0.0, length_m=4.0, width_m=1.8, aspect_deg=0.0),      # Center.
+        dict(cls="uuv", range_m=100.0, bearing_deg=55.0, length_m=5.0, width_m=2.0, aspect_deg=30.0),   # FOV edge, partly outside.
+        dict(cls="debris", range_m=16.0, bearing_deg=-10.0, length_m=8.0, width_m=3.0, aspect_deg=90.0),  # Short range.
+        dict(cls="uuv", range_m=100.0, bearing_deg=-55.0, length_m=5.0, width_m=2.0, aspect_deg=-30.0),  # Opposite edge.
     ]
     _, annos = render_ping(targets, max_range_m=150.0, seed=9, size=640)
     assert len(annos) >= 3, f"四类情况多数应保留标注: {annos}"
@@ -129,7 +130,7 @@ def test_tiny_distant_target_dropped_by_area_filter():
     assert annos == [], "面积 < 16 px 的框必须丢弃"
 
 
-# ---------------------------------------------------------------- 数据集生成
+# ---------------------------------------------------------------- Dataset generation
 
 def test_gen_dataset_labels_and_layout(tmp_path):
     n = 40
@@ -156,13 +157,13 @@ def test_gen_dataset_labels_and_layout(tmp_path):
             assert w > 0 and h > 0
     assert empties >= 1, "10% 负样本应产生空标签文件（seed=0, n=40 固定结果）"
 
-    # 划分比例 ~85/15（±1 张容差）
+    # Split ratio about85/15, with one-image tolerance.
     n_val = sum(1 for p_ in imgs if p_.parent.name == "val")
     assert abs(n_val - round(n * 0.15)) <= 1
 
 
 def test_gen_dataset_rerun_cleans_stale_files(tmp_path):
-    """重跑（不同 n/划分）不得留下旧 split 的残留文件。"""
+    """Reruns with different n/splits must not leave stale files from old splits."""
     out = tmp_path / "ds"
     gen_main(["--n", "10", "--out", str(out), "--seed", "0",
               "--size", "320", "--yaml", str(tmp_path / "a.yaml")])
@@ -182,18 +183,18 @@ def test_gen_dataset_yaml_relative_and_names(tmp_path):
     assert "/Users/" not in text, "yaml 不得包含 macOS 绝对路径"
     path_line = next(l for l in text.splitlines() if l.startswith("path:"))
     assert not path_line.split(":", 1)[1].strip().startswith("/"), "path 必须是相对路径"
-    # 类别顺序：0 uuv，1 fish_school，2 debris，3 marine_mammal
+    # Class order: 0 uuv, 1 fish_school, 2 debris, 3 marine_mammal.
     names_block = text.split("names:", 1)[1]
     order = [line.strip() for line in names_block.splitlines() if line.strip()]
     assert order == ["0: uuv", "1: fish_school", "2: debris", "3: marine_mammal"]
 
 
 def test_render_seed_matches_contract_docstring_roundtrip():
-    """回归：标注 bbox 与图像同源——把 bbox 中心反算回像素，验证框落在非零区域附近。"""
+    """Regression: map bbox center to pixels and verify the box covers nonzero echoes."""
     img, annos = render_ping([_uuv(rng_m=70.0, L=4.0, W=2.0)], seed=21, size=640)
     assert annos
     x1, y1, x2, y2 = annos[0]["bbox"]
     patch = img[y1 : y2 + 1, x1 : x2 + 1]
     assert patch.max() > 0, "标注框内应有回波（框覆盖回波）"
-    # 框外上方（更远一侧为声影方向，取框正上方 5px 带内的均值不高于框内）
+    # Farther side is the shadow: mean of the5px band directly above is no brighter than inside.
     assert img[max(0, y1 - 6) : y1, x1:x2].mean() <= patch.mean() + 5

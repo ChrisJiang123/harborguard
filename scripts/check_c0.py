@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
-"""HarborGuard C0 环境自检（任务书 C · 步骤 C0 验收）。
-
-用法（仓库根目录）::
-
-    .venv/bin/python scripts/check_c0.py
-
-逐项打印 PASS / FAIL / PENDING 与摘要。
-- FAIL：环境必需项损坏，必须修复。
-- PENDING：依赖外部条件（API key、GPU、拔网线等），如实标注待完成，不假报通过。
-退出码：0 = 无 FAIL；1 = 存在 FAIL。
+"""HarborGuard C0 environment self-check. Run .venv/bin/python scripts/check_c0.py from the repository
+root. Report PASS/FAIL/PENDING per item and summary. FAIL means a required component is broken.
+Missing external API/GPU/physical-network evidence stays PENDING. Exit0 means no FAIL; exit1 means
+at least one FAIL.
 """
+
 
 from __future__ import annotations
 
@@ -68,14 +63,14 @@ def summary() -> int:
     n_fail = sum(1 for _, s, _ in _results if s == FAIL)
     n_pend = sum(1 for _, s, _ in _results if s == PENDING)
     print("\n" + "=" * 64)
-    print(f"C0 自检汇总: {n_pass} PASS, {n_fail} FAIL, {n_pend} PENDING(待完成)")
+    print(f"C0 self-check: {n_pass} PASS, {n_fail} FAIL, {n_pend} PENDING")
     if n_fail:
-        print("FAIL 项:")
+        print("FAIL items:")
         for name, s, detail in _results:
             if s == FAIL:
                 print(f"  - {name}: {detail}")
     if n_pend:
-        print("PENDING 项（外部条件，待完成）:")
+        print("PENDING items (external prerequisites):")
         for name, s, detail in _results:
             if s == PENDING:
                 print(f"  - {name}: {detail}")
@@ -84,17 +79,17 @@ def summary() -> int:
 
 
 def main() -> int:
-    # 1. Python 版本 ------------------------------------------------------
+    # 1. Python version.
     v = sys.version_info
     if (v.major, v.minor) >= (3, 11):
         record("python", PASS, f"{sys.version.split()[0]} ({sys.executable})")
     else:
-        record("python", FAIL, f"{sys.version.split()[0]}，需要 >= 3.11（任务书 C0）")
+        record("python", FAIL, f"{sys.version.split()[0]}; requires >=3.11 (C0)")
 
-    # 2. .env 显式加载（要求 6：不能只创建文件却不读取） -------------------
+    # 2. Explicit dotenv loading, not just creating the file.
     env_file = ROOT / ".env"
     before = set(os.environ)
-    from agent.config import ENV_PATH, get_settings  # noqa: E402  (导入即 load_dotenv)
+    from agent.config import ENV_PATH, get_settings  # noqa: E402 - Import explicitly loads dotenv.
 
     after = set(os.environ)
     injected = sorted(after - before)
@@ -109,14 +104,14 @@ def main() -> int:
         record(
             "env.load",
             PASS,
-            f"{ENV_PATH} 已被 agent/config.py 显式加载；"
-            f"从 .env 注入 {len(injected)} 项 {injected}；"
-            f"进程环境优先覆盖 {len(overridden)} 项 {overridden}",
+            f"{ENV_PATH} explicitly loaded by agent/config.py; "
+            f"injected {len(injected)} dotenv values {injected}; "
+            f"process environment overrides {len(overridden)} values {overridden}",
         )
     elif env_file.exists():
-        record("env.load", PENDING, ".env 存在但没有任何可读键值")
+        record("env.load", PENDING, ".env exists but has no readable key/value pairs")
     else:
-        record("env.load", FAIL, f".env 不存在（模板见 .env.example），config 只用了默认值")
+        record("env.load", FAIL, f".env is missing (see .env.example); configuration used defaults only")
 
     cfg = get_settings()
     record(
@@ -125,10 +120,10 @@ def main() -> int:
         f"ANTHROPIC_MODEL={cfg.anthropic_model} | BACKEND={cfg.backend_base_url} "
         f"(ws={cfg.backend_ws_url}) | AGENT={cfg.agent_host}:{cfg.agent_port} | "
         f"OLLAMA={cfg.ollama_base_url} model={cfg.ollama_model} "
-        f"(云端超时 {cfg.anthropic_timeout_s}s / 本地 {cfg.ollama_timeout_s}s)",
+        f"(cloud timeout {cfg.anthropic_timeout_s}s / local {cfg.ollama_timeout_s}s)",
     )
 
-    # 3. 核心依赖导入 ------------------------------------------------------
+    # 3. Core dependency imports.
     mods = [
         "numpy", "cv2", "yaml", "matplotlib", "fastapi", "uvicorn",
         "httpx", "websockets", "pydantic", "anthropic", "openai",
@@ -144,7 +139,7 @@ def main() -> int:
         except Exception as e:  # noqa: BLE001
             missing.append(f"{m} ({e.__class__.__name__})")
     if missing:
-        record("deps.import", FAIL, "导入失败: " + ", ".join(missing))
+        record("deps.import", FAIL, "Import failed: " + ", ".join(missing))
     else:
         record("deps.import", PASS, " ".join(versions))
 
@@ -154,11 +149,11 @@ def main() -> int:
         if int(pydantic.VERSION.split(".")[0]) >= 2:
             record("deps.pydantic_v2", PASS, f"pydantic {pydantic.VERSION}")
         else:
-            record("deps.pydantic_v2", FAIL, f"pydantic {pydantic.VERSION}，契约要求 >= 2")
+            record("deps.pydantic_v2", FAIL, f"pydantic {pydantic.VERSION}; contract requires >=2")
     except Exception as e:  # noqa: BLE001
         record("deps.pydantic_v2", FAIL, str(e))
 
-    # 4. YOLO 权重加载（任务书命令：YOLO('yolo26n.pt').info()） -------------
+    # 4. YOLO weight loading.
     try:
         from ultralytics import YOLO
 
@@ -174,18 +169,18 @@ def main() -> int:
             except Exception as e:  # noqa: BLE001
                 if w == "yolo11n.pt":
                     raise
-                print(f"      (yolo26n.pt 不可用: {e.__class__.__name__}，尝试 yolo11n.pt 兜底)")
+                print(f"      (yolo26n.pt unavailable: {e.__class__.__name__}; trying yolo11n.pt fallback)")
         if loaded is not None and used:
-            record("yolo.weights", PASS, f"{used} 已下载到 .cache/ 并成功加载")
+            record("yolo.weights", PASS, f"{used} downloaded into .cache/ and loaded")
         else:
-            record("yolo.weights", FAIL, "未加载任何权重")
+            record("yolo.weights", FAIL, "No weights loaded")
     except Exception as e:  # noqa: BLE001
         record("yolo.weights", FAIL, f"{e.__class__.__name__}: {e}")
 
-    # 5. Ollama CLI + 服务 -------------------------------------------------
+    # 5. Ollama CLI and service.
     ollama_bin = shutil.which("ollama")
     if not ollama_bin:
-        record("ollama.cli", FAIL, "ollama 不在 PATH（brew install ollama）")
+        record("ollama.cli", FAIL, "ollama is not on PATH (brew install ollama)")
     else:
         ver = subprocess.run([ollama_bin, "--version"], capture_output=True, text=True)
         record("ollama.cli", PASS, (ver.stdout or ver.stderr).strip())
@@ -197,21 +192,21 @@ def main() -> int:
     try:
         r = httpx.get(tags_url, timeout=3)
         models = [m.get("name", "") for m in r.json().get("models", [])]
-        record("ollama.server", PASS, f"{tags_url} -> 模型: {models or '（空，先 ollama pull）'}")
+        record("ollama.server", PASS, f"{tags_url} -> Models: {models or 'empty; run ollama pull first'}")
     except Exception as e:  # noqa: BLE001
-        record("ollama.server", FAIL, f"{e.__class__.__name__}: 无法连接 {tags_url}（brew services start ollama）")
+        record("ollama.server", FAIL, f"{e.__class__.__name__}: cannot connect to {tags_url} (brew services start ollama)")
 
-    # 6. 与运行时同一原生接口、模型和format；这里只验连通/JSON，不冒充事实验收。
+    # 6. Same native adapter/model/format as runtime; connectivity/JSON only, not facts.
     if models:
         try:
             target, fmt, text = asyncio.run(configured_local_chat(cfg, models))
-            record("ollama.chat", PASS, f"model={target} format={fmt} JSON回复: {text[:120]!r}（连通性检查）")
+            record("ollama.chat", PASS, f"model={target} format={fmt} JSON reply: {text[:120]!r} (connectivity check)")
         except Exception as e:  # noqa: BLE001
             record("ollama.chat", FAIL, f"{e.__class__.__name__}: {e}")
     else:
-        record("ollama.chat", PENDING, f"无本地模型；需要配置的 {cfg.ollama_model}（自检不下载模型）")
+        record("ollama.chat", PENDING, f"Configured local model {cfg.ollama_model} is unavailable (self-check does not download it)")
 
-    # 7. 云端 LLM 一次真实调用 --------------------------------------------
+    # 7. One actual cloud LLM call.
     has_cred = bool(cfg.anthropic_api_key or cfg.anthropic_auth_token)
     sdk_env_cred = bool(
         os.environ.get("ANTHROPIC_API_KEY")
@@ -219,18 +214,18 @@ def main() -> int:
     )
     if cfg.cloud_provider != "anthropic":
         record("cloud.llm", PENDING,
-               f"CLOUD_PROVIDER={cfg.cloud_provider}; 不探测旧Anthropic适配，不发生收费调用")
+               f"CLOUD_PROVIDER={cfg.cloud_provider}; legacy Anthropic adapter is not probed; no billable call")
     elif not (has_cred or sdk_env_cred):
         record(
             "cloud.llm",
             PENDING,
-            "未配置 ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN，跳过真实调用（待完成，不假报通过）",
+            "ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN unset; actual call skipped (PENDING, not PASS)",
         )
     else:
         try:
             import anthropic
 
-            src = "config(.env)" if has_cred else "进程环境变量"
+            src = "config(.env)" if has_cred else "process environment"
             kwargs: dict = {"timeout": cfg.anthropic_timeout_s, "max_retries": 0}
             if cfg.anthropic_api_key:
                 kwargs["api_key"] = cfg.anthropic_api_key
@@ -239,9 +234,9 @@ def main() -> int:
             if cfg.anthropic_base_url:
                 kwargs["base_url"] = cfg.anthropic_base_url
             client = anthropic.Anthropic(**kwargs)
-            # smoke test 明确关闭 thinking：Sonnet 5 默认 adaptive thinking，
-            # thinking 块会消耗输出预算（代理下即便 disabled 也可能返回空 thinking 块），
-            # 因此 max_tokens 给足余量（C3 正式调用时再按需处理 thinking）
+            # Smoke test explicitly disables thinking; Sonnet5 defaults to adaptive thinking.
+            # Reasoning blocks consume output budget, including empty proxy blocks;
+            # allow sufficient max_tokens and handle runtime thinking separately.
             resp = client.messages.create(
                 model=cfg.anthropic_model,
                 max_tokens=1024,
@@ -255,20 +250,20 @@ def main() -> int:
                 record(
                     "cloud.llm",
                     PENDING,
-                    f"凭据有效（HTTP 200，model={resp.model}，stop_reason={resp.stop_reason}）"
-                    f"但未取到文本回复，待复核",
+                    f"Credentials accepted (HTTP200, model={resp.model}, stop_reason={resp.stop_reason}) "
+                    f"but no text response was obtained; review required",
                 )
             else:
                 record(
                     "cloud.llm",
                     PASS,
-                    f"凭据来源={src}；model={resp.model} 实际返回 {first_text[:40]!r}",
+                    f"credential_source={src}; model={resp.model} returned {first_text[:40]!r}",
                 )
         except Exception as e:  # noqa: BLE001
             record(
                 "cloud.llm",
                 PENDING,
-                f"调用失败（待完成，不假报通过）: {e.__class__.__name__}: {e}",
+                f"Call failed (PENDING, not PASS): {e.__class__.__name__}: {e}",
             )
 
     return summary()

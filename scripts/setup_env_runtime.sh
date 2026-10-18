@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ============================================================================
-# 环境一：运行环境 .venv（MacBook 开发与演示主机）
-# 用途：Agent 服务 + render_ping + SonarDetector CPU 推理
-# 优先用 uv（本 MacBook 的 macOS 26 上 brew Python 的 pip/truststore 会崩），
-# 其他机器回落到标准 python3.11 + pip。
+# Runtime .venv for the MacBook development/demo host.
+# Agent, render_ping and SonarDetector CPU inference.
+# Prefer uv: Homebrew Python pip/truststore failed on the recorded macOS26 host.
+# Other machines fall back to standard Python3.11 and pip.
 # ============================================================================
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -23,12 +23,12 @@ else
   ./.venv/bin/pip install -r requirements-runtime.txt
 fi
 
-./.venv/bin/python -c "import fastapi, ultralytics, anthropic, openai; print('[runtime] 依赖安装完成')"
+./.venv/bin/python -c "import fastapi, ultralytics, anthropic, openai; print('[runtime] Dependencies installed')"
 
-# 生成 .env（若不存在）
+# Create .env only when absent.
 if [ ! -f .env ]; then
   cp .env.example .env
-  echo "[runtime] 已从 .env.example 生成 .env，请编辑填写密钥（不会提交）"
+  echo "[runtime] Created .env from .env.example; fill credentials locally (never commit it)"
 fi
 
-echo "[runtime] 自检：./.venv/bin/python scripts/check_c0.py"
+echo "[runtime] Self-check: ./.venv/bin/python scripts/check_c0.py"
