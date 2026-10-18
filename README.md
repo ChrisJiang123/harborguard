@@ -20,7 +20,7 @@ The frontend displays live state, detection images, recommendations, decisions a
 
 | Evidence | Exact scope |
 | --- | --- |
-| Latest official main observed while preparing this README | `d46e4793c39bf45f19719962026f82ff3e546168`: includes B fix #16, report #17 and A's 3D update #18. This README task did not merge them or rerun complete acceptance on that SHA. |
+| Latest official main checked out for this README | `e9ae07fbf1e233d83c983803b3992b165eae163c`: includes B fix #16, report #17, A's 3D update #18, and C's subsequent #19 language/configuration fixes. These upstream changes were fetched into an isolated worktree; this documentation task did not merge them into main or rerun complete system acceptance on that SHA. |
 | Last complete Windows acceptance run | Main `a841bf9a70d8bf8237b9e03763852a34bed10368`: **232 Python tests passed, 2 skipped**; frontend build, lint and A1-A6 passed; approximately **4.98 Hz** state delivery. |
 | Actual browser demonstration | One real A/B/C **2D** flow in **4 minutes 46 seconds** on a841bf9. 3D was unavailable in that test browser. Screenshots were saved; this is not a recorded video. |
 | B options-publication fix | Tested source `e1b3305`, report commit `390687a`: **237 passed, 2 skipped**, with actual browser/Agent metric consistency and Reject checks. Subsequently merged in #16; this does not automatically validate every later frontend change. |
@@ -28,7 +28,7 @@ The frontend displays live state, detection images, recommendations, decisions a
 
 The two skipped tests lacked a separate COCO smoke-test weight; the delivered sonar weight was actually exercised. The original 500-simulation-second security deadline was missed at 505 seconds. Four frontend history/recovery boundaries remain open in the last audited recovery code. The 20 ms target is best effort; correctness and 5 Hz delivery take priority.
 
-See the [full report](docs/final-delivery-20261017.md), [A recovery handoff](backend/docs/A-final-recovery-handoff.md), [B publication fix](https://github.com/ChrisJiang123/harborguard/blob/390687ab227014201fc122fdab657f0569e3ecb6/backend/docs/options-publication-fix.md) and [A's subsequent 3D evidence](https://github.com/ChrisJiang123/harborguard/blob/d46e4793c39bf45f19719962026f82ff3e546168/docs/3d-shoreline-realism/README.md). Earlier reports retain their original timestamps and scope.
+See the [full report](docs/final-delivery-20261017.md), [A recovery handoff](backend/docs/A-final-recovery-handoff.md), [B publication fix](backend/docs/options-publication-fix.md), [A's subsequent 3D evidence](docs/3d-shoreline-realism/README.md) and [C's isolated retest](docs/C-acceptance-20261017-1743-retest-20261017-1911.md). Earlier reports retain their original timestamps and scope.
 
 ## Architecture and contracts
 
@@ -112,6 +112,7 @@ export BACKEND_BASE_URL=http://127.0.0.1:8000
 export BACKEND_WS_URL=ws://127.0.0.1:8000/ws
 export AGENT_HOST=127.0.0.1
 export AGENT_PORT=8001
+export AGENT_LANG=en
 export CLOUD_PROVIDER=disabled
 export OLLAMA_BASE_URL=http://127.0.0.1:9/v1
 export OLLAMA_MODEL=qwen3:1.7b
@@ -123,6 +124,8 @@ python -m agent.main
 For PowerShell, set the same variables with `$env:NAME = 'value'`, then run `.venv/Scripts/python.exe -m agent.main`. This profile deliberately uses an unavailable local-model endpoint to reach the deterministic template promptly; a local warmup failure is expected. No cloud credential, GPU or running Ollama instance is required for this profile. Verify an actual recommendation has `model=template`; startup health may initially report `idle`.
 
 The Agent explicitly loads the root `.env` without overriding existing process variables. `.env.example` documents optional cloud/local settings, but it is not a credential and its defaults are not this offline profile. Never print or commit `.env`, tokens or keys. Use the [Mac runbook](docs/mac-demo-runbook.md) only when deliberately selecting the separately documented OpenRouter/Ollama deployment.
+
+The latest C code honors the configured local model and defaults `AGENT_LANG` to `en`. Chinese output in English mode is rejected and may fall back to the English template within the existing budget. C's isolated retest reported 10 English recommendations, all template and none local; it did not establish English LoRA quality. Frozen Chinese test50/confirm60 scores do not measure English performance.
 
 ### Start A
 
@@ -203,7 +206,7 @@ For full module details use [Agent documentation](agent/README.md), [LoRA docume
 
 - **Federal funding:** proposed **NSF SBIR Phase I** for real-echo validation and calibrated uncertainty, subject to suitability, applicant eligibility, Project Pitch and invitation. No grant, invitation or eligibility determination is claimed. See [NSF](https://www.nsf.gov/funding/opportunities/small-business-innovation-research-small-business-technology) and [eligibility](https://seedfund.nsf.gov/solicitation-eligibility/).
 - **Global application:** a proposed Los Angeles -> Shanghai/Yangshan adaptation. Authorized local maps, depth/tidal references, acoustic calibration, language, data controls and approval procedures must be validated. No overseas partner, deployment or field result is claimed.
-- **Poster:** an **A3 portrait PDF** has been prepared for the organizer's Drive-link submission workflow. File preparation is separate from uploading it, checking viewer access and pasting its Drive link into Devpost.
+- **Poster:** an **A3 portrait PDF with A's recorded 3D overview** has been prepared for the organizer's Drive-link submission workflow. The screenshot is labeled as replay evidence and is separate from the older system metrics. File preparation is separate from uploading it, checking viewer access and pasting its Drive link into Devpost.
 
 Detailed [Twist responses](docs/twist-responses-en.md) and the [English project story](docs/devpost-story-en.md) are available for team review. A pitch deck, playable video, actual teammate confirmations and final submission receipt remain separate deliverables; this repository does not prove their completion.
 

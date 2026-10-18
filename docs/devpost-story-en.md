@@ -39,7 +39,7 @@ The observed Recovery result was 6 clear, 3 blocked and 3 unsurveyed zones. The 
 
 The most important lesson was that coverage and certainty are different. We preserved original model-failure cases and added conservative unresolved-state handling rather than hide wrong classifications with more favorable data.
 
-Current observations and AIS are synthetic or simulated. Real-ocean performance and operational safety are not certified. Some frontend recovery races remain; 3D was unavailable in the acceptance browser. The B patch for metric-only response-option broadcasts was separately tested (237 passed, 2 skipped) and has subsequently been merged in PR #16. Official main observed during this document update is d46e479, which also includes A's later 3D update #18; the old full-system test totals are not automatically acceptance of that newer combination. The Windows run did not validate cloud/local/LoRA serving; C's separate synthetic evaluations retain their own provenance.
+Current observations and AIS are synthetic or simulated. Real-ocean performance and operational safety are not certified. Some frontend recovery races remain; 3D was unavailable in the earlier Windows acceptance browser. A has supplied separately recorded 3D browser evidence, now used in the poster with its replay label preserved. The B patch for metric-only response-option broadcasts was separately tested (237 passed, 2 skipped) and merged in PR #16. Official main checked out during this update is e9ae07f, including A's #18 and C's #19 language/configuration updates. Older full-system test totals are not automatically acceptance of the newer combination. C's new English mode can fall back to English templates when model output remains Chinese; it does not prove English LoRA quality. Separate model evaluations retain their own provenance.
 
 ## Dual-use fit
 
@@ -55,7 +55,7 @@ Our adaptation example is **Shanghai/Yangshan**, as a proposal rather than a dep
 
 ## Twist 3 - Poster
 
-Our A3 portrait poster brings together an actual prototype screenshot, the workflow, the proposed funding route, the Shanghai adaptation plan, measured evidence and a GitHub QR code. It is supplied as a print-ready PDF, with a 300 dpi PNG companion. The organizer requires a Drive link in Devpost: uploading the PDF, checking viewer access and pasting that real link are separate steps, not yet performed by this task.
+Our A3 portrait poster uses A's actual recorded **3D overview**, together with the workflow, proposed funding route, Shanghai adaptation plan, separately dated system measurements and a GitHub QR code. The screenshot remains labeled REPLAY; it is not presented as a new LIVE capture or as proof of current all-service acceptance. The poster is a print-ready PDF, with a 300 dpi PNG companion. The organizer requires a Drive link in Devpost: uploading the PDF, checking viewer access and pasting that real link are separate steps, not yet performed by this task.
 
 ## Responsible use
 
@@ -72,7 +72,8 @@ Before final submission, the team must confirm this list against its own contrib
 
 - [GitHub repository](https://github.com/ChrisJiang123/harborguard)
 - [Acceptance report, pinned report commit](https://github.com/ChrisJiang123/harborguard/blob/a4d40277847519f614d54a7d2eae519cae1b1ff6/docs/final-delivery-20261017.md)
-- [B metric-broadcast candidate branch](https://github.com/ChrisJiang123/harborguard/tree/codex/harborguard-options-publication)
+- [Merged B metric-broadcast fix](https://github.com/ChrisJiang123/harborguard/pull/16)
+- [A's recorded 3D evidence](https://github.com/ChrisJiang123/harborguard/blob/e9ae07fbf1e233d83c983803b3992b165eae163c/docs/3d-shoreline-realism/README.md)
 - [NSF program](https://www.nsf.gov/funding/opportunities/small-business-innovation-research-small-business-technology), [eligibility](https://seedfund.nsf.gov/solicitation-eligibility/), [Project Pitch](https://seedfund.nsf.gov/apply/project-pitch-information/)
 - [Shanghai context](https://english.shanghai.gov.cn/en-Latest-WhatsNew/20260814/f4427a05be154fc4957a5f62d67d6f2e.html)
 
