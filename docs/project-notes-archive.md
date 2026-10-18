@@ -1,8 +1,8 @@
-<!-- English translation of the historical README from a4d4027. Legacy filename retained for stable links. -->
+<!-- English translation of the historical README from a4d4027. Renamed from README.zh-CN.md. -->
 
 # HarborGuard C: historical environment and acceptance notes
 
-This file is an **English translation of the archived Chinese README** from commit `a4d4027`. Its legacy filename is retained for incoming links. Historical claims below retain their original scope and dates; they do not supersede the [current README](../README.md), latest acceptance reports or current main SHA.
+This file is an **English translation of the archived Chinese README** from commit `a4d4027`. It was previously named `README.zh-CN.md`; current repository links now use `project-notes-archive.md`. Links pinned to historical commits still resolve to the historical name. Historical claims below retain their original scope and dates; they do not supersede the [current README](../README.md), latest acceptance reports or current main SHA.
 
 The 2026-10-17 full-system delivery check used main `a841bf9`: [results/limits](final-delivery-20261017.md), [five-minute runbook](demo-runbook.md), [Devpost draft](devpost-submission-draft.md). That Windows run used templates and completed a 2D browser loop in 4m46s; recovery boundaries and 3D still had failing/pending items. C-team measurements below are distinct from that combined run.
 

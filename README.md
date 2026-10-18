@@ -6,7 +6,7 @@ A port-security and disaster-recovery digital-twin prototype built for the Innov
 
 The current demonstration uses **synthetic acoustic observations and simulated AIS**. It is not certified for real-world navigation, underwater surveillance or port reopening.
 
-[Demo runbook](docs/demo-runbook.md) · [Acceptance evidence](docs/final-delivery-20261017.md) · [Project story](docs/devpost-story-en.md) · [Three twists](docs/twist-responses-en.md) · [Historical documentation archive](docs/README.zh-CN.md)
+[Demo runbook](docs/demo-runbook.md) · [Acceptance evidence](docs/final-delivery-20261017.md) · [Project story](docs/devpost-story-en.md) · [Three twists](docs/twist-responses-en.md) · [Historical documentation archive](docs/project-notes-archive.md)
 
 ## What it does
 
@@ -200,7 +200,7 @@ C4's 501 input records split into 493 training records (450 synthetic + 43 captu
 
 Historical C0 automatic checks and GPU checks do not replace physical Wi-Fi loss, projector or cross-device video playback. The earlier macOS 26/Homebrew Python issue motivated `scripts/setup_env_runtime.sh` preferring uv; this is a machine-specific workaround, not a reason to rebuild a working environment. Keep runtime, YOLO training and LoRA training environments separate. No new training is needed for the demo.
 
-For full module details use [Agent documentation](agent/README.md), [LoRA documentation](ml/lora/README.md), [historical README archive, now in English](docs/README.zh-CN.md) and the source audit. The Agent validates structure, IDs and selected deterministic facts, but cannot certify every free-text assertion; invalid output may retry or fall back. It never changes alert levels or calls the decision endpoint itself.
+For full module details use [Agent documentation](agent/README.md), [LoRA documentation](ml/lora/README.md), [historical README archive, now in English](docs/project-notes-archive.md) and the source audit. The Agent validates structure, IDs and selected deterministic facts, but cannot certify every free-text assertion; invalid output may retry or fall back. It never changes alert levels or calls the decision endpoint itself.
 
 ## Three twists and future work
 

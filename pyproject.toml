@@ -20,6 +20,8 @@ build-backend = "setuptools.build_meta"
 include = ["backend*"]
 
 [tool.pytest.ini_options]
+# Default offline suites. Full acceptance also includes the root tests directory:
+# python -m pytest backend/tests agent/tests tests -q
 testpaths = ["backend/tests", "agent/tests"]
 pythonpath = ["."]
 
