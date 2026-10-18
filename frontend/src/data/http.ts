@@ -5,9 +5,11 @@ export class APIError extends Error {
   constructor(message: string, status = 0) { super(message); this.name = 'APIError'; this.status = status }
 }
 
-export async function requestJSON<T>(url: string, init: RequestInit = {}): Promise<T> {
+export const DEFAULT_TIMEOUT_MS = 8000
+
+export async function requestJSON<T>(url: string, init: RequestInit = {}, timeoutMs: number = DEFAULT_TIMEOUT_MS): Promise<T> {
   try {
-    const signal = init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000)
+    const signal = init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs)
     const headers = new Headers(init.headers)
     headers.set('Accept', 'application/json')
     if (init.body !== undefined) headers.set('Content-Type', 'application/json')
