@@ -15,6 +15,30 @@ export function surveyEdgeOpacity(depths: Float32Array, columns: number, rows: n
   return opacity
 }
 
+/** Continuous distance-field coverage in metre space; display alpha only.
+ * Leave the legacy one-cell helper above for its source-preservation regression.
+ */
+export function surveyEdgeFade(depths: Float32Array, columns: number, rows: number, dx: number, dz: number, band = 24): Float32Array {
+  const distances = new Float32Array(depths.length)
+  for (let i = 0; i < depths.length; i++) distances[i] = Number.isFinite(depths[i]) ? band : 0
+  const diagonal = Math.hypot(dx, dz)
+  for (let row = 0; row < rows; row++) for (let col = 0; col < columns; col++) {
+    const i = row*columns+col
+    if (col > 0) distances[i] = Math.min(distances[i]!, distances[i-1]!+dx)
+    if (row > 0) distances[i] = Math.min(distances[i]!, distances[i-columns]!+dz)
+    if (row > 0 && col > 0) distances[i] = Math.min(distances[i]!, distances[i-columns-1]!+diagonal)
+    if (row > 0 && col+1 < columns) distances[i] = Math.min(distances[i]!, distances[i-columns+1]!+diagonal)
+  }
+  for (let row = rows-1; row >= 0; row--) for (let col = columns-1; col >= 0; col--) {
+    const i = row*columns+col
+    if (col+1 < columns) distances[i] = Math.min(distances[i]!, distances[i+1]!+dx)
+    if (row+1 < rows) distances[i] = Math.min(distances[i]!, distances[i+columns]!+dz)
+    if (row+1 < rows && col+1 < columns) distances[i] = Math.min(distances[i]!, distances[i+columns+1]!+diagonal)
+    if (row+1 < rows && col > 0) distances[i] = Math.min(distances[i]!, distances[i+columns-1]!+diagonal)
+  }
+  return distances.map(distance => { const t = Math.min(1, distance/band); return t*t*(3-2*t) })
+}
+
 /** Conservative display tessellation, not new soundings. Never bridges NoData. */
 export function buildSeabedMeshData(grid: BathymetryGrid, refinement: 1 | 2 = 2, excludeBounds?: BathymetryBounds) {
   const { width, height, bounds, nodata_value } = grid.metadata

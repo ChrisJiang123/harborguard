@@ -10,7 +10,12 @@ const { parseLocalBase } = require(path.join(root, 'data/localBase.js'))
 const { updateLine } = require(path.join(root, 'view3d/lineBuffers.js'))
 const { buildBathymetryContours } = require(path.join(root, 'view3d/seabedContours.js'))
 const { buildWaterSurfaceData } = require(path.join(root, 'view3d/waterMask.js'))
-const { buildSeabedMeshData, surveyEdgeOpacity } = require(path.join(root, 'view3d/seabedMesh.js'))
+const { buildSeabedMeshData, surveyEdgeOpacity, surveyEdgeFade } = require(path.join(root, 'view3d/seabedMesh.js'))
+const { heightfieldNormals, smoothRegionalHeights } = require(path.join(root,'view3d/heightfield.js'))
+const { regionalMeshData, regionalDetailGrid } = require(path.join(root,'view3d/regionalMesh.js'))
+const { quayFloorSampler } = require(path.join(root,'view3d/quayClosure.js'))
+const { coastalBoundary } = require(path.join(root,'view3d/coastalBoundary.js'))
+const { stitchTerrainBoundary } = require(path.join(root,'view3d/stitchTerrain.js'))
 const { DEMO_ASSETS, DEMO_BUOYS, DEMO_ZONES } = require(path.join(root, 'data/demoGeometry.js'))
 const { createMockEngine } = require(path.join(root, 'data/mock.js'))
 const { useHarbor, receiveMessage } = require(path.join(root, 'store/useHarbor.js'))
@@ -126,8 +131,52 @@ assert.ok(dem.values.some(value => value === dem.metadata.nodata_value))
 assert.ok(dem.values.some(value => value > 0 && value !== dem.metadata.nodata_value))
 const shoreTerrain = parseShoreTerrain(JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '../public/data/shore-dem-usgs-3dep.json'), 'utf8')))
 assert.ok(shoreTerrain)
+// Reconstruct the bundled mask, including narrow spits, islands and crop edges.
+// Check geometry rather than mirroring RDP: no elevation edits, inverted faces,
+// unbounded relocation, source-mask edits or movement of the outer crop edge.
+{
+  const {width,height,nodata_value,spacing_m_approx} = shoreTerrain.metadata
+  const mask = Uint8Array.from(shoreTerrain.values,v=>v!==nodata_value?1:0)
+  const positions = new Float32Array(mask.length*3)
+  for(let r=0;r<height;r++) for(let c=0;c<width;c++) {
+    const i=r*width+c
+    positions[i*3]=c*spacing_m_approx.east_west
+    positions[i*3+1]=mask[i]?shoreTerrain.values[i]:0
+    positions[i*3+2]=r*spacing_m_approx.north_south
+  }
+  const original=positions.slice(), originalMask=mask.slice()
+  const edges=coastalBoundary(positions,mask,width,height,10)
+  assert.deepEqual(mask,originalMask,'shoreline reconstruction must not fill missing elevation samples')
+  for(let i=0;i<mask.length;i++) {
+    assert.equal(positions[i*3+1],original[i*3+1],'height is unchanged by contour reconstruction')
+    const displacement=Math.hypot(positions[i*3]-original[i*3],positions[i*3+2]-original[i*3+2])
+    assert.ok(displacement<=10.002,'bounded horizontal display reconstruction')
+    if(!mask[i]||i%width===0||i%width===width-1||i<width||i>=width*(height-1)) assert.ok(displacement<.002,'NoData and outer crop coordinates stay pinned')
+  }
+  const area=(a,b,c)=>(positions[b*3]-positions[a*3])*(positions[c*3+2]-positions[a*3+2])-(positions[b*3+2]-positions[a*3+2])*(positions[c*3]-positions[a*3])
+  for(let r=0;r<height-1;r++) for(let c=0;c<width-1;c++) {
+    const a=r*width+c,b=a+1,e=a+width,d=e+1
+    if([a,b,e,d].every(i=>mask[i])) assert.ok(area(a,b,e)>=0 && area(b,d,e)>=0,'no inverted triangles or cracks from boundary displacement')
+  }
+  let beforeTurns=0,afterTurns=0
+  const next=new Map(edges.map(([a,b])=>[a,b]))
+  for(const [a,b] of edges) {
+    const c=next.get(b)
+    if(c===undefined) continue
+    for(const [p,isAfter] of [[original,false],[positions,true]]) {
+      const ux=p[b*3]-p[a*3],uz=p[b*3+2]-p[a*3+2],vx=p[c*3]-p[b*3],vz=p[c*3+2]-p[b*3+2],length=Math.hypot(ux,uz)*Math.hypot(vx,vz)
+      if(length>.001 && (ux*vx+uz*vz)/length<.5) { if(isAfter) afterTurns++;else beforeTurns++ }
+    }
+  }
+  assert.ok(afterTurns<beforeTurns*.2,'remove repeated raster right-angle teeth while preserving constrained corners')
+  console.log(`PASS bounded shoreline reconstruction: ${beforeTurns} -> ${afterTurns} sharp turns; no inverted faces, source heights or NoData edits.`)
+}
 assert.equal(shoreTerrain.metadata.vertical_datum, 'NAVD88')
 assert.equal(shoreTerrain.metadata.vertical_units, 'm')
+assert.equal(shoreTerrain.metadata.grid_registration,'pixel_centres')
+assert.ok(111132*(shoreTerrain.metadata.bounds.north-shoreTerrain.metadata.bounds.south)/(shoreTerrain.metadata.height-1) <= 5, 'actual returned bounds, not requested bounds, establish <=5 m north/south spacing')
+assert.ok(shoreTerrain.metadata.imagery_bounds.north > shoreTerrain.metadata.bounds.north && shoreTerrain.metadata.imagery_bounds.south < shoreTerrain.metadata.bounds.south)
+assert.ok(shoreTerrain.metadata.spacing_m_approx.east_west <= 5 && shoreTerrain.metadata.spacing_m_approx.north_south <= 5, 'land display must sample at <=5 m in each axis')
 assert.equal(shoreTerrain.metadata.elevation_positive, 'up')
 assert.ok(shoreTerrain.values.filter(value => value !== shoreTerrain.metadata.nodata_value).length > 60000)
 assert.ok(shoreTerrain.metadata.max_elevation_m - shoreTerrain.metadata.min_elevation_m > 50, 'shoreline DEM should have actual elevation relief')
@@ -162,10 +211,26 @@ assert.deepEqual(waterMesh.indices, [0, 2, 1, 1, 2, 3])
 nearPoint(waterMesh.positions.slice(0, 3), worldPosition(33.73, -118.27, 0))
 const coastlineMesh = buildWaterSurfaceData({ ...waterGrid, values: [10, -9999, 12, 13] })
 assert.equal(coastlineMesh.indices.length, 0, 'water triangles must not cross land/NoData corners')
-const noaaWaterMesh = buildWaterSurfaceData(dem)
+const fill = parseBathymetry(JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '../public/data/seabed-fill-regional.json'), 'utf8')))
+assert.ok(fill)
+assert.equal(fill.metadata.source_kind,'regional_dem')
+assert.match(fill.metadata.source,/Southern California Coastal Relief Model/)
+assert.equal(fill.metadata.datum_conversion.applied,false)
+assert.equal(fill.metadata.datum_conversion.offset_m,0)
+assert.match(fill.metadata.reference_water_level_note,/untransformed/)
+assert.equal(fill.metadata.survey_sha256,require('node:crypto').createHash('sha256').update(require('node:fs').readFileSync(path.join(__dirname,'../public/data/seabed-dem.json'))).digest('hex'))
+assert.deepEqual(fill.metadata.bounds,dem.metadata.bounds)
+assert.equal(fill.metadata.width,dem.metadata.width)
+assert.equal(fill.metadata.height,dem.metadata.height)
+// Survey-only mask remains a regression of the measurement domain. Actual
+// water rendering uses regional+survey depth >0, with a separate land mask.
+const surveyWaterMask = buildWaterSurfaceData(dem)
+const noaaWaterMesh = buildWaterSurfaceData(fill)
+assert.ok(noaaWaterMesh.supportedCells > surveyWaterMask.supportedCells,'water must include modelled nearshore water outside MBES coverage')
+assert.equal(buildWaterSurfaceData({...waterGrid,values:[10,0,12,13]}).indices.length,0,'zero-depth land is not automatically water')
 const refinedNoaa = buildSeabedMeshData(dem, 2)
 assert.equal(refinedNoaa.factor, 1, 'dense multibeam display must not be subdivided again')
-assert.equal(refinedNoaa.indices.length, noaaWaterMesh.supportedCells * 6)
+assert.equal(refinedNoaa.indices.length, surveyWaterMask.supportedCells * 6)
 assert.equal(refinedNoaa.columns, dem.metadata.width)
 assert.ok(refinedNoaa.indices.every(index => Number.isFinite(refinedNoaa.depths[index])))
 for (let index = 0; index < dem.values.length; index += 97) {
@@ -182,7 +247,7 @@ for (const { left, right, top, bottom } of noaaWaterMesh.rectangles) {
     const a = row*dem.metadata.width+col
     assert.equal(covered[a],0,'merged water rectangles must not overlap')
     covered[a]=1
-    for (const i of [a,a+1,a+dem.metadata.width,a+dem.metadata.width+1]) assert.notEqual(dem.values[i],dem.metadata.nodata_value,'merged water must not bridge a NoData hole')
+    for (const i of [a,a+1,a+dem.metadata.width,a+dem.metadata.width+1]) assert.ok(fill.values[i] > 0 && fill.values[i] !== fill.metadata.nodata_value,'water must not bridge land or a NoData hole in the WATER mask; MBES gaps may be modelled water')
   }
 }
 assert.equal(covered.reduce((sum,v)=>sum+v,0),noaaWaterMesh.supportedCells,'merged mask must preserve every supported cell')
@@ -226,6 +291,52 @@ assert.equal(detailed.factor, 1)
 assert.equal(buildSeabedMeshData(refinementSource, 1, refinementSource.metadata.bounds).indices.length, 0)
 assert.equal(buildBathymetryContours(refinementSource, 5, refinementSource.metadata.bounds).length, 0)
 console.log(`PASS multibeam detail: source BAG IDs/checksums/NoData; 35,577 shared coarse/fine samples; 1 m display / 1–2 m native patch ${detailed.indices.length/3} triangles; combined seabed ${(clipped.indices.length+detailed.indices.length)/3} triangles; coverage gaps retained; no overlapping LOD faces.`)
+// Separate fill has no faces over survey-supported cells, and pins boundary
+// vertices to the measured heights without changing the measured arrays.
+const originalSurveyHash=JSON.stringify(dem.values)
+const regional=regionalMeshData(fill,dem,detail.metadata.bounds)
+for(let j=0;j<regional.indices.length;j+=6) {
+  const a=regional.indices[j],b=a+1,c=a+dem.metadata.width,d=c+1
+  assert.ok([a,b,c,d].some(i=>dem.values[i]===dem.metadata.nodata_value),'regional fill cannot replace a measured cell')
+  for(const i of [a,b,c,d]) {
+    assert.ok(Number.isFinite(regional.depths[i]))
+    if(dem.values[i]!==dem.metadata.nodata_value) near(regional.depths[i],dem.values[i],2e-6)
+  }
+}
+const patchFill=regionalDetailGrid(fill,detail)
+assert.equal(JSON.stringify(dem.values),originalSurveyHash)
+for(let i=0;i<detail.values.length;i++) if(detail.values[i]!==detail.metadata.nodata_value) assert.equal(patchFill.values[i],detail.values[i],'regional patch pins measured boundary without changing the survey')
+assert.ok(parseBathymetry(patchFill),'transient regional detail metadata must describe its own field')
+for(let row=0;row<=176;row++)for(let col=0;col<=200;col++) {
+  if(row!==0&&row!==176&&col!==0&&col!==200)continue
+  const a=fill.values[(row+368)*dem.metadata.width+col+600],b=patchFill.values[row*8*detail.metadata.width+col*8]
+  if(a!==fill.metadata.nodata_value&&b!==patchFill.metadata.nodata_value)near(a,b,2e-6)
+}
+const patchRegional=regionalMeshData(patchFill,detail)
+for(let j=0;j<patchRegional.indices.length;j+=6) {
+  const a=patchRegional.indices[j]
+  assert.ok([a,a+1,a+detail.metadata.width,a+detail.metadata.width+1].some(i=>detail.values[i]===detail.metadata.nodata_value),'fine fill must not overlap fine measured cells')
+}
+const fade=surveyEdgeFade(new Float32Array([NaN,10,10,10,10,10]),6,1,8,8,32)
+assert.equal(fade[0],0); assert.ok(fade[1]>0&&fade[1]<fade[2]&&fade[2]<fade[3]&&fade[3]<fade[4]);assert.equal(fade[5],1)
+const plane=Float32Array.from([0,2,4,3,5,7,6,8,10])
+const normals=heightfieldNormals(plane,3,3,1,1)
+nearPoint([...normals.slice(12,15)],[-2/Math.sqrt(14),1/Math.sqrt(14),-3/Math.sqrt(14)])
+const masked=new Float32Array([5,5,5,5,NaN,5,5,5,5])
+assert.ok([...smoothRegionalHeights(masked,3,3)].every((v,i)=>i===4?Number.isNaN(v):v===5))
+assert.ok([...heightfieldNormals(masked,3,3,1,1)].every((v,i)=>i%3===1?v===1:v===0),'NoData must not create edge normals pointing toward zero elevation')
+const coarseFixture={...waterGrid,metadata:{...waterGrid.metadata,width:3,height:3},values:Array(9).fill(10)}
+const fineFixture={...coarseFixture,metadata:{...coarseFixture.metadata,bounds:{west:-118.27,east:-118.265,north:33.73,south:33.725}},values:[10,10,10,10,10,12,10,12,10]}
+const coarseData=buildSeabedMeshData(coarseFixture,1,fineFixture.metadata.bounds)
+const stitched=stitchTerrainBoundary(coarseData,coarseFixture,fineFixture)
+assert.deepEqual([...stitched.positions.slice(0,coarseData.positions.length)],[...coarseData.positions],'stitching must not move any original sounding')
+assert.ok(stitched.indices.length>coarseData.indices.length,'coarse boundary must split at supported fine edge vertices')
+for(let i=coarseData.depths.length;i<stitched.depths.length;i++) assert.equal(stitched.depths[i],12,'new edge vertices come from the fine source, not a vertical skirt')
+const quaySample=quayFloorSampler({...waterGrid,metadata:{...waterGrid.metadata,bounds:{west:-118.26,east:-118.2599,north:33.73,south:33.7299}}})
+const closurePoint=quaySample(-2,1)
+assert.ok(closurePoint && closurePoint[1]<0,'quay closes to a supported model floor vertex')
+assert.equal(quayFloorSampler({...waterGrid,values:[10,-9999,12,13]})(0,0),null,'a lone sounding cannot establish a quay floor face')
+console.log(`PASS independent regional fill: ${regional.indices.length/3} harbor + ${patchRegional.indices.length/3} inspection triangles; no measured-cell overlap; water includes regional domain; Float32 masked normals; continuous fade; source-preserving LOD stitching.`)
 const contours = buildBathymetryContours(dem)
 assert.ok(contours.length > 0)
 assert.ok(contours.every(segment => Number.isFinite(segment.from.lat) && Number.isFinite(segment.from.lon) && Number.isFinite(segment.to.lat) && Number.isFinite(segment.to.lon)))

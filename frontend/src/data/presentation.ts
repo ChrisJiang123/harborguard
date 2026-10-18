@@ -1,4 +1,5 @@
 import type { Detection } from '../types/contract'
+import { englishDisplayValue, englishText } from './english'
 
 export function localSonarPath(detection: Detection): string {
   const path = detection.image_url
@@ -8,5 +9,5 @@ export function localSonarPath(detection: Detection): string {
 }
 export function metricEntries(value: unknown): [string, string][] {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return []
-  return Object.entries(value).map(([key, item]) => [key, typeof item === 'number' && Number.isFinite(item) ? String(item) : typeof item === 'string' ? item : JSON.stringify(item) ?? '—'])
+  return Object.entries(value).map(([key, item]) => [englishText(key), typeof item === 'number' && Number.isFinite(item) ? String(item) : typeof item === 'string' ? englishText(item) : JSON.stringify(englishDisplayValue(item)) ?? '—'])
 }

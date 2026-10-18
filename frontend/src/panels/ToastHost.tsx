@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { englishText } from '../data/english'
 import { useOperations } from '../store/useOperations'
 
 export function ToastHost() {
@@ -9,5 +10,5 @@ export function ToastHost() {
     return () => clearTimeout(timer)
   }, [toast])
   if (!toast) return null
-  return <div className={`toast ${toast.kind}`} role={toast.kind === 'error' ? 'alert' : 'status'}><span>{toast.text}</span><button aria-label="Dismiss notification" onClick={() => useOperations.setState({ toast: null })}>×</button></div>
+  return <div className={`toast ${toast.kind}`} role={toast.kind === 'error' ? 'alert' : 'status'}><span>{englishText(toast.text)}</span><button aria-label="Dismiss notification" onClick={() => useOperations.setState({ toast: null })}>×</button></div>
 }

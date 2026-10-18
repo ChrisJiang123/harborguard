@@ -1,5 +1,9 @@
 // Presentation-only translations for existing source labels and recorded messages.
 // Keep original records and IDs intact; never use translated text to infer state.
+import { LEGACY_SOURCE_TEXT } from './legacyEnglish'
+
+export const ENGLISH_UNAVAILABLE = 'English translation unavailable for this source text. Review the original source before acting.'
+export const hasHanText = (value: string) => /\p{Script=Han}/u.test(value)
 const SOURCE_TEXT: Record<string, string> = {
   '演示集装箱码头一': 'Demo Container Terminal 1',
   '演示集装箱码头二': 'Demo Container Terminal 2',
@@ -36,6 +40,15 @@ const SOURCE_TEXT: Record<string, string> = {
 }
 
 const SOURCE_PATTERNS: [RegExp, (...parts: string[]) => string][] = [
+  [/^已提交 (\S+) 建议 (\S+)（(.+?) → (.+?)，([\d.]+) ms）$/, (_all, route, id, alert, option, ms) => `Submitted ${route} recommendation ${id} (${alert} → ${option}, ${ms} ms)`],
+  [/^Agent 模型路由 ([^；\s]+) → ([^；\s]+)；(.+)$/, (_all, from, to, details) => `Agent model route ${from} → ${to}; ${details.replaceAll('；', '; ')}`],
+  [/^浮标 (\S+) 状态异常，需核实量程相交分区覆盖$/, (_all, id) => `Buoy ${id} has an abnormal status; verify coverage in zones intersecting its nominal range.`],
+  [/^浮标 (\S+) 状态为 (\S+)；按其量程与分区几何相交计算，相关分区为 (.+)。相关分区仍有其他在线浮标量程相交，建议复核实际声学覆盖并安排巡逻。$/, (_all, id, status, zones) => `Buoy ${id} status: ${status}. Zones intersecting its nominal range: ${zones === '无' ? 'none' : zones}. Other online buoys' nominal ranges still intersect these zones. Verify actual acoustic coverage and arrange patrols.`],
+  [/^浮标 (\S+) 状态为 (\S+)；按其量程与分区几何相交计算，相关分区为 (.+)。其中 (.+) 未发现其他在线浮标量程相交，建议人工补位或巡逻。$/, (_all, id, status, zones, uncovered) => `Buoy ${id} status: ${status}. Zones intersecting its nominal range: ${zones === '无' ? 'none' : zones}. No other online buoy range intersects ${uncovered}; arrange manual coverage or patrols.`],
+  [/^浮标离线 (\d+) 个[:：](.*)$/, (_all, count, ids) => `${count} buoys offline: ${ids}`],
+  [/^(\d+)个浮标离线[:：](.*)$/, (_all, count, ids) => `${count} buoys offline: ${ids}`],
+  [/^(.+)区域覆盖率不足([\d.]+)%$/, (_all, zone, value) => `${zone} coverage is below ${value}%.`],
+  [/^(.+)区域未勘测$/, (_all, zone) => `${zone} is unsurveyed.`],
   [/^场景 (\w+) 开始，speed=(.+)$/, (_all, scenario, speed) => `Scenario ${scenario} started, speed=${speed}`],
   [/^航迹 (\S+) 警报等级 (\d+) → (\d+)$/, (_all, track, from, to) => `Track ${track} alert level ${from} → ${to}`],
   [/^航迹 (\S+) 消失，警报 (\S+) 已解除$/, (_all, track, alert) => `Track ${track} lost; alert ${alert} cleared`],
@@ -48,9 +61,23 @@ const SOURCE_PATTERNS: [RegExp, (...parts: string[]) => string][] = [
 export function englishText(value: string | null | undefined): string {
   if (!value) return ''
   if (SOURCE_TEXT[value]) return SOURCE_TEXT[value]
+  if (LEGACY_SOURCE_TEXT[value]) return LEGACY_SOURCE_TEXT[value]!
   for (const [pattern, render] of SOURCE_PATTERNS) {
     const match = value.match(pattern)
-    if (match) return render(...match)
+    if (match) {
+      const translated = render(...match)
+      return hasHanText(translated) ? ENGLISH_UNAVAILABLE : translated
+    }
   }
+  // Arbitrary model prose is not a translation catalogue entry. Never invent
+  // an English recommendation or silently pass non-English source prose through.
+  return hasHanText(value) ? ENGLISH_UNAVAILABLE : value
+}
+
+/** Translate string leaves for display without rewriting stored metrics or IDs. */
+export function englishDisplayValue(value: unknown): unknown {
+  if (typeof value === 'string') return englishText(value)
+  if (Array.isArray(value)) return value.map(englishDisplayValue)
+  if (value !== null && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key,item]) => [englishText(key), englishDisplayValue(item)]))
   return value
 }

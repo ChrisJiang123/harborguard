@@ -4,7 +4,10 @@ import { worldPosition } from './coordinates'
 interface WaterRectangle { left: number; right: number; top: number; bottom: number }
 export interface WaterSurfaceData { positions: number[]; indices: number[]; supportedCells: number; rectangles: WaterRectangle[] }
 
-/** Build a flat water surface only over grid cells with four supported underwater corners. */
+/** Mask input is the regional+survey WATER domain, not MBES survey coverage.
+ * Positive depth establishes modelled water; NoData and on/above-datum land do
+ * not establish water. Absence of a sounding does not establish land either.
+ */
 export function buildWaterSurfaceData(grid: BathymetryGrid): WaterSurfaceData {
   const { width, height, bounds, nodata_value } = grid.metadata
   const positions: number[] = []
@@ -18,7 +21,7 @@ export function buildWaterSurfaceData(grid: BathymetryGrid): WaterSurfaceData {
     let left = -1
     for (let column = 0; column < width; column++) {
       const a = row * width + column, b = a + 1, c = a + width, d = c + 1
-      const valid = column < width - 1 && grid.values[a] !== nodata_value && grid.values[b] !== nodata_value && grid.values[c] !== nodata_value && grid.values[d] !== nodata_value
+      const valid = column < width - 1 && [a,b,c,d].every(i => grid.values[i] !== nodata_value && Number.isFinite(grid.values[i]) && grid.values[i]! > 0)
       if (valid) { supportedCells++; if (left < 0) left = column; continue }
       if (left < 0) continue
       const key = `${left}:${column}`

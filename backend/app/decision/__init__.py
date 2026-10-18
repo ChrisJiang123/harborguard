@@ -89,8 +89,12 @@ class DecisionEngine:
             if world.t-self.last_optimized.get(aid, -float("inf")) < config.OPTIMIZE_EVERY_S:
                 continue
             data = self.optimizer.generate(tracks_by_id[alert["track_id"]], alert)
-            signature = tuple((o["id"], tuple(o["zones_closed"]), tuple(o["speed_limit_zones"]))
-                              for o in data["options"])
+            # Metrics/ranking can change while the closure geometry stays fixed.
+            # Frontend and Agent consume this event, so dedupe the whole proposal.
+            signature = (tuple(data["ranked"]), tuple(
+                (o["id"], o["label"], o["is_baseline"], tuple(o["zones_closed"]),
+                 tuple(o["speed_limit_zones"]), o["berths_open_pct"], o["vessels_affected"],
+                 o["delay_vessel_hours"], o["residual_risk"]) for o in data["options"]))
             self.options[aid] = data
             self.last_optimized[aid] = world.t
             alert["options_ready"] = True

@@ -1,5 +1,7 @@
 # 3D clarity and collapsible panels — 2026-10-18
 
+Current shoreline changes and new on-device evidence are in [3D shoreline validation](../docs/3d-shoreline-realism/README.md). The records below retain their original historical scope.
+
 Historical clarity evidence below predates the multibeam replacement. Current
 seabed source, sample counts, datum, screenshots and measured readings are in
 [MULTIBEAM-VALIDATION.md](MULTIBEAM-VALIDATION.md) and

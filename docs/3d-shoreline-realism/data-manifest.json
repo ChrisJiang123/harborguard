@@ -1,0 +1,145 @@
+{
+  "base_commit": "99d7091",
+  "validation_date_local": "2026-10-17 America/Los_Angeles",
+  "vertical_conversion_applied": false,
+  "vertical_offset_m": 0,
+  "files": [
+    {
+      "path": "frontend/public/data/seabed-dem.json",
+      "sha256": "1298e4e7f256ba2654639c139865edd49e9e0f4052834d31f269295886a22abf",
+      "bytes": 7526067,
+      "metadata": {
+        "source_kind": "survey",
+        "source": "NOAA/NOS H12617 (2013-09-13 to 2013-11-03), Reson 7125 multibeam; 1 m and 2 m finalized BAG products (2019 packaging). Historical archive, not present-day port conditions.",
+        "source_url": "https://www.ngdc.noaa.gov/nos/H12001-H14000/H12617.html",
+        "vertical_datum": "MLLW (H12617 survey)",
+        "width": 1401,
+        "height": 911,
+        "bounds": {
+          "west": -118.31,
+          "south": 33.7,
+          "east": -118.19,
+          "north": 33.765
+        },
+        "approximate_spacing_m": {
+          "east_west": 7.94,
+          "north_south": 7.95
+        },
+        "nodata_cells": 676839
+      },
+      "unchanged_from_main": true
+    },
+    {
+      "path": "frontend/public/data/seabed-detail-mb.json",
+      "sha256": "873739693afb40bf2a8ad1f5e580cd22df0730bee4ba548942c37e018c1a0730",
+      "bytes": 13446655,
+      "metadata": {
+        "source_kind": "survey",
+        "source": "NOAA/NOS H12617 (2013-09-13 to 2013-11-03), Reson 7125 multibeam; 1 m and 2 m finalized BAG products (2019 packaging). Historical archive, not present-day port conditions.",
+        "source_url": "https://www.ngdc.noaa.gov/nos/H12001-H14000/H12617.html",
+        "vertical_datum": "MLLW (H12617 survey)",
+        "width": 1601,
+        "height": 1409,
+        "bounds": {
+          "west": -118.25857142857143,
+          "south": 33.72614285714286,
+          "east": -118.24142857142857,
+          "north": 33.73871428571429
+        },
+        "approximate_spacing_m": {
+          "east_west": 0.99,
+          "north_south": 0.99
+        },
+        "nodata_cells": 1713067
+      },
+      "unchanged_from_main": true
+    },
+    {
+      "path": "frontend/public/data/seabed-fill-regional.json",
+      "sha256": "39021b64a336a8167b5dd8d855d468410c463e95ce3b611b2961b775ece02508",
+      "bytes": 8761248,
+      "metadata": {
+        "source_kind": "regional_dem",
+        "source": "NOAA/NCEI Southern California Coastal Relief Model v2, 1 arc-second",
+        "source_url": "https://www.ncei.noaa.gov/products/coastal-relief-model",
+        "vertical_datum": "MSL (NOAA Southern California CRM v2)",
+        "datum_conversion": {
+          "applied": false,
+          "offset_m": 0,
+          "reason": "No source/epoch-specific verified datum grid supplied; do not infer a NAVD88/MSL/MLLW engineering tie."
+        },
+        "width": 1401,
+        "height": 911,
+        "bounds": {
+          "west": -118.31,
+          "south": 33.7,
+          "east": -118.19,
+          "north": 33.765
+        },
+        "approximate_spacing_m": {
+          "east_west": 7.94,
+          "north_south": 7.95
+        },
+        "nodata_cells": 583276,
+        "input_sha256": "643b7a7d33fa8a33807a205a6a89179bcea9e23fea22adb3faf59e754239db78",
+        "survey_sha256": "1298e4e7f256ba2654639c139865edd49e9e0f4052834d31f269295886a22abf",
+        "native_resolution": "1 arc-second CRM (~26×31 m); finer display sampling is interpolation",
+        "transition_m": 32
+      }
+    },
+    {
+      "path": "frontend/public/data/shore-dem-usgs-3dep.json",
+      "sha256": "ff2bc8b62706f78fc273b7761f6801e2cbcb169a98b4f25bd41053ccbbe5d938",
+      "bytes": 21179418,
+      "metadata": {
+        "source_kind": "lidar_dem",
+        "source": "USGS 3DEP Elevation ImageServer (regional multi-resolution DEM; NOAA regional topo-bathy land mask)",
+        "source_url": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
+        "vertical_datum": "NAVD88",
+        "width": 2304,
+        "height": 1500,
+        "bounds": {
+          "west": -118.30997395833333,
+          "east": -118.19002604166667,
+          "south": 33.70002166666667,
+          "north": 33.76497833333333
+        },
+        "spacing_m_approx": {
+          "east_west": 4.821915622707137,
+          "north_south": 4.815719999999514
+        },
+        "grid_registration": "pixel_centres",
+        "imagery_bounds": {
+          "west": -118.31,
+          "south": 33.699921875,
+          "east": -118.19,
+          "north": 33.765078125
+        },
+        "nodata_cells": 1877180
+      }
+    },
+    {
+      "path": "frontend/public/data/shore-ortho-usgs-naip.png",
+      "sha256": "15e44d12171990297da01447f5875990a089e528388aca8a39086bef704e6a0f",
+      "bytes": 9154383
+    },
+    {
+      "path": "frontend/scripts/fixtures/crm-socal-crop.json",
+      "sha256": "643b7a7d33fa8a33807a205a6a89179bcea9e23fea22adb3faf59e754239db78",
+      "bytes": 629240,
+      "metadata": {
+        "source": "NOAA/NCEI Southern California Coastal Relief Model v2, 1 arc-second",
+        "source_url": "https://www.ncei.noaa.gov/products/coastal-relief-model",
+        "vertical_datum": "MSL (NOAA Southern California CRM v2)",
+        "width": 433,
+        "height": 235,
+        "bounds": {
+          "west": -118.30999996248,
+          "east": -118.18999996152,
+          "south": 33.699999981599994,
+          "north": 33.764999982119996
+        }
+      }
+    }
+  ]
+}

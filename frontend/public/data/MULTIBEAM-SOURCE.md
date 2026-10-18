@@ -1,12 +1,12 @@
 # NOAA H12617 multibeam bathymetry
 
-The default seabed is now **survey-derived multibeam bathymetry**, not CRM,
+The measured seabed layer is **survey-derived multibeam bathymetry**, not CRM,
 CoNED, an ordinary land DEM, a backscatter image, or procedural terrain.
 
 - Survey: [H12617, San Pedro and Vicinity](https://www.ngdc.noaa.gov/nos/H12001-H14000/H12617.html).
 - Acquisition: 2013-09-13 to 2013-11-03 (survey catalog); archived BAG packaging 2019-09-26 is NOT the acquisition date.
 - Instrument: Reson 7125 MBES. Historical finalized grids, not raw sonar pings or current port soundings.
-- Products: `H12617_MB_1m_MLLW_1of2.bag` and `H12617_MB_2m_MLLW_2of2.bag` from the catalog's **Bathymetry** section. 1 m is preferred wherever all support cells are valid; otherwise the measured 2 m product is used. No other terrain fills gaps.
+- Products: `H12617_MB_1m_MLLW_1of2.bag` and `H12617_MB_2m_MLLW_2of2.bag` from the catalog's **Bathymetry** section. 1 m is preferred wherever all support cells are valid; otherwise the measured 2 m product is used. Neither multibeam JSON contains gap filling. The optional independent regional model layer now supplements unsupported water cells; see [shoreline rendering validation](../../../docs/3d-shoreline-realism/README.md).
 - NOAA catalog license: CC0-1.0. NOAA explicitly says these products are **not for navigation**.
 
 ## Coordinates, sign and reference plane
@@ -47,8 +47,7 @@ patch is not a separate simulation. Outside it the harbor retains ~8 m sampling.
 This is **not** a whole-harbor 1 m display or a guarantee of 1 m accuracy.
 Native resolution counts are now embedded: local patch 541,854 samples with 1 m
 support and 888 with 2 m support; interpolating the latter does not create new
-1 m observations. One-cell inward display feathering softens NoData silhouettes
-without changing coordinates/depths or adding coverage. See
+1 m observations. Survey-only rendering uses continuous distance-field edge alpha. In the composite view, an independent hatched regional layer meets opaque measured edges; neither path changes measured coordinates, depths or NoData. Coarse boundary triangles can split at valid fine-source vertices without a vertical skirt. See
 [sonar/layout and data-discovery notes](../../SONAR-DEPLOYMENT.md) for newer
 0.5 m Long Beach surveys and their location limitations.
 
