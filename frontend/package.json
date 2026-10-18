@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "check:deployment": "node scripts/verify-deployment.cjs",
     "refresh:osm": "node scripts/fetch-osm.mjs",
     "refresh:buildings": "node scripts/fetch-lacounty-buildings.mjs",
     "refresh:noaa-bathy": "node scripts/refresh-noaa-crm.mjs",
