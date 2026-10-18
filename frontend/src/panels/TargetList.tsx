@@ -9,9 +9,11 @@ export function TargetList() {
   const select = useHarbor(s => s.selectTrack)
   const conn = useHarbor(s => s.conn)
   const mode = useHarbor(s => s.latest?.mode)
+  const scenario = useHarbor(s => s.latest?.scenario)
+  const preview = conn === 'mock' && !scenario
   const grouped = Object.values(alerts)
   return <section className="targets-section"><SectionHeading index="01" title="Alert Targets" note={`${grouped.length} ${grouped.length === 1 ? "alert" : "alerts"}`} />
-    {!grouped.length && <div className="empty-state"><span className="empty-symbol">◎</span><strong>{mode === 'disaster' ? 'No security alerts' : conn === 'live' || conn === 'mock' || conn === 'replay' ? 'All Clear' : 'Waiting for connection'}</strong><p>{mode === 'disaster' ? 'Disaster mode is active. Survey and reopening plans appear on the right.' : conn === 'mock' ? 'A Level 1 alert appears 10 seconds into Scenario A.' : 'Targets appear here after receiving backend state.'}</p></div>}
+    {!grouped.length && <div className="empty-state"><span className="empty-symbol">◎</span><strong>{preview ? 'Ready to explore' : mode === 'disaster' ? 'No security alerts' : conn === 'live' || conn === 'mock' || conn === 'replay' ? 'All Clear' : 'Waiting for connection'}</strong><p>{preview ? 'Choose Scenario A or B to start a local demo, or Live to join the shared session.' : mode === 'disaster' ? 'Disaster mode is active. Survey and reopening plans appear on the right.' : conn === 'mock' ? 'A Level 1 alert appears 10 seconds into Scenario A.' : 'Targets appear here after receiving backend state.'}</p></div>}
     {([3, 2, 1] as const).map(level => {
       const items = grouped.filter(alert => alert.level === level).sort((a, b) => b.risk - a.risk)
       if (!items.length) return null

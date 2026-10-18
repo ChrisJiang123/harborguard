@@ -12,8 +12,9 @@ function ClockReadout() {
 function ConnectionBadge() {
   const conn = useHarbor(s => s.conn)
   const network = useHarbor(s => s.latest?.network)
+  const scenario = useHarbor(s => s.latest?.scenario)
   const critical = useHarbor(s => Object.values(s.alerts).some(alert => alert.level === 3))
-  return <div className="connection-group">{critical && <span className="critical-badge">Level 3 Alert</span>}{network === 'offline' && <span className="offline-badge">Network Offline</span>}<span className={`connection ${conn}`}><i />{CONN_LABELS[conn]}</span></div>
+  return <div className="connection-group">{critical && <span className="critical-badge">Level 3 Alert</span>}{network === 'offline' && <span className="offline-badge">Network Offline</span>}<span className={`connection ${conn}`}><i />{conn === 'mock' && !location.search && !scenario ? 'PREVIEW' : CONN_LABELS[conn]}</span></div>
 }
 function CommandControls() {
   const conn = useHarbor(s => s.conn)
@@ -42,5 +43,5 @@ function CommandControls() {
 
 export function TopBar() {
   const mock = new URLSearchParams(location.search).get('mock') === '1'
-  return <header className="topbar"><div className="brand"><span className="brand-icon">H</span><h1>Harbor<span>Guard</span></h1></div><nav className="source-switch" aria-label="Data source"><a className={!location.search ? 'active' : ''} href="/">Live</a><a className={mock ? 'active' : ''} href="/?mock=1">Local Demo</a><a className={location.search.includes('replay=') ? 'active' : ''} href="/?replay=demo_b.jsonl">Demo Replay</a></nav><CommandControls /><div className="topbar-status"><ClockReadout /><ConnectionBadge /></div></header>
+  return <header className="topbar"><div className="brand"><span className="brand-icon">H</span><h1>Harbor<span>Guard</span></h1></div><nav className="source-switch" aria-label="Data source"><a className={!location.search ? 'active' : ''} href="/">Overview</a><a className={location.search.includes('live=1') ? 'active' : ''} href="/?live=1">Live</a><a className={mock ? 'active' : ''} href="/?mock=1">Local Demo</a><a className={location.search.includes('replay=') ? 'active' : ''} href="/?replay=demo_b.jsonl">Demo Replay</a></nav><CommandControls /><div className="topbar-status"><ClockReadout /><ConnectionBadge /></div></header>
 }

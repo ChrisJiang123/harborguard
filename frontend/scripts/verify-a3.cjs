@@ -9,6 +9,33 @@ const { useHarbor, receiveMessage } = require(path.join(root, 'store/useHarbor.j
 const { runOperation, useOperations } = require(path.join(root, 'store/useOperations.js'))
 const { createMockEngine, startMock, getMock } = require(path.join(root, 'data/mock.js'))
 const { loadLocalData } = require(path.join(root, 'data/staticData.js'))
+
+// A new visitor must not inherit or mutate the shared live demonstration.
+{
+  const messages = []
+  const idle = createMockEngine(message => messages.push(message), undefined, undefined, undefined, true)
+  idle.start()
+  const snapshot = messages.at(-1)
+  assert.equal(snapshot.type, 'state')
+  assert.equal(snapshot.scenario, null)
+  assert.equal(snapshot.paused, true)
+  assert.equal(snapshot.t, 0)
+  assert.deepEqual(snapshot.tracks, [])
+  assert.deepEqual(snapshot.alerts, [])
+  assert.ok(snapshot.buoys.every(buoy => !buoy.pinging))
+  assert.equal(messages.filter(message => message.type === 'event').length, 0)
+  const count = messages.length
+  idle.advance(300)
+  assert.equal(messages.length, count)
+  idle.startScenario('a')
+  idle.advance(66)
+  assert.ok(messages.some(message => message.event === 'recommendation'))
+  idle.control('reset')
+  assert.deepEqual(messages.at(-1).tracks, [])
+  assert.equal(messages.at(-1).scenario, null)
+  idle.stop()
+}
+
 const { activeAlertId, effectiveOptionId, riskContributions } = require(path.join(root, 'panels/selection.js'))
 const { zoneStyle } = require(path.join(root, 'map2d/styles.js'))
 const { requestJSON, APIError } = require(path.join(root, 'data/http.js'))

@@ -9,5 +9,6 @@ export function startSource(): () => void {
   if (params.get('mock') === '1') return startMock()
   const file = params.get('replay')
   if (file) return startReplay(file)
-  return startLive()
+  if (params.get('live') === '1') return startLive()
+  return startMock(true)
 }

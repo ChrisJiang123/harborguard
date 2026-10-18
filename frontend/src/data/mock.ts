@@ -18,15 +18,15 @@ export const MOCK_OPTIONS: Option[] = mockOptions(DEMO_ZONES.features.map(zone =
 type Sink = (msg: HarborMsg) => void
 
 // The generator represents B for local demonstration only. Production risk values are never recalculated.
-export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status?: Buoy['status'] })[], inputAsset?: Asset, inputZoneIds?: string[]) {
+export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status?: Buoy['status'] })[], inputAsset?: Asset, inputZoneIds?: string[], idle = false) {
   let seq = 0
   let t = 0
   let stopped = false
-  let paused = false
+  let paused = idle
   let speed = 1
   let mode: StateMsg['mode'] = 'security'
   let network: StateMsg['network'] = 'online'
-  let scenario: StateMsg['scenario'] = 'a'
+  let scenario: StateMsg['scenario'] = idle ? null : 'a'
   let decided = false
   let restricted = new Set<string>()
   const delivered = new Set<string>()
@@ -78,8 +78,8 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
     }
     return {
       type: 'state', seq: ++seq, t, mode, network, scenario, paused, speed,
-      buoys: buoys.map((buoy, i) => ({ ...buoy, pinging: buoy.status === 'ok' && Math.floor(t * 5) % 25 === i * 2 })),
-      tracks: [target, fish, inbound, outbound], alerts: level > 0 ? [alert] : [],
+      buoys: buoys.map((buoy, i) => ({ ...buoy, pinging: scenario !== null && buoy.status === 'ok' && Math.floor(t * 5) % 25 === i * 2 })),
+      tracks: idle && scenario === null ? [] : [target, fish, inbound, outbound], alerts: level > 0 ? [alert] : [],
       zones: zoneIds.map((id, i) => mode === 'disaster' ? disasterZone(id, i) : { id, state: restricted.has(id) ? 'restricted' : 'open', coverage: 1 }),
     }
   }
@@ -96,6 +96,7 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
   function publish() {
     const state = snapshot()
     sink(state)
+    if (idle && scenario === null) return
     const alert = state.alerts[0]!
     once('started', 0, () => event('log', { log: { t, level: 'info', source: 'sim', text: 'Local demo started. All current data is simulated.' } }))
     if (mode === 'disaster' && scenario === 'b') {
@@ -197,14 +198,14 @@ export function createMockEngine(sink: Sink, inputBuoys?: (StaticBuoy & { status
 let activeMock: ReturnType<typeof createMockEngine> | null = null
 export function getMock() { return activeMock }
 
-export function startMock(): () => void {
+export function startMock(idle = false): () => void {
   let disposed = false
   let timer: ReturnType<typeof setInterval> | undefined
   useHarbor.getState().setConnection('mock')
   const init = async () => {
     const resources = await loadLocalData()
     if (disposed) return
-    activeMock = createMockEngine(msg => receiveMessage(msg), resources.buoys, resources.assets[0], resources.zones.features.map(zone => zone.properties.id))
+    activeMock = createMockEngine(msg => receiveMessage(msg), resources.buoys, resources.assets[0], resources.zones.features.map(zone => zone.properties.id), idle)
     activeMock.start()
     timer = setInterval(() => activeMock?.advance(0.2), 200)
   }

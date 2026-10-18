@@ -20,7 +20,7 @@ const Scene = lazy(() => import('../view3d/Scene'))
 function ViewFooter() {
   const conn = useHarbor(s => s.conn)
   const mode = useHarbor(s => s.latest?.mode)
-  return <div className="view-footer"><span><i className="status-dot" />{conn === 'mock' ? 'Local simulated data · Not live port conditions' : conn === 'live' ? 'Live backend data' : conn === 'replay' ? 'File replay · Read-only · Backend disconnected' : 'Waiting for backend · Local demo available'}</span><span>{mode === 'disaster' ? 'Disaster mode · Source-provided reopening plan' : 'Security mode · Source-provided response metrics'}</span></div>
+  return <div className="view-footer"><span><i className="status-dot" />{conn === 'mock' ? (!location.search ? 'Visitor preview · Local simulated data · Not live port conditions' : 'Local simulated data · Not live port conditions') : conn === 'live' ? 'Live backend data' : conn === 'replay' ? 'File replay · Read-only · Backend disconnected' : 'Waiting for backend · Local demo available'}</span><span>{mode === 'disaster' ? 'Disaster mode · Source-provided reopening plan' : 'Security mode · Source-provided response metrics'}</span></div>
 }
 function MainView() {
   const view = useHarbor(s => s.view)

@@ -15,7 +15,7 @@ export function ensureMapData(force = false): Promise<void> {
   pending = (async () => {
     try {
       const params = new URLSearchParams(location.search)
-      const offline = params.get('mock') === '1' || params.has('replay')
+      const offline = params.get('live') !== '1' || params.get('mock') === '1' || params.has('replay')
       const local = loadLocalData(force)
       if (offline) {
         useMapData.setState({ resources: await local, loading: false })
