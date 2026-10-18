@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { BufferGeometry, Color, ExtrudeGeometry, Float32BufferAttribute, Path, Shape, Vector2 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { loadLocalBase, loadPortBuildings } from '../data/localBase'
@@ -85,7 +85,9 @@ export function HarborModels3D({ verticalScale, onStatus, quayWalls = true, smoo
   }, [onStatus])
   return <group>
     {base && <PortLines data={base} terrain={terrain} verticalScale={verticalScale} />}
-    {terrain && <CoastalTerrain3D grid={terrain} verticalScale={verticalScale} quayWalls={quayWalls} smoothing={smoothing} shoreline={shoreline} floor={floor} detailFloor={detailFloor} />}
+    {/* Local imagery may still be decoding. Keep the canvas, water and survey
+        mounted rather than propagating its suspension to the entire 3D view. */}
+    {terrain && <Suspense fallback={null}><CoastalTerrain3D grid={terrain} verticalScale={verticalScale} quayWalls={quayWalls} smoothing={smoothing} shoreline={shoreline} floor={floor} detailFloor={detailFloor} /></Suspense>}
     {buildings && <PortBuildings data={buildings} verticalScale={verticalScale} terrain={terrain} />}
   </group>
 }

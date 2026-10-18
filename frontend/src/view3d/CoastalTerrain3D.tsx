@@ -21,6 +21,10 @@ function heightColor(height: number, minimum: number, maximum: number): Color {
 }
 export function CoastalTerrain3D({ grid, verticalScale, quayWalls = true, smoothing = true, shoreline = true, floor, detailFloor }: { grid: ShoreTerrainGrid; verticalScale: number; quayWalls?: boolean; smoothing?: boolean; shoreline?: boolean; floor?: BathymetryGrid | null; detailFloor?: BathymetryGrid | null }) {
   const gl = useThree(s => s.gl)
+  // Resolve imagery before allocating the large land mesh. A suspended first
+  // render discards its memoized work; allocating first repeats that work on
+  // retry (and twice again in development StrictMode).
+  const sourceImagery = useTexture('/data/shore-ortho-usgs-naip.png')
   const geometry = useMemo(() => {
     const result = new BufferGeometry()
     const { width, height, bounds, nodata_value, min_elevation_m, max_elevation_m } = grid.metadata
@@ -104,7 +108,6 @@ export function CoastalTerrain3D({ grid, verticalScale, quayWalls = true, smooth
     result.computeVertexNormals(); result.computeBoundingSphere()
     return result
   },[geometry,grid,floor,detailFloor])
-  const sourceImagery = useTexture('/data/shore-ortho-usgs-naip.png')
   const imagery = useMemo(() => {
     const texture = sourceImagery.clone()
     texture.colorSpace = SRGBColorSpace
