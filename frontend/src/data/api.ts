@@ -52,12 +52,16 @@ async function localRequest(path: string, method: 'GET' | 'POST', body?: unknown
   return { ok: true }
 }
 
-async function request<T>(path: string, method: 'GET' | 'POST' = 'GET', body?: unknown, signal?: AbortSignal): Promise<T> {
+// Agent /ask has an 18s generation budget and a 20s backend proxy timeout.
+// Allow 19s here; all other endpoints retain the default 8s timeout.
+const ASK_TIMEOUT_MS = 19000
+
+async function request<T>(path: string, method: 'GET' | 'POST' = 'GET', body?: unknown, signal?: AbortSignal, timeoutMs?: number): Promise<T> {
   const conn = useHarbor.getState().conn
   if (method === 'POST' && conn === 'replay') throw new APIError('Actions are disabled during replay.')
   if (method === 'POST' && conn !== 'live' && conn !== 'mock') throw new APIError('Backend disconnected. Wait for LIVE status.')
   if (conn === 'mock' || conn === 'replay') return await localRequest(path, method, body) as T
-  return requestJSON<T>(`${BASE}${path}`, { method, signal, ...(body === undefined ? {} : { body: JSON.stringify(body) }) })
+  return requestJSON<T>(`${BASE}${path}`, { method, signal, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }, timeoutMs)
 }
 
 async function command(path: string, body: unknown): Promise<{ ok: true }> {
@@ -108,5 +112,5 @@ export const api = {
   // Agent-owned endpoints are wrapped for the shared REST surface, not invoked by the UI.
   postRecommendation: (recommendation: Recommendation) => command('/recommendations', recommendation),
   postLog: (log: Pick<LogEntry, 'level' | 'source' | 'text'>) => command('/log', log),
-  ask: (question: string, track_id?: string) => request<{ answer: string; model: Recommendation['model'] }>('/agent/ask', 'POST', { question, track_id }),
+  ask: (question: string, track_id?: string) => request<{ answer: string; model: Recommendation['model'] }>('/agent/ask', 'POST', { question, track_id }, undefined, ASK_TIMEOUT_MS),
 }

@@ -2,6 +2,9 @@
 
 24h 黑客松：洛杉矶港水下安防数字孪生。本仓库现包含 A（前端 5173）、B（后端 8000）与 C（模型/Agent）三部分；本 README 前半保留 C 的环境说明，前端的完整启动、联调、3D 操作和验收状态见 [frontend/README.md](frontend/README.md)。
 
+Mac 演示机的四进程启动、端口占用保护、停止方式和四分钟实时演示流程见
+[docs/mac-demo-runbook.md](docs/mac-demo-runbook.md)。
+
 ## C 负责的四个模块
 
 | 目录 | 内容 | 步骤 | 状态 |
