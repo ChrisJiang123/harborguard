@@ -468,3 +468,11 @@ a { color: #70c8f9; text-decoration: none; }
 .history-notice { padding: 6px 18px; background: #0b1a28; border-bottom: 1px solid #203448; color: #a8bed0; font-size: 12px; }
 .history-notice summary { cursor: pointer; width: fit-content; }
 .history-notice p { margin: 8px 0; max-width: 75ch; font-size: 14px; }
+
+/* Source disclosures occupy layout space below the canvas, never the terrain. */
+.three-view-layout { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.three-view-layout > .three-stage { flex: 1; min-height: 180px; }
+.three-view-layout > .three-data-panel { position: static; flex: 0 0 auto; width: 100%; max-width: none; margin: 0; padding: 6px 12px; border: 0; border-top: 1px solid #29445a; border-radius: 0; background: #0b1a28; font-size: 12px; }
+.three-view-layout > .three-data-panel .three-panel-body { max-height: 160px; }
+.three-view-layout > .three-data-panel .three-source-note,
+.three-view-layout > .three-data-panel .three-environment-note { display: block; }
